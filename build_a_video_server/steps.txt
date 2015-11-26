@@ -1,0 +1,30 @@
+wget http://nginx.org/download/nginx-1.6.0.tar.gz
+wget http://h264.code-shop.com/download/nginx_mod_h264_streaming-2.2.7.tar.gz
+wget http://sourceforge.net/projects/pcre/files/pcre/8.35/pcre-8.35.tar.gz
+wget http://zlib.net/zlib-1.2.8.tar.gz
+wget http://www.openssl.org/source/openssl-1.0.1g.tar.gz
+wget -O nginx-rtmp-module.zip https://github.com/arut/nginx-rtmp-module/archive/master.zip
+
+./configure \
+--prefix=/usr/local/nginx \
+--add-module=../nginx_mod_h264_streaming-2.2.7 \
+--add-module=../nginx-rtmp-module \
+--with-http_flv_module \
+--with-http_mp4_module \
+--with-http_stub_status_module \
+--with-http_ssl_module \
+--with-pcre=../pcre-8.35 \
+--with-zlib=../zlib-1.2.8 \
+--with-debug
+
+
+nginx_mod_h264_streaming-2.2.7/src/ngx_http_streaming_module.c:158
+comment:
+	/* TODO: Win32 */
+	if (r->zero_in_uri)
+	{
+		return NGX_DECLINED;
+	}
+
+
+
