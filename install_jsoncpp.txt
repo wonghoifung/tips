@@ -1,0 +1,6 @@
+export MYSCONS=/home/albert/3rd/scons-2.3.5
+export SCONS_LIB_DIR=$MYSCONS/engine
+
+in jsoncpp dir:
+python $MYSCONS/script/scons platform=linux-gcc
+ln -s libjson_linux-gcc-4.4.7_libmt.so libjson.so
