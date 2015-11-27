@@ -1,0 +1,10 @@
+yum install -y git
+adduser git
+ssh-keygen -t rsa
+cat .ssh/id_rsa.pub > /home/git/.ssh/authorized_keys
+cd /data/git/
+git init --bare project.git
+chown -R git.git project.git
+git:x:1001:1001:git version control:/home/git:/usr/bin/git-shell
+git clone ssh://git@123.123.123.123:123123/data/git/project.git
+
