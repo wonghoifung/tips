@@ -1,0 +1,3 @@
+sudo yum install e2fsprogs-devel
+sudo yum install uuid-devel
+sudo yum install libuuid-devel
