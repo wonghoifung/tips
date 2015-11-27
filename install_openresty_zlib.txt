@@ -13,3 +13,14 @@ LIBDIR ?= -L/usr/lib -L/home/albert/openresty/luajit/lib
 
 ln -s /home/albert/openresty/luajit/lib/libluajit-5.1.so.2.1.0 /usr/lib/liblua.so
 ln -s /usr/lib/liblua.so /usr/lib/libluajit-5.1.so.2 
+
+
+
+zlib.so way 2:
+wget https://github.com/brimworks/lua-zlib/archive/master.zip
+unzip master.zip;cd lua-zlib-master;
+cmake28 -DLUA_INCLUDE_DIR=/usr/local/include/luajit-2.0
+vi CmakeList.txt , comment line 27
+make
+cp zlib.so /usr/local/lib
+cp zlib.so /usr/local/nginx/lualib
