@@ -1,0 +1,3 @@
+./bootstrap.sh --prefix=/data/apps/xxxxx/env/boost --with-libraries=filesystem,date_time,timer,thread,system
+./b2 --show-libraries
+./b2 install
