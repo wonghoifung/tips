@@ -1,0 +1,15 @@
+openresty:
+yum -y install pcre-devel openssl openssl-devel
+./configure --prefix=/home/albert/openresty_test --with-luajit-xcflags='-std=gnu99'
+
+
+zlib.so:
+cmake -DLUA_INCLUDE_DIR=/home/albert/openresty/luajit/include/luajit-2.1  //no use
+
+LUAPATH ?= /home/albert/openresty/luajit/include/luajit-2.1
+LUACPATH ?= /home/albert/openresty/lualib
+INCDIR ?= -I/home/albert/openresty/luajit/include/luajit-2.1
+LIBDIR ?= -L/usr/lib -L/home/albert/openresty/luajit/lib
+
+ln -s /home/albert/openresty/luajit/lib/libluajit-5.1.so.2.1.0 /usr/lib/liblua.so
+ln -s /usr/lib/liblua.so /usr/lib/libluajit-5.1.so.2 
