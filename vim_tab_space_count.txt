@@ -1,0 +1,20 @@
+# tab to space
+:set ts=4
+:set expandtab
+:%retab!
+
+# space to tab
+:set ts=4
+:set noexpandtab
+:%retab!
+
+# .vimrc /etc/vimrc
+set tabstop=4 
+set softtabstop=4 
+set shiftwidth=4 
+set noexpandtab 
+set nu 
+set autoindent 
+set cindent
+
+
