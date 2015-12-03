@@ -66,7 +66,23 @@ class Solution {
 		return head;
 	}
 };
-
+/* a cool solution
+class Solution {
+	public:
+		ListNode* removeElements(ListNode* head, int val) {
+			auto pp = &head;
+			while (*pp) {
+				if ((*pp)->val == val) {
+					*pp = (*pp)->next;
+				}
+				else {
+					pp = &((*pp)->next);
+				}
+			}
+			return head;
+		}
+};
+*/
 int main()
 {
 	Solution s;
