@@ -1,0 +1,3 @@
+vim .git/config
+
+url = https://github.com/wonghoifung/tips.git -> url = https://NAME@github.com/wonghoifung/tips.git
