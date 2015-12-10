@@ -79,8 +79,34 @@ public:
 		{
 			return root;
 		}
+/*
+		while (1)
+		{
+			if (p->val < root->val && q->val < root->val && root->left != NULL)
+			{
+				root = root->left;
+				continue;
+			}
+			if (p->val > root->val && q->val > root->val && root->right != NULL)
+			{
+				root = root->right;
+				continue;
+			}
+			return root;
+		}
+*/
 		vector<TreeNode*> ppath;
 		vector<TreeNode*> qpath;
+/*
+ 		if (p->val < root->val && q->val < root->val)
+		{
+			return lowestCommonAncestor(root->left, p, q);
+		}
+		if (p->val > root->val && q->val > root->val)
+		{
+			return lowestCommonAncestor(root->right, p, q);
+		}
+*/
 		if (!dfs(root, ppath, p->val) || !dfs(root, qpath, q->val))
 		{
 			return NULL;
