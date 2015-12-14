@@ -1,0 +1,1 @@
+redis-cli -p 6380 keys "XXX*" | xargs redis-cli -p 6380 del
