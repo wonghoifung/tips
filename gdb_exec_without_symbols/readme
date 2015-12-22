@@ -1,0 +1,8 @@
+gcc test.c # compile to bin without symbols
+
+gcc -g -o a.out.debug test.c # compile to bin with symbols
+
+objcopy --only-keep-debug a.out.debug a.out.symbols # get symbols from debug version
+
+gdb -s a.out.symbols -e a.out # debug the release version with sybols
+
