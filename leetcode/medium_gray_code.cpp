@@ -41,6 +41,23 @@ public:
 
 class Solution {
 public:
+	vector<int> grayCode(int n) {
+		vector<int> res;
+		res.push_back(0);
+		if (n == 0) return res;
+		res.push_back(1);
+		for (int i = 1; i < n; ++i)
+		{
+			int cnt = res.size();
+			for (int j = cnt - 1; j >= 0; --j)
+			{
+				int num = res[j];
+				num |= (1 << i);
+				res.push_back(num);
+			}
+		}
+		return res;
+	}
 	void flipBit(int& n, int pos) {
 		if (n & (1 << pos)) {
 			n &= ~(1 << pos);
@@ -49,7 +66,7 @@ public:
 			n |= (1 << pos);
 		}
 	}
-	vector<int> grayCode(int n) {
+	vector<int> grayCodeSlow(int n) {
 		vector<int> res;
 		int num = 0;
 		res.push_back(num);
