@@ -1,0 +1,3 @@
+SELECT Salary FROM Employee GROUP BY Salary 
+UNION ALL (SELECT null AS Salary)
+ORDER BY Salary DESC LIMIT 1 OFFSET 1
