@@ -71,8 +71,8 @@ void stream_base::prepare_and_read()
 {
 	boost::system::error_code e;
 
-	boost::asio::socket_base::keep_alive op(true);
-	socket().set_option(op, e);
+	// boost::asio::socket_base::keep_alive op(true);
+	// socket().set_option(op, e);
 
 	// {
 	// 	typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPIDLE> keep_aliveidle;
