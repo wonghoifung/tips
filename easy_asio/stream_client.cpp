@@ -1,4 +1,5 @@
 #include "stream_client.h"
+#include "stream_handler.h"
 
 stream_client::stream_client() : timer_(NULL), io_service_(NULL), handler_(NULL)
 {
@@ -18,18 +19,18 @@ stream_client::~stream_client()
 
 int stream_client::on_connect(stream_handler* handler)
 {
-  if (connecthandler_.empty() == false)
+  if (connect_cb_.empty() == false)
 	{
-		return connecthandler_(handler);
+		return connect_cb_(handler);
 	}
 	return 0;
 }
 
 int stream_client::on_message(stream_handler* handler, inmessage* inmsg)
 {
-  if (message_handler_.empty() == false)
+  if (message_cb_.empty() == false)
 	{
-		return message_handler_(handler, inmsg);
+		return message_cb_(handler, inmsg);
 	}
   return 0;
 }
@@ -45,9 +46,9 @@ int stream_client::on_close(stream_handler* handler, const int err)
   timer_->expires_from_now(boost::posix_time::seconds(30));
   timer_->async_wait(boost::bind(&stream_client::on_alarm, this, boost::asio::placeholders::error));
 
-  if (closehandler_.empty() == false)
+  if (close_cb_.empty() == false)
   {
-    return closehandler_(handler);
+    return close_cb_(handler);
   }
   return 0;
 }

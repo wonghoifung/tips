@@ -2,7 +2,10 @@
 #define core_header
 
 #include "message_handler.h"
+#include "inmessage.h"
+#include "outmessage.h"
 #include <map>
+#include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
 
 class peer;

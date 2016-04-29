@@ -1,6 +1,7 @@
 #ifndef peer_header
 #define peer_header
 
+#include <stdint.h>
 #include <boost/noncopyable.hpp>
 
 class stream_handler;

@@ -1,5 +1,6 @@
-#include "packet_parser.h"
-#include "packet_base.h"
+#include "inmessage.h"
+#include "outmessage.h"
+#include "message_parser.h"
 
 class concrete_message_parser :  public message_parser
 {

@@ -4,8 +4,11 @@
 #include "stream_base.h"
 #include <boost/bind.hpp>
 
-stream_server::stream_server(boost::asio::io_service& io_service, const string & host, short port, message_handler * msghandler)
-	:io_service_(io_service),acceptor_(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(host), port)), msghandler_(msghandler), hcnt_(0)
+stream_server::stream_server(boost::asio::io_service& io_service, const std::string& host, short port, message_handler* msghandler)
+	:io_service_(io_service),
+	acceptor_(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(host), port)), 
+	msghandler_(msghandler), 
+	hcnt_(0)
 {
 	for (size_t i = 0; i < 100; ++i) {
 		post_accept_event();

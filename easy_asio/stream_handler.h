@@ -1,8 +1,9 @@
 #ifndef stream_handler_header
 #define stream_handler_header
 
-#include "packet_base.h"
-#include "packet_parser.h"
+#include "inmessage.h"
+#include "outmessage.h"
+#include "message_parser.h"
 #include "message_handler.h"
 #include "stream_base.h"
 
@@ -33,8 +34,8 @@ public:
 
 private:
 	// required by stream_base
-	virtual int on_rawdata(const char * buf, const size_t len);
-	virtual int on_close(const int err,string mess="");
+	virtual int on_rawdata(const char* buf, const size_t len);
+	virtual int on_close(const int err, std::string mess="");
 	virtual int on_connect(const int e);
 
 	// required by message_parser_handler

@@ -1,9 +1,12 @@
 #include "core.h"
 #include "peer.h"
+#include "commands.h"
+#include "stream_handler.h"
 
 core::core(const uint32_t svrid, boost::asio::io_service& ios) : svrid_(svrid), ios_(ios)
 {
-
+  (void)svrid_;
+  (void)ios_;
 }
 
 core::~core()
@@ -22,7 +25,7 @@ int core::on_message(stream_handler* sh, inmessage* inmsg)
 
   // not verified messages
   switch (cmd) {
-    case CLIENT_COMMAND_LOGON:
+    case cmd_peer_login:
       handle_login(inmsg, sh);
   }
 
@@ -33,21 +36,23 @@ int core::on_message(stream_handler* sh, inmessage* inmsg)
 
   // already verified messages
   switch (cmd) {
-    case SOCKET_CLOSE_MSG:
+    case cmd_sock_close:
       cleanup_and_del_peer(p, inmsg);
   }
+
+  return 0;
 }
 
 int core::on_close(stream_handler* sh, const int err)
 {
   if (sh) {
     outmessage msg;
-    msg.Begin(SOCKET_CLOSE_MSG);
-    msg.WriteInt(err);
-    msg.End();
+    msg.begin(cmd_sock_close);
+    msg.write_int(err);
+    msg.end();
 
     inmessage fakemsg;
-    fakemsg.copy(msg.message_buf(), msg.message_size());
+    fakemsg.copy(msg.buffer(), msg.size());
 
     on_message(sh, &fakemsg);
   }
@@ -111,10 +116,9 @@ peer* core::check_reconnect_peer(const uint32_t id)
   peer* p = get_peer(id);
   if (p) {
     outmessage outmsg;
-    outmsg.Begin(SERVER_COMMAND_NOTIFY_PLAYER_KICKED);
-    outmsg.WriteInt(id);
-    outmsg.WriteInt(KICKED_RELOGIN);
-    outmsg.End();
+    outmsg.begin(cmd_kick_peer);
+    outmsg.write_int(id);
+    outmsg.end();
     send_message(&outmsg, p->get_stream_handler());
 
     // notify other modules that use this peer
@@ -135,11 +139,11 @@ int core::send_message(outmessage* outmsg, stream_handler* handler)
 
 int core::handle_login(inmessage* inmsg, stream_handler* handler)
 {
-  if (hander->get_ud) return -1; // already login
+  if (handler->get_ud()) return -1; // already login
 
-  const uint32_t id = inmsg->ReadInt();
-  const std::string key = inmsg->ReadString();
-  const std::string info = inmsg->ReadString();
+  const uint32_t id = inmsg->read_int();
+  const std::string key = inmsg->read_cstring();
+  const std::string info = inmsg->read_cstring();
 
   // check key, process info
 
@@ -153,9 +157,9 @@ int core::handle_login(inmessage* inmsg, stream_handler* handler)
   }
 
   outmessage outmsg;
-  output.Begin(SERVER_COMMAND_LOGON_SUCCESS);
+  outmsg.begin(cmd_peer_login);
   // some info...
-  output.End();
+  outmsg.end();
   send_message(&outmsg, handler);
 
   return 0;

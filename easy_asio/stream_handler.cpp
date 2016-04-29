@@ -1,6 +1,4 @@
 #include "stream_handler.h"
-#include "log.h"
-
 #include <boost/bind.hpp>
 
 stream_handler::stream_handler(boost::asio::io_service& io_service, const unsigned int hcnt, message_handler* handler, bool alarm)
@@ -27,7 +25,7 @@ void stream_handler::disable_alarm()
 
 int stream_handler::send(outmessage *msg)
 {
-	return stream_base::send(msg->packet_buf(), msg->packet_size());
+	return stream_base::send(msg->buffer(), msg->size());
 }
 
 int stream_handler::on_rawdata(const char * buf, const size_t len)

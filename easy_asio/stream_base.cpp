@@ -50,7 +50,7 @@ void stream_base::handle_write( const boost::system::error_code & error, size_t 
 	}
 }
 
-void stream_base::close_and_callback(const int err, string mess)
+void stream_base::close_and_callback(const int err, std::string mess)
 {
 	on_close(err, mess);
 	if (writepostcnt_ == 0 && readpostcnt_ == 0) {
@@ -74,20 +74,20 @@ void stream_base::prepare_and_read()
 	boost::asio::socket_base::keep_alive op(true);
 	socket().set_option(op, e);
 
-	{
-		typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPIDLE> keep_aliveidle;
-		socket().set_option(keep_aliveidle(60), e);
-	}
+	// {
+	// 	typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPIDLE> keep_aliveidle;
+	// 	socket().set_option(keep_aliveidle(60), e);
+	// }
 
-	{
-		typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPINTVL> keep_aliveintvl;
-		socket().set_option(keep_aliveintvl(30), e);
-	}
+	// {
+	// 	typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPINTVL> keep_aliveintvl;
+	// 	socket().set_option(keep_aliveintvl(30), e);
+	// }
 
-	{
-		typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPCNT> keep_alivecnt;
-		socket().set_option(keep_alivecnt(3), e);
-	}
+	// {
+	// 	typedef boost::asio::detail::socket_option::integer<IPPROTO_TCP, TCP_KEEPCNT> keep_alivecnt;
+	// 	socket().set_option(keep_alivecnt(3), e);
+	// }
 
 	boost::asio::ip::tcp::no_delay option(true);
 	socket().set_option(option, e);
@@ -140,7 +140,7 @@ void stream_base::close()
 	}
 }
 
-void stream_base::connect(const string & host, const string & port)
+void stream_base::connect(const std::string& host, const std::string& port)
 {
 	socket_.async_connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(host),
 		static_cast<unsigned short>(atoi_s(port))),
