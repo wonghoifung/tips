@@ -16,7 +16,7 @@ stream_base::~stream_base( void )
 	{
 		delete *it;
 	}
-  buffer_.clear();
+  	buffer_.clear();
 }
 
 void stream_base::handle_write( const boost::system::error_code & error, size_t bytes_transferred)
@@ -44,7 +44,7 @@ void stream_base::handle_write( const boost::system::error_code & error, size_t 
 			}
 			else if (writepostcnt_ == 0) {
 				boost::system::error_code e;
-				socket_.close(e);
+				socket_.close(e); // initiate to close, callback to cleanup?
 			}
 		}
 	}
@@ -136,7 +136,7 @@ void stream_base::close()
 		close_read();
 	} else {
 		boost::system::error_code e;
-		socket_.close(e);
+		socket_.close(e); // initiate to close, callback to cleanup?
 	}
 }
 

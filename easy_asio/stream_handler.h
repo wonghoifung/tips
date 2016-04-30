@@ -10,7 +10,7 @@
 class stream_handler : public stream_base, public message_parser_handler
 {
 public:
-	stream_handler(boost::asio::io_service& io_service, const unsigned int h, message_handler * handler, bool alarm = true);
+	stream_handler(boost::asio::io_service& io_service, const unsigned int h, message_handler* handler, bool alarm = true);
 	virtual ~stream_handler(void);
 
 	const static unsigned int DISABLE_ALL_EVENT					= 0;
