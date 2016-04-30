@@ -38,7 +38,7 @@ protected:
 	int readpostcnt_;
 	int writepostcnt_;
 	bool delayclose_;
-	std::list<shared_const_buffer*> buffer_;
+	std::list<shared_const_buffer*> buffer_; // replace with loop buffer
 };
 
 #endif
