@@ -28,7 +28,7 @@ protected:
 	void prepare_and_read();
 	void close_read();
 	void handle_write(const boost::system::error_code& error, size_t /*bytes_transferred*/);
-	void close_and_callback(const int err, std::string mess = "");
+	void invoke_close_callback_and_self_delete(const int err, std::string mess = "");
 	void post_read_event();
 	void post_write_event();
 

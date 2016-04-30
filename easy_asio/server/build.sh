@@ -1,0 +1,1 @@
+g++ -g -o server *.cpp -I/Users/wonghoifung/myenvironment/include -L/Users/wonghoifung/myenvironment/lib -lboost_date_time -lboost_system  

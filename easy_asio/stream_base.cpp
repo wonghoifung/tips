@@ -24,7 +24,7 @@ void stream_base::handle_write( const boost::system::error_code & error, size_t 
 	--writepostcnt_;
 	assert(writepostcnt_ >= 0 && readpostcnt_ >= 0);
 	if (error.value() != 0) {
-		close_and_callback(error.value(),error.message());
+		invoke_close_callback_and_self_delete(error.value(),error.message());
 	}
 	else {
 		shared_const_buffer* p = buffer_.front();
@@ -40,17 +40,17 @@ void stream_base::handle_write( const boost::system::error_code & error, size_t 
 		}
 		else if (delayclose_) {
 			if (writepostcnt_ == 0 && readpostcnt_ == 0) {
-				close_and_callback(0);
+				invoke_close_callback_and_self_delete(0);
 			}
 			else if (writepostcnt_ == 0) {
 				boost::system::error_code e;
-				socket_.close(e); // initiate to close, callback to cleanup?
+				socket_.close(e); // initiate to close, there is pending read, therefore callback cleanup will happen in next loop
 			}
 		}
 	}
 }
 
-void stream_base::close_and_callback(const int err, std::string mess)
+void stream_base::invoke_close_callback_and_self_delete(const int err, std::string mess)
 {
 	on_close(err, mess);
 	if (writepostcnt_ == 0 && readpostcnt_ == 0) {
@@ -126,7 +126,7 @@ void stream_base::handle_read(const boost::system::error_code& error, size_t byt
 		on_rawdata(m_data, bytes_transferred);
 		post_read_event();
 	} else {
-		close_and_callback(error.value(), error.message());
+		invoke_close_callback_and_self_delete(error.value(), error.message());
 	}
 }
 
@@ -136,7 +136,7 @@ void stream_base::close()
 		close_read();
 	} else {
 		boost::system::error_code e;
-		socket_.close(e); // initiate to close, callback to cleanup?
+		socket_.close(e); // initiate to close, there is pending read, therefore callback cleanup will happen in next loop
 	}
 }
 
