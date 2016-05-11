@@ -36,6 +36,10 @@ static void check_bool(const char* tag, bool b) {
 	}
 }
 
+static bool list_visit(const std::string& val) {
+	printf("----> %s\n", val.c_str());
+}
+
 int main() {
 	set_rlimit();
 
@@ -53,6 +57,7 @@ int main() {
 	for (size_t i=0; i<result.size(); ++i) {
 		printf("%s\n", result[i].c_str());
 	}
+	check_bool("keys_visit", prc->keys_visit("*", list_visit));
 
 	return 0;
 }
