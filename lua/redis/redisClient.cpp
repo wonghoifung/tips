@@ -10,6 +10,7 @@
 #include <alloca.h>
 #include <dirent.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <assert.h>
 #include <stdio.h>
 
@@ -55,24 +56,24 @@
 	} \
 } while (0)
 
-#define CHECK_REPLYTYPE_RETBOOL(reply, type) do { \
-	if (reply->type != type) { \
+#define CHECK_REPLYTYPE_RETBOOL(reply, t) do { \
+	if (reply->type != t) { \
 		printf("error type: %d\n", reply->type); \
 		freeReplyObject(reply); \
 		return false; \
 	} \
 } while (0)
 
-#define CHECK_REPLYTYPE_RETSTRING(reply, type) do { \
-	if (reply->type != type) { \
+#define CHECK_REPLYTYPE_RETSTRING(reply, t) do { \
+	if (reply->type != t) { \
 		printf("error type: %d\n", reply->type); \
 		freeReplyObject(reply); \
 		return ""; \
 	} \
 } while (0)
 
-#define CHECK_REPLYTYPE_RETINT(reply, type) do { \
-	if (reply->type != type) { \
+#define CHECK_REPLYTYPE_RETINT(reply, t) do { \
+	if (reply->type != t) { \
 		printf("error type: %d\n", reply->type); \
 		freeReplyObject(reply); \
 		return 0; \
@@ -85,8 +86,7 @@
 	buf[reply->len] = 0
 
 redisClient::redisClient(const char* ip, uint16_t port) : ip_(ip), port_(port), ctx_(NULL) {
-	ec_ = ec_success;
-	memset(error_, 0, error_bufsize);
+	
 }
 
 redisClient::~redisClient() {
@@ -110,7 +110,6 @@ bool redisClient::connect() {
 }
 
 bool redisClient::disconnect() {
-	invalidate_errbuf();
 	if (ctx_) {
 		redisFree(ctx_);
 		ctx_ = NULL;
@@ -122,7 +121,7 @@ bool redisClient::ping() {
 	CHECK_CONTEXT_RETBOOL;
 	redisReply* reply = (redisReply*)redisCommand(ctx_, "PING");
 	CHECK_REPLY_RETBOOL(reply);
-	CHECK_REPLYTYPE_RETBOOL(reply, REDIS_REPLY_STRING);
+	CHECK_REPLYTYPE_RETBOOL(reply, REDIS_REPLY_STATUS);
 	char* buf = NULL;
 	GET_REPLY_STRING(reply, buf);
 	if (strcmp(buf, "PONG") != 0) {
@@ -198,9 +197,8 @@ bool redisClient::load_scripts(const char* spath) {
 			return false;
 		}
 		if (reply->type == REDIS_REPLY_STRING) {
-			char buf[1024] = { 0 };
-			assert(r->len < (int)sizeof(buf));
-			memcpy(buf, reply->str, reply->len);
+			char* buf = NULL;
+			GET_REPLY_STRING(reply, buf);
 			printf("new script, id:%s, sha:%s\n", scriptid.c_str(), buf);
 			scriptid2sha_[scriptid] = buf;
 			freeReplyObject(reply);
@@ -269,7 +267,7 @@ bool redisClient::call_script(const std::string& scriptid, int keycnt, int cnt, 
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> keys;
 	std::vector<std::string> args;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	int k(0), i(0);
 	for (; i < cnt; ++i) {
@@ -361,7 +359,7 @@ bool redisClient::lpush(const std::string& key, const std::vector<std::string>& 
 bool redisClient::lpush(const std::string& key, int cnt, ...) {
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> vals;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; ++i) {
 		const char* p = va_arg(vl, const char*);
@@ -396,7 +394,7 @@ bool redisClient::rpush(const std::string& key, const std::vector<std::string>& 
 bool redisClient::rpush(const std::string& key, int cnt, ...) {
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> vals;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; ++i) {
 		const char* p = va_arg(vl, const char*);
@@ -611,7 +609,7 @@ bool redisClient::hdel(const std::string& key, const std::vector<std::string>& f
 bool redisClient::hdel(const std::string& key, int cnt, ...) {
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> fields;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; ++i) {
 		const char* p = va_arg(vl, const char*);
@@ -644,7 +642,7 @@ static redisReply* redisSadd(redisContext* ctx, const std::string& key, const st
 	return reply;
 }
 
-bool redisClient::sadd(const std::string& key, const std::vecotr<std::string>& members) {
+bool redisClient::sadd(const std::string& key, const std::vector<std::string>& members) {
 	CHECK_CONTEXT_RETBOOL;
 	redisReply* reply = redisSadd(ctx_, key, members);
 	CHECK_REPLY_RETBOOL(reply);
@@ -656,7 +654,7 @@ bool redisClient::sadd(const std::string& key, const std::vecotr<std::string>& m
 bool redisClient::sadd(const std::string& key, int cnt, ...) {
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> members;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; ++i) {
 		const char* p = va_arg(vl, const char*);
@@ -701,7 +699,7 @@ bool redisClient::srem(const std::string& key, const std::vector<std::string>& m
 bool redisClient::srem(const std::string& key, int cnt, ...) {
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> members;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; ++i) {
 		const char* p = va_arg(vl, const char*);
@@ -745,7 +743,7 @@ static redisReply* redisZadd(redisContext* ctx, const std::string& key, const st
 	argv[idx++] = "ZADD";
 	char* pkey = (char*)alloca(key.size() + 1); std::copy(key.begin(), key.end(), pkey); pkey[key.size()] = 0;
 	argv[idx++] = pkey;
-	std::map<std::string, int>::iterator it = pairs.begin();
+	std::map<std::string, int>::const_iterator it = pairs.begin();
 	for (; it != pairs.end(); ++it) {
 		char* score = (char*)alloca(64);
 		snprintf(score, 64, "%d", it->second);
@@ -774,7 +772,7 @@ bool redisClient::zadd(const std::string& key, const std::map<std::string, int>&
 bool redisClient::zadd(const std::string& key, int cnt, ...) { // cnt pairs of score and value
 	CHECK_CONTEXT_RETBOOL;
 	std::map<std::string, int> pairs;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; i += 2) {
 		int s = va_arg(vl, int);
@@ -820,7 +818,7 @@ bool redisClient::zrem(const std::string& key, const std::vector<std::string>& m
 bool redisClient::zrem(const std::string& key, int cnt, ...) { // cnt is number of members
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> members;
-	va_list vl = 0;
+	va_list vl;
 	va_start(vl, cnt);
 	for (int i = 0; i < cnt; ++i) {
 		const char* p = va_arg(vl, const char*);
@@ -863,7 +861,7 @@ bool redisClient::zrange(const std::string& key, int start, int stop, std::vecto
 	return true;
 }
 
-bool redisClient::zrange_withscores(const std::string& key, int start, int stop, std::map<std::map,int>& result) {
+bool redisClient::zrange_withscores(const std::string& key, int start, int stop, std::map<std::string,int>& result) {
 	CHECK_CONTEXT_RETBOOL;
 	redisReply* reply = (redisReply*)redisCommand(ctx_, "ZRANGE %s %d %d WITHSCORES", key.c_str(), start, stop);
 	CHECK_REPLY_RETBOOL(reply);

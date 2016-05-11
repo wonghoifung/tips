@@ -61,7 +61,7 @@ public:
 	bool hdel(const std::string& key, const std::vector<std::string>& fields);
 	bool hdel(const std::string& key, int cnt, ...);
 
-	bool sadd(const std::string& key, const std::vecotr<std::string>& members);
+	bool sadd(const std::string& key, const std::vector<std::string>& members);
 	bool sadd(const std::string& key, int cnt, ...);
 	bool srem(const std::string& key, const std::vector<std::string>& members);
 	bool srem(const std::string& key, int cnt, ...);
@@ -74,7 +74,7 @@ public:
 	bool zrem(const std::string& key, int cnt, ...); // cnt is number of members
 	int zcard(const std::string& key);
 	bool zrange(const std::string& key, int start, int stop, std::vector<std::string>& result);
-	bool zrange_withscores(const std::string& key, int start, int stop, std::map<std::map,int>& result);
+	bool zrange_withscores(const std::string& key, int start, int stop, std::map<std::string,int>& result);
 	bool zvisit(const std::string& key, int start, int stop, zset_visit_callback cb);
 
 private:
