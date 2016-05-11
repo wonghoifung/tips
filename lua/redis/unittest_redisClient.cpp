@@ -30,9 +30,9 @@ inline void set_rlimit()
 
 static void check_bool(const char* tag, bool b) {
 	if (b) {
-		printf("%-10s ok\n", tag);
+		printf("----> %-10s ok\n", tag);
 	} else {
-		printf("%-10s failure\n", tag);
+		printf("----> %-10s failure\n", tag);
 	}
 }
 
@@ -43,6 +43,16 @@ int main() {
 	redisClient* prc = &rc;
 	check_bool("connect", prc->connect());
 	check_bool("ping", prc->ping());
+	check_bool("disconnect", prc->disconnect());
+	check_bool("!ping", !prc->ping());
+	check_bool("connect", prc->connect());
+	check_bool("ping", prc->ping());
+	check_bool("ping", prc->ping());
+	std::vector<std::string> result;
+	check_bool("keys", prc->keys("*", result));
+	for (size_t i=0; i<result.size(); ++i) {
+		printf("%s\n", result[i].c_str());
+	}
 
 	return 0;
 }
