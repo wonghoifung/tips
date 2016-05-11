@@ -25,6 +25,7 @@ public:
 	~redisClient();
 
 	bool connect();
+	bool disconnect();
 	bool ping();
 	bool keys(const std::string& pattern, std::vector<std::string>& result);
 	bool keys_visit(const std::string& pattern, list_visit_callback cb);
@@ -33,8 +34,10 @@ public:
 	bool call_script(const std::string& scriptid, const std::vector<std::string>& keys, const std::vector<std::string>& args);
 	bool call_script(const std::string& scriptid, int keycnt, int cnt, ...); // cnt is total of keys cnt and args cnt
 
-	bool set(const std::string& key, const std::string& val);
-	std::string get(const std::string& key);
+	bool setstr(const std::string& key, const std::string& val);
+	std::string getstr(const std::string& key);
+	bool setint(const std::string& key, int val);
+	int getint(const std::string& key);
 	bool del(const std::string& key);
 
 	bool lpush(const std::string& key, const std::vector<std::string>& vals);
