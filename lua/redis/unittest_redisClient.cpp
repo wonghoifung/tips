@@ -318,22 +318,39 @@ int main() {
 		check_bool("zvisit",prc->zvisit("myzet",0,-1,zset_visit));
 	}
 
-	{
+	std::vector<std::string> datas;
+	for (int i=0; i<10000; ++i) {
 		char buf[64] = {0};
+		sprintf(buf,"tag%d",i);
+		datas.push_back(buf);
+	}
+
+	{
 		timekeeper tk("set 10000");
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < (int)datas.size(); ++i)
 		{
-			sprintf(buf,"tag%d",i);
-			prc->setint(buf,i);
+			prc->setstr(datas[i],datas[i]);
 		}
 	}
 	{
-		char buf[64] = {0};
 		timekeeper tk("get 10000");
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < (int)datas.size(); ++i)
 		{
-			sprintf(buf,"tag%d",i);
-			check_bool("get 10000", i==prc->getint(buf), false);
+			check_bool("get 10000", prc->getstr(datas[i])==datas[i], false);
+		}
+	}
+	{
+		timekeeper tk("hset 10000");
+		for (int i = 0; i < (int)datas.size(); ++i)
+		{
+			prc->hset("testhash",datas[i],datas[i]);
+		}
+	}
+	{
+		timekeeper tk("hget 10000");
+		for (int i = 0; i < (int)datas.size(); ++i)
+		{
+			check_bool("get 10000", prc->hget("testhash",datas[i])==datas[i], false);
 		}
 	}
 
