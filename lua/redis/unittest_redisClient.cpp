@@ -1,6 +1,8 @@
 #include "redisClient.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
+#include <time.h>
 #include <sys/resource.h>
 
 inline void set_rlimit()
@@ -30,22 +32,59 @@ inline void set_rlimit()
 
 static int okcnt = 0;
 static int failurecnt = 0;
-static void check_bool(const char* tag, bool b) {
+static void check_bool(const char* tag, bool b, bool verbose=true) {
 	if (b) {
 		okcnt += 1;
-		printf("----> %-10s ok\n", tag);
+		if (verbose) printf("----> %-10s ok\n", tag);
 	} else {
 		failurecnt += 1;
-		printf("----> %-10s failure\n", tag);
+		if (verbose) printf("----> %-10s failure\n", tag);
 	}
+}
+
+static bool in_vector(const std::string& s, const std::vector<std::string>& v) {
+	for (size_t i=0; i<v.size(); ++i) {
+		if (v[i]==s) return true;
+	}
+	return false;
 }
 
 static bool list_visit(const std::string& val) {
 	printf("----> %s\n", val.c_str());
 }
 
+static bool hash_visit(const std::string& key, const std::string& val) {
+	printf("----> %s: %s\n", key.c_str(), val.c_str());
+}
+
+static bool zset_visit(const std::string& val, int score) {
+	printf("----> %s: %d\n", val.c_str(), score);
+}
+
+class timekeeper {
+	timekeeper(const timekeeper&);
+	timekeeper& operator=(const timekeeper&);
+	timespec begts;
+	std::string info;
+	long convertToMs(timespec& ts) {
+		return ts.tv_sec*1000+ts.tv_nsec/1000000;
+	}
+public:
+	timekeeper(const char* in) : info(in) {
+		clock_gettime(CLOCK_MONOTONIC_RAW, &begts);
+	}
+	~timekeeper() {
+		timespec endts;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &endts);
+		long diffms = convertToMs(endts) - convertToMs(begts);
+		printf("[%s] time elasped: %ldms\n", info.c_str(), diffms);
+	}
+};
+
 int main() {
 	set_rlimit();
+
+	timekeeper tk("main");
 
 	redisClient rc("127.0.0.1", 6379);
 	redisClient* prc = &rc;
@@ -121,6 +160,7 @@ int main() {
 	check_bool("del", prc->del("b"));
 	check_bool("getint", (0==prc->getint("b")));
 	{
+		check_bool("del", prc->del("mylist"));
 		check_bool("llen", (0==prc->llen("mylist")));
 		std::vector<std::string> v;
 		v.push_back("a");
@@ -149,6 +189,152 @@ int main() {
 		check_bool("lrange", prc->lrange("mylist",0,-1,res));
 		check_bool("lrange result", (res.size()==2 && res[0]=="b" && res[1]=="z"));
 		check_bool("lvisit", prc->lvisit("mylist",0,-1,list_visit));
+	}
+	{
+		check_bool("del", prc->del("myhash"));
+		check_bool("hset", prc->hset("myhash", "id1", "123"));
+		check_bool("hset", prc->hset("myhash", "id2", "456"));
+		check_bool("hset", prc->hset("myhash", "id3", "789"));
+		check_bool("hget", ("123"==prc->hget("myhash","id1")));
+		check_bool("hget", ("456"==prc->hget("myhash","id2")));
+		check_bool("hget", ("789"==prc->hget("myhash","id3")));
+		check_bool("hget", (""==prc->hget("myhash","id4")));
+		check_bool("hlen", (3==prc->hlen("myhash")));
+		check_bool("hexists", (true==prc->hexists("myhash","id1")));
+		check_bool("hexists", (true==prc->hexists("myhash","id2")));
+		check_bool("hexists", (true==prc->hexists("myhash","id3")));
+		check_bool("hexists", (false==prc->hexists("myhash","id4")));
+		std::vector<std::string> keys;
+		check_bool("hkeys", prc->hkeys("myhash", keys));
+		check_bool("hkeys result", (3==keys.size() && in_vector("id1",keys) && in_vector("id2",keys) && in_vector("id3",keys)));
+		std::map<std::string, std::string> res;
+		check_bool("hgetall", prc->hgetall("myhash",res));
+		check_bool("hgetall result", (3==res.size() && res["id1"]=="123" && res["id2"]=="456" && res["id3"]=="789"));
+		check_bool("hvisit", prc->hvisit("myhash", hash_visit));
+		std::vector<std::string> fields;
+		fields.push_back("id2");
+		check_bool("hdel", prc->hdel("myhash", fields));
+		check_bool("hvisit", prc->hvisit("myhash", hash_visit));
+		check_bool("hdel", prc->hdel("myhash", 1, "id1"));
+		check_bool("hvisit", prc->hvisit("myhash", hash_visit));
+	}
+	{
+		check_bool("del", prc->del("myset"));
+		std::vector<std::string> members;
+		members.push_back("a");
+		members.push_back("b");
+		members.push_back("c");
+		members.push_back("x");
+		members.push_back("y");
+		members.push_back("z");
+		check_bool("sadd",prc->sadd("myset",members));
+		check_bool("sadd",prc->sadd("myset",3,"m","n","o"));
+		check_bool("sismember",(true==prc->sismember("myset","a")));
+		check_bool("sismember",(true==prc->sismember("myset","b")));
+		check_bool("sismember",(true==prc->sismember("myset","c")));
+		check_bool("sismember",(true==prc->sismember("myset","x")));
+		check_bool("sismember",(true==prc->sismember("myset","y")));
+		check_bool("sismember",(true==prc->sismember("myset","z")));
+		check_bool("sismember",(true==prc->sismember("myset","m")));
+		check_bool("sismember",(true==prc->sismember("myset","n")));
+		check_bool("sismember",(true==prc->sismember("myset","o")));
+		check_bool("sismember",(false==prc->sismember("myset","p")));
+		check_bool("scard",(9==prc->scard("myset")));
+		members.clear();
+		members.push_back("a");
+		members.push_back("x");
+		members.push_back("m");
+		check_bool("srem",prc->srem("myset",members));
+		check_bool("scard",(6==prc->scard("myset")));
+		check_bool("sismember",(false==prc->sismember("myset","a")));
+		check_bool("sismember",(true==prc->sismember("myset","b")));
+		check_bool("sismember",(true==prc->sismember("myset","c")));
+		check_bool("sismember",(false==prc->sismember("myset","x")));
+		check_bool("sismember",(true==prc->sismember("myset","y")));
+		check_bool("sismember",(true==prc->sismember("myset","z")));
+		check_bool("sismember",(false==prc->sismember("myset","m")));
+		check_bool("sismember",(true==prc->sismember("myset","n")));
+		check_bool("sismember",(true==prc->sismember("myset","o")));
+		check_bool("sismember",(false==prc->sismember("myset","p")));
+		check_bool("srem",prc->srem("myset",3,"b","y","n"));
+		check_bool("scard",(3==prc->scard("myset")));
+		check_bool("sismember",(false==prc->sismember("myset","a")));
+		check_bool("sismember",(false==prc->sismember("myset","b")));
+		check_bool("sismember",(true==prc->sismember("myset","c")));
+		check_bool("sismember",(false==prc->sismember("myset","x")));
+		check_bool("sismember",(false==prc->sismember("myset","y")));
+		check_bool("sismember",(true==prc->sismember("myset","z")));
+		check_bool("sismember",(false==prc->sismember("myset","m")));
+		check_bool("sismember",(false==prc->sismember("myset","n")));
+		check_bool("sismember",(true==prc->sismember("myset","o")));
+		check_bool("sismember",(false==prc->sismember("myset","p")));
+	}
+	{
+		check_bool("del", prc->del("myzet"));
+		std::map<std::string, int> pairs;
+		pairs["a"]=3;
+		pairs["b"]=2;
+		pairs["c"]=1;
+		pairs["x"]=11;
+		pairs["y"]=22;
+		pairs["z"]=33;
+		check_bool("zadd", prc->zadd("myzet",pairs));
+		check_bool("zadd", prc->zadd("myzet",3,111,"mm",222,"nn",333,"oo"));
+		check_bool("zcard", (9==prc->zcard("myzet")));
+		std::vector<std::string> res1;
+		check_bool("zrange", prc->zrange("myzet",0,-1,res1));
+		check_bool("zrange result", (9==res1.size()));
+		check_bool("zrange result", ("c"==res1[0]));
+		check_bool("zrange result", ("b"==res1[1]));
+		check_bool("zrange result", ("a"==res1[2]));
+		check_bool("zrange result", ("x"==res1[3]));
+		check_bool("zrange result", ("y"==res1[4]));
+		check_bool("zrange result", ("z"==res1[5]));
+		check_bool("zrange result", ("mm"==res1[6]));
+		check_bool("zrange result", ("nn"==res1[7]));
+		check_bool("zrange result", ("oo"==res1[8]));
+		std::map<std::string,int> res2;
+		check_bool("zrange_withscores", prc->zrange_withscores("myzet",0,-1,res2));
+		check_bool("zrange_withscores result", (9==res2.size()));
+		check_bool("zrange_withscores result", (3==res2["a"]));
+		check_bool("zrange_withscores result", (2==res2["b"]));
+		check_bool("zrange_withscores result", (1==res2["c"]));
+		check_bool("zrange_withscores result", (11==res2["x"]));
+		check_bool("zrange_withscores result", (22==res2["y"]));
+		check_bool("zrange_withscores result", (33==res2["z"]));
+		check_bool("zrange_withscores result", (111==res2["mm"]));
+		check_bool("zrange_withscores result", (222==res2["nn"]));
+		check_bool("zrange_withscores result", (333==res2["oo"]));
+		check_bool("zvisit",prc->zvisit("myzet",0,-1,zset_visit));
+		std::vector<std::string> members;
+		members.push_back("a");
+		members.push_back("x");
+		members.push_back("mm");
+		check_bool("zrem",prc->zrem("myzet",members));
+		check_bool("zcard", (6==prc->zcard("myzet")));
+		check_bool("zvisit",prc->zvisit("myzet",0,-1,zset_visit));
+		check_bool("zrem",prc->zrem("myzet",3,"b","y","nn"));
+		check_bool("zcard", (3==prc->zcard("myzet")));
+		check_bool("zvisit",prc->zvisit("myzet",0,-1,zset_visit));
+	}
+
+	{
+		char buf[64] = {0};
+		timekeeper tk("set 10000");
+		for (int i = 0; i < 10000; ++i)
+		{
+			sprintf(buf,"tag%d",i);
+			prc->setint(buf,i);
+		}
+	}
+	{
+		char buf[64] = {0};
+		timekeeper tk("get 10000");
+		for (int i = 0; i < 10000; ++i)
+		{
+			sprintf(buf,"tag%d",i);
+			check_bool("get 10000", i==prc->getint(buf), false);
+		}
 	}
 
 	printf("ok count: %d, failure count: %d\n", okcnt, failurecnt);

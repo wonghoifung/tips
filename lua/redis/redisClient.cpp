@@ -790,7 +790,7 @@ bool redisClient::zadd(const std::string& key, int cnt, ...) { // cnt pairs of s
 	std::map<std::string, int> pairs;
 	va_list vl;
 	va_start(vl, cnt);
-	for (int i = 0; i < cnt; i += 2) {
+	for (int i = 0; i < cnt; ++i) {
 		int s = va_arg(vl, int);
 		const char* p = va_arg(vl, const char*);
 		pairs[p] = s;
