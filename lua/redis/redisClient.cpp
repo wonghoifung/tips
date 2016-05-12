@@ -303,6 +303,9 @@ std::string redisClient::getstr(const std::string& key) {
 	CHECK_CONTEXT_RETSTRING;
 	redisReply* reply = (redisReply*)redisCommand(ctx_, "GET %s", key.c_str());
 	CHECK_REPLY_RETSTRING(reply);
+	if (reply->type == REDIS_REPLY_NIL) {
+		return "";
+	}
 	CHECK_REPLYTYPE_RETSTRING(reply, REDIS_REPLY_STRING);
 	char* buf = NULL;
 	GET_REPLY_STRING(reply, buf);
@@ -322,8 +325,13 @@ int redisClient::getint(const std::string& key) {
 	CHECK_CONTEXT_RETINT;
 	redisReply* reply = (redisReply*)redisCommand(ctx_, "GET %s", key.c_str());
 	CHECK_REPLY_RETINT(reply);
-	CHECK_REPLYTYPE_RETINT(reply, REDIS_REPLY_INTEGER);
-	int ret = reply->integer;
+	if (reply->type == REDIS_REPLY_NIL) {
+		return 0;
+	}
+	CHECK_REPLYTYPE_RETINT(reply, REDIS_REPLY_STRING);
+	char* buf = NULL;
+	GET_REPLY_STRING(reply, buf);
+	int ret = atoi(buf);
 	freeReplyObject(reply);
 	return ret;
 }

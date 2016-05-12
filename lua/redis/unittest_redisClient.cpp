@@ -108,6 +108,47 @@ int main() {
 		std::string name;
 		check_bool("call_script", prc->call_script("hash_json_get",&name,NULL,1,3,"hjson","id2","name"));
 		check_bool("hash_json_get result", (name=="wong"));
+		std::string sex;
+		check_bool("call_script", prc->call_script("hash_json_get",&sex,NULL,1,3,"hjson","id2","sex"));
+		check_bool("hash_json_get result", (sex==""));
+	}
+	check_bool("setstr", prc->setstr("a","axxxxxxxxxxxxxxxxxxxxxxxxxz"));
+	check_bool("getstr", ("axxxxxxxxxxxxxxxxxxxxxxxxxz"==prc->getstr("a")));
+	check_bool("setint", prc->setint("b",123456));
+	check_bool("getint", (123456==prc->getint("b")));
+	check_bool("del", prc->del("a"));
+	check_bool("getstr", (""==prc->getstr("a")));
+	check_bool("del", prc->del("b"));
+	check_bool("getint", (0==prc->getint("b")));
+	{
+		check_bool("llen", (0==prc->llen("mylist")));
+		std::vector<std::string> v;
+		v.push_back("a");
+		v.push_back("b");
+		v.push_back("c");
+		check_bool("lpush", prc->lpush("mylist",v));
+		check_bool("lpush", prc->lpush("mylist", 2, "d", "e"));
+		check_bool("llen", (5==prc->llen("mylist")));
+		check_bool("lpop", ("e"==prc->lpop("mylist")));
+		check_bool("llen", (4==prc->llen("mylist")));
+		check_bool("lpop", ("d"==prc->lpop("mylist")));
+		check_bool("llen", (3==prc->llen("mylist")));
+		check_bool("lpop", ("c"==prc->lpop("mylist")));
+		check_bool("llen", (2==prc->llen("mylist")));
+		check_bool("rpop", ("a"==prc->rpop("mylist")));
+		std::vector<std::string> vv;
+		vv.push_back("x");
+		vv.push_back("y");
+		check_bool("rpush", prc->rpush("mylist",vv));
+		check_bool("rpush", prc->rpush("mylist", 2, "z", "zz"));
+		check_bool("llen", (5==prc->llen("mylist")));
+		check_bool("rpop", ("zz"==prc->rpop("mylist")));
+		check_bool("lrem", prc->lrem("mylist",0,"x"));
+		check_bool("lrem", prc->lrem("mylist",0,"y"));
+		std::vector<std::string> res;
+		check_bool("lrange", prc->lrange("mylist",0,-1,res));
+		check_bool("lrange result", (res.size()==2 && res[0]=="b" && res[1]=="z"));
+		check_bool("lvisit", prc->lvisit("mylist",0,-1,list_visit));
 	}
 
 	printf("ok count: %d, failure count: %d\n", okcnt, failurecnt);
