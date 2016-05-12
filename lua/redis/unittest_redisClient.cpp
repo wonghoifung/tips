@@ -51,14 +51,17 @@ static bool in_vector(const std::string& s, const std::vector<std::string>& v) {
 
 static bool list_visit(const std::string& val) {
 	printf("----> %s\n", val.c_str());
+	return true;
 }
 
 static bool hash_visit(const std::string& key, const std::string& val) {
 	printf("----> %s: %s\n", key.c_str(), val.c_str());
+	return true;
 }
 
 static bool zset_visit(const std::string& val, int score) {
 	printf("----> %s: %d\n", val.c_str(), score);
+	return true;
 }
 
 class timekeeper {
