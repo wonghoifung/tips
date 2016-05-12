@@ -31,7 +31,7 @@ bool redisManager::delRedis(int id) {
 	std::map<int, redisClient*>::iterator it = redisClients_.find(id);
 	if (it != redisClients_.end()) {
 		delete it->second;
-		redisClients.erase(it);
+		redisClients_.erase(it);
 	} 
 	return true;
 }
@@ -60,7 +60,7 @@ bool redisManager::del(const std::string& key) {
 }
 
 const std::vector<int>* redisManager::get(const std::string& key) const {
-	svimap_t::iterator it = keyClients_.find(key);
+	svimap_t::const_iterator it = keyClients_.find(key);
 	if (it != keyClients_.end()) {
 		return &it->second;
 	}
