@@ -31,8 +31,8 @@ public:
 	bool keys_visit(const std::string& pattern, list_visit_callback cb);
 
 	bool load_scripts(const char* spath);
-	bool call_script(const std::string& scriptid, const std::vector<std::string>& keys, const std::vector<std::string>& args);
-	bool call_script(const std::string& scriptid, int keycnt, int cnt, ...); // cnt is total of keys cnt and args cnt
+	bool call_script(const std::string& scriptid, std::string* outs, int* outi, const std::vector<std::string>& keys, const std::vector<std::string>& args);
+	bool call_script(const std::string& scriptid, std::string* outs, int* outi, int keycnt, int cnt, ...); // cnt is total of keys cnt and args cnt
 
 	bool setstr(const std::string& key, const std::string& val);
 	std::string getstr(const std::string& key);

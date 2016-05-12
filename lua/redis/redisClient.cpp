@@ -240,7 +240,7 @@ static redisReply* redisEval(redisContext* ctx, const std::string& sha, const st
 	return reply;
 }
 
-bool redisClient::call_script(const std::string& scriptid, const std::vector<std::string>& keys, const std::vector<std::string>& args) {
+bool redisClient::call_script(const std::string& scriptid, std::string* outs, int* outi, const std::vector<std::string>& keys, const std::vector<std::string>& args) {
 	CHECK_CONTEXT_RETBOOL;
 	scriptmap_t::iterator it = scriptid2sha_.find(scriptid);
 	if (it == scriptid2sha_.end()) {
@@ -253,17 +253,25 @@ bool redisClient::call_script(const std::string& scriptid, const std::vector<std
 		printf("eval error: %s\n", ctx_->errstr);
 		return false;
 	}
-	bool ret = (reply->type == REDIS_REPLY_INTEGER);
 	if (reply->type == REDIS_REPLY_STRING) {
 		char* buf = NULL;
 		GET_REPLY_STRING(reply, buf);
-		printf("%s\n", buf);
+		if (outs) {
+			*outs = buf;
+		} else {
+			printf("unhandled: %s\n", buf);
+		}
+	} 
+	else if (reply->type == REDIS_REPLY_INTEGER) {
+		if (outi) {
+			*outi = reply->integer;
+		} 
 	}
 	freeReplyObject(reply);
-	return ret;
+	return true;
 }
 
-bool redisClient::call_script(const std::string& scriptid, int keycnt, int cnt, ...) { // cnt is total of keys cnt and args cnt
+bool redisClient::call_script(const std::string& scriptid, std::string* outs, int* outi, int keycnt, int cnt, ...) { // cnt is total of keys cnt and args cnt
 	CHECK_CONTEXT_RETBOOL;
 	std::vector<std::string> keys;
 	std::vector<std::string> args;
@@ -280,7 +288,7 @@ bool redisClient::call_script(const std::string& scriptid, int keycnt, int cnt, 
 		}
 	}
 	va_end(vl);
-	return call_script(scriptid, keys, args);
+	return call_script(scriptid, outs, outi, keys, args);
 } 
 
 bool redisClient::setstr(const std::string& key, const std::string& val) {
