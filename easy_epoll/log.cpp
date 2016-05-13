@@ -40,7 +40,7 @@ void set_log_level(int l)
     if(l>=0) __log_level__ = l > 4 ? l : 4;
 }
 
-void reset_hex_level()
+void toggle_hex_level()
 {
     __hex_level__^=1;
     if(__hex_level__==0) {
@@ -50,56 +50,6 @@ void reset_hex_level()
     	__log_level__ = 7;
     }
     log_notice("log_level=[%d],hex_level=[%d],bef_log_level=[%d]",__log_level__,__hex_level__,__bef_log_level__);
-}
-
-void write_access(int access, const char* rsp_buf, const char* fmt, ...)
-{
-    if (0 == access) return;
-
-    char  rspinfo[MAX_PATH_LEN] = {'\0'};
-    int   rsplen                = 0;
-    char* checkpoint            = strstr ((char *)rsp_buf, "\r\n");
-
-    if (NULL == checkpoint) return;
-
-    rsplen = checkpoint - rsp_buf;
-    if(rsplen > MAX_PATH_LEN - 1) rsplen = MAX_PATH_LEN - 1;
-
-    memcpy (rspinfo, rsp_buf, rsplen);
-    rspinfo[rsplen] = 0x00;
-
-    // save errno
-    int savedErrNo = errno;
-    int off = 0;
-    char buf[LOGSIZE];
-    char logfile[MAX_PATH_LEN];
-
-    struct tm tm;
-    time_t now = time(NULL);
-    localtime_r(&now, &tm);
-    off = snprintf(buf, LOGSIZE - 1, "[%02d:%02d:%02d] : response info[%s] ", tm.tm_hour, tm.tm_min, tm.tm_sec, rspinfo);
-
-    snprintf(logfile, MAX_PATH_LEN - 1, "%s/%s.access%04d%02d%02d.log",
-            log_dir, appname,
-            tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-
-    va_list ap;
-    va_start(ap, fmt);
-    // restore errno
-    errno = savedErrNo;
-    off += vsnprintf(buf+off, LOGSIZE-off-2, fmt, ap);
-    va_end(ap);
-
-    if(buf[off-1] != '\n') buf[off++] = '\n';
-
-    if(appname[0]) {
-        int fd = open (logfile, O_CREAT | O_LARGEFILE | O_APPEND |O_WRONLY, 0644);
-
-        if (fd >= 0) {
-            write(fd, buf, off);
-            close (fd);
-        }
-    }
 }
 
 static int access_log()
@@ -126,7 +76,7 @@ static int access_log()
 			fprintf(stderr, "ATTENTION: the prefix of the log file is not set\n");
 			return -1;
 		}
-		snprintf(logfile, MAX_PATH_LEN-1, "%s/%s_%d.log",log_dir, appname,cur_file_pos);
+		snprintf(logfile, MAX_PATH_LEN-1, "%s/%s_%d.log", log_dir, appname, cur_file_pos);
 		int flags = O_CREAT | O_LARGEFILE | O_APPEND | O_WRONLY;
 		if(btruncate) {
 			flags |= O_TRUNC;

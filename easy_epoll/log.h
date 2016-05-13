@@ -12,8 +12,7 @@ __BEGIN_DECLS
 extern int __log_level__;
 extern int __hex_level__;
 
-#define log_generic(lvl, fmt, args...)           write_log(lvl, __FILE__, __FUNCTION__, __LINE__ , fmt, ##args)
-#define log_access(accesslog, buf, fmt, args...) write_access(accesslog, buf, fmt, ##args)
+#define log_generic(lvl, fmt, args...) write_log(lvl, __FILE__, __FUNCTION__, __LINE__ , fmt, ##args)
 #define TRACE(fmt, args...)		    log_generic(-1, fmt, ##args)
 #define log_emerg(fmt, args...)	    log_generic(0, fmt, ##args)
 #define log_alert(fmt, args...)		log_generic(1, fmt, ##args)
@@ -25,16 +24,11 @@ extern int __hex_level__;
 #define log_debug(fmt, args...)		do{ if(__log_level__>=7)log_generic(7, fmt, ##args); } while(0)
 #define hex_debug(head,size,str)	do{ if(__hex_level__>0)write_hex(__hex_level__, __FILE__, __FUNCTION__, __LINE__, head, size, str); } while(0)
 
-#if __cplusplus
 extern void init_log(const char* app, const char* dir = NULL, int max_num = -1, int max_size = -1);
-#else
-extern void init_log(const char* app, const char* dir, int max_num, int max_size);
-#endif
 extern void set_log_level(int);
-extern void reset_hex_level();
+extern void toggle_hex_level();
 extern void write_log(int, const char*, const char*, int, const char*, ...) __attribute__((format(__printf__,5,6)));
 extern void write_hex(int level, const char* filename, const char* funcname, int lineno, const char* head, int size, char* str);
-extern void write_access(int access, const char* rsp_buf, const char* fmt, ...) __attribute__((format(__printf__,3,4)));
 
 __END_DECLS
 
