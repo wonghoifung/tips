@@ -23,21 +23,27 @@ MYSOURCEDIRS = ./
 
 SOURCEDIRS = $(MYSOURCEDIRS)
 
+C_SOURCES = $(foreach tmp, $(SOURCEDIRS), $(wildcard $(tmp)*.c))
+C_OBJS = $(patsubst %.c, %.o, $(C_SOURCES))
+
 CPP_SOURCES = $(foreach tmp, $(SOURCEDIRS), $(wildcard $(tmp)*.cpp))
 CPP_OBJS = $(patsubst %.cpp, %.o, $(CPP_SOURCES))
 
 all:compile
 .PHONY : all
 
+.c.o:
+	$(CC) -fPIC -c -o $*.o $(CFLAGS) $(INCLUDES) $*.c
+
 .cpp.o:
 	$(CXX) -fPIC -c -o $*.o $(CPPFLAGS) $(INCLUDES) $*.cpp
 
-compile: $(CPP_OBJS) 
+compile: $(CPP_OBJS) $(C_OBJS)
 	$(CXX) $(LINKFLAGS) -shared -o $(TARGET) $^ $(LIBS)
 
 .PHONY : clean
 clean:
-	rm -f $(CPP_OBJS) 
+	rm -f $(CPP_OBJS) $(C_OBJS)
 	rm -f $(TARGET)
 
 install: $(TARGET)
