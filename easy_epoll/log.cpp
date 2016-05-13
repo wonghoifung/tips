@@ -14,7 +14,6 @@
 #define LOGSIZE         1 * 1024 * 1024
 #define MAX_PATH_LEN    256
 
-int __stdin__ = 0; // TODO
 int __log_level__ = 6;
 int __bef_log_level__ = 0;
 int __hex_level__ = 0;
@@ -34,11 +33,6 @@ void init_log(const char* app, const char* dir, int max_num, int max_size)
     if(access(log_dir, W_OK|X_OK) < 0) log_error("logdir(%s): not writable", log_dir);
     if(max_num > 0) max_file_num = max_num;
     if(max_size > 0) max_file_size = max_size;
-}
-
-void write_to_stdin(int i) 
-{
-    __stdin__ = i;
 }
 
 void set_log_level(int l)
@@ -174,10 +168,17 @@ void write_log(int level, const char* filename, const char* funcname, int lineno
 
     localtime_r(&now, &tm);
     filename = basename(filename);
-    off = snprintf(buf, LOGSIZE-1,
-            "[%c]%02d%02d-%02d:%02d:%02d|%s(%d)%s|",
-            logTT[level],tm.tm_mon + 1, tm.tm_mday,tm.tm_hour, tm.tm_min, tm.tm_sec,
-            filename, lineno, funcname);
+    if (level == -1) {
+        off = snprintf(buf, LOGSIZE-1,
+                "[T]%02d%02d-%02d:%02d:%02d|%s(%d)%s|",
+                tm.tm_mon + 1, tm.tm_mday,tm.tm_hour, tm.tm_min, tm.tm_sec,
+                filename, lineno, funcname);
+    } else {
+        off = snprintf(buf, LOGSIZE-1,
+                "[%c]%02d%02d-%02d:%02d:%02d|%s(%d)%s|",
+                logTT[level],tm.tm_mon + 1, tm.tm_mday,tm.tm_hour, tm.tm_min, tm.tm_sec,
+                filename, lineno, funcname); 
+    }
     if((fd = access_log())<=0) return;
 
     va_list ap;

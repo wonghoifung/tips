@@ -30,7 +30,6 @@ extern void init_log(const char* app, const char* dir = NULL, int max_num = -1, 
 #else
 extern void init_log(const char* app, const char* dir, int max_num, int max_size);
 #endif
-extern void write_to_stdin(int i);
 extern void set_log_level(int);
 extern void reset_hex_level();
 extern void write_log(int, const char*, const char*, int, const char*, ...) __attribute__((format(__printf__,5,6)));
