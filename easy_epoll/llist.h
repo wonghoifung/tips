@@ -24,6 +24,7 @@ typedef struct {
 typedef int(*list_find_p)(ELE* pELE, void* key);
 typedef void(*list_travel_p)(ELE* pELE, void* key);
 
+// TODO
 LLIST* lhandle;
 list_travel_p travel_p;
 list_find_p find_p;
