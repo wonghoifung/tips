@@ -79,7 +79,7 @@ static inline void internal_add_kdtimer(timer_base_t* base, kdtimer_t* timer)
         vec = base->sltv3.vec + i;
     }
     else {
-        // 64bit jiffies? 
+        // 64bit jiffies? not for long interval timer
         INIT_LIST_HEAD(&timer->list);
     }
     list_add(&timer->list, vec->prev);
@@ -139,7 +139,7 @@ static inline void cascade_kdtimers(struct kdtimer_vec* tv)
         curr = next;
     }
     INIT_LIST_HEAD(head);
-    tv->index = (tv->index + 1) & TVN_MASK;
+    tv->index = (tv->index + 1) & TVN_MASK; // will rewind to 0
 }
 
 static inline void run_kdtimer_list(timer_base_t* base, unsigned long jiffies)
@@ -170,7 +170,7 @@ repeat:
             goto repeat;
         }
         base->kdtimer_jiffies += 1 << SHIFT_BITS;
-        base->sltv1.index = (base->sltv1.index + 1) & TVR_MASK;
+        base->sltv1.index = (base->sltv1.index + 1) & TVR_MASK; // will rewind to 0
     }
 }
 
