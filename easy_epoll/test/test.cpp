@@ -1,6 +1,9 @@
 #include "timer.h"
 #include <sys/resource.h>
 #include <iostream>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 inline void set_rlimit()
 {
@@ -32,14 +35,9 @@ void te_callback(void* ptr) {
 }
 
 int main() {
-	// set_rlimit();
-	std::cout<<"0"<<std::endl;
+	set_rlimit();
 	init_timer();
-	std::cout<<"1"<<std::endl;
 	time_ev te = {1,NULL,(void*)"albert",te_callback};
-	std::cout<<"2"<<std::endl;
 	start_timer(1, 1000, &te);
-	std::cout<<"3"<<std::endl;
 	start_timer(2, 1000, &te);
-	std::cout<<"4"<<std::endl;
 }

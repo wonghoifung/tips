@@ -69,24 +69,30 @@ static inline void internal_add_kdtimer(timer_base_t* base, kdtimer_t* timer)
 {
     unsigned long expires = timer->expires;
     unsigned long idx = expires - base->kdtimer_jiffies;
+    printf("expires:%lu(%ld), idx:%lu(%ld)\n",expires,expires,idx,idx);
     struct list_head* vec;
     if (idx < 1 << (SHIFT_BITS + TVR_BITS)) {
+        printf("level 1\n");
         int i = (expires >> SHIFT_BITS) & TVR_MASK;
         vec = base->sltv1.vec + i;
     }
     else if (idx < 1 << (SHIFT_BITS + TVR_BITS + TVN_BITS)) {
+        printf("level 2\n");
         int i = (expires >> (SHIFT_BITS + TVR_BITS)) & TVN_MASK;
         vec = base->sltv2.vec + i;
     }
     else if ((signed long)idx < 0) {
         // already expired
+        printf("level -1\n");
         vec = base->sltv1.vec + base->sltv1.index;
     }
     else if (idx <= 0xffffffffUL) {
+        printf("level 3\n");
         int i = (expires >> (SHIFT_BITS + TVR_BITS + TVN_BITS)) & TVN_MASK;
         vec = base->sltv3.vec + i;
     }
     else {
+        printf("level nil\n");
         // 64bit jiffies? not for long interval timer
         INIT_LIST_HEAD(&timer->list);
     }
@@ -167,8 +173,6 @@ static inline void cascade_kdtimers(struct kdtimer_vec* tv)
 
 static inline void run_kdtimer_list(timer_base_t* base, unsigned long jiffies)
 {
-	printf("jiffies: %ld\n", jiffies);
-	printf("base->kdtimer_jiffies: %ld\n", base->kdtimer_jiffies);
     while ((long) (jiffies - base->kdtimer_jiffies) >= 0) {
         struct list_head *head, *curr;
         if (!base->sltv1.index) {
@@ -201,9 +205,6 @@ repeat:
 
 static inline void kdtimer_collect()
 {
-	printf("call times\n");
-	times(NULL);
-	printf("call run_kdtimer_list\n");
     run_kdtimer_list(t_base, times(NULL));
 }
 
@@ -216,11 +217,8 @@ static void on_timer(void* ctx)
 
 void init_timer()
 {
-	printf("---1\n");
 	kdtimer_init();
-	printf("---2\n");
 	run_timer();
-	printf("---3\n");
 }
 
 int start_timer(int sec, int usec, struct time_ev* ev)
