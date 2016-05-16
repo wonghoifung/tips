@@ -1,0 +1,2 @@
+show variables like '%general%';
+set @@global.general_log=1;
