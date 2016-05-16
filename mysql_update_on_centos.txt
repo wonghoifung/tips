@@ -1,0 +1,11 @@
+1. download the latest repos
+http://dev.mysql.com/downloads/repo/yum/
+
+2. update local yum repos
+rpm -Uvh *.rpm  
+
+3. check if updated
+yum repolist enabled | grep mysql  
+
+4. install
+yum install mysql-community-server
