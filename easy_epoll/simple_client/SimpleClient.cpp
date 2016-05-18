@@ -30,7 +30,7 @@ static bool initTimer() {
 	return true;
 }
 
-SimpleClient::SimpleClient(StreamServer* ss):parser_(NULL),ss_(ss) {
+SimpleClient::SimpleClient(stream_server* ss):parser_(NULL),ss_(ss) {
 	initTimer();
 	sc = this;
 	SetNeedDel(false);

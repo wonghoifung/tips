@@ -1,16 +1,16 @@
-#ifndef STREAMSERVER_HEADER
-#define STREAMSERVER_HEADER
+#ifndef STREAM_SERVER_HEADER
+#define STREAM_SERVER_HEADER
 
 #include "event_loop.h"
 #include "StreamHandler.h"
 #include "timer.h"
 #include <map>
 
-class StreamServer:public event_loop
+class stream_server:public event_loop
 {
 public:
-	StreamServer(void);
-	virtual ~StreamServer(void);
+	stream_server(void);
+	virtual ~stream_server(void);
 
 	virtual tcpconn* CreateHandler(void);
     virtual void OnConnect(StreamHandler *pHandler );

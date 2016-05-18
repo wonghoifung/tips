@@ -3,7 +3,7 @@
 
 #include "tcpconn.h"
 #include "MessageParser.h"
-#include "StreamServer.h"
+#include "stream_server.h"
 #include "Connector.h"
 
 class SimpleClient: public tcpconn
@@ -12,7 +12,7 @@ class SimpleClient: public tcpconn
 	SimpleClient& operator=(const SimpleClient&);
 
 public:
-	SimpleClient(StreamServer* ss);
+	SimpleClient(stream_server* ss);
 	~SimpleClient();
 	bool connect(const std::string& host, const std::string& port);
  	int send(OutMessage* msg);
@@ -26,7 +26,7 @@ public:
 private:
 	Connector connector_;
 	MessageParser* parser_;
-	StreamServer* ss_;
+	stream_server* ss_;
 };
 
 #endif

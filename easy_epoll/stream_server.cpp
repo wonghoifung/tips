@@ -1,19 +1,19 @@
-#include "StreamServer.h"
+#include "stream_server.h"
 #include "SocketApi.h"
 #include <stdarg.h>
 #include <assert.h>
 
-StreamServer::StreamServer(void)
+stream_server::stream_server(void)
 :event_loop()
 {
 	m_nMaxID = 0;
 }
 
-StreamServer::~StreamServer(void)
+stream_server::~stream_server(void)
 {
 }
 
-tcpconn * StreamServer::CreateHandler(void)
+tcpconn * stream_server::CreateHandler(void)
 {
 	StreamHandler *pNewHandler = NULL;
     int nHandlerID = GetUseID();
@@ -21,7 +21,7 @@ tcpconn * StreamServer::CreateHandler(void)
 	return pNewHandler;
 }
 
-void  StreamServer::OnConnect(StreamHandler *pHandler )
+void  stream_server::OnConnect(StreamHandler *pHandler )
 {
     int id = pHandler->GetHandlerID();
     if(m_HandlerMap.find(id) == m_HandlerMap.end())
@@ -30,12 +30,12 @@ void  StreamServer::OnConnect(StreamHandler *pHandler )
     }
     else
     {
-        log_debug("StreamServer::ProcessConnected Error %d\r\n", pHandler->GetHandlerID());
+        log_debug("stream_server::ProcessConnected Error %d\r\n", pHandler->GetHandlerID());
         assert(false);
     }
 }
 
-void  StreamServer::OnDisconnect(StreamHandler *pHandler )
+void  stream_server::OnDisconnect(StreamHandler *pHandler )
 {
     int id = pHandler->GetHandlerID();
     std::map<int, StreamHandler*>::iterator iter = m_HandlerMap.find(id);
@@ -45,19 +45,19 @@ void  StreamServer::OnDisconnect(StreamHandler *pHandler )
     }
     else
     {
-        log_debug("StreamServer::ProcessClose Error %d\r\n",pHandler->GetHandlerID());
+        log_debug("stream_server::ProcessClose Error %d\r\n",pHandler->GetHandlerID());
         assert(false);
     }
 }
 
-int StreamServer::ProcessOnTimer(StreamHandler *pHandler)
+int stream_server::ProcessOnTimer(StreamHandler *pHandler)
 {
     log_debug("connect 30s and no packet,disconnect \n");
     DisConnect(pHandler);
 	return 0;
 }
 
-StreamHandler * StreamServer::FindHandler(int nIndex)
+StreamHandler * stream_server::FindHandler(int nIndex)
 {
 	std::map<int, StreamHandler*>::iterator iter = m_HandlerMap.find(nIndex);
 
@@ -68,7 +68,7 @@ StreamHandler * StreamServer::FindHandler(int nIndex)
 	return NULL;
 }
 
-int StreamServer::GetUseID(void)
+int stream_server::GetUseID(void)
 {
     ++m_nMaxID;
     while(m_HandlerMap.find(m_nMaxID) != m_HandlerMap.end())

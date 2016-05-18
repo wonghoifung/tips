@@ -1,12 +1,12 @@
 #ifndef SIMPLESERVER_HEADER
 #define SIMPLESERVER_HEADER
 
-#include "StreamServer.h"
+#include "stream_server.h"
 #include "timer.h"
 
 class Peer;
 
-class SimpleServer : public StreamServer, public timer_handler
+class SimpleServer : public stream_server, public timer_handler
 {
 	SimpleServer(const SimpleServer&);
 	SimpleServer& operator=(const SimpleServer&);

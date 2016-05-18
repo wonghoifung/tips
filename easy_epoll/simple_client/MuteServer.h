@@ -1,10 +1,10 @@
 #ifndef MUTESERVER_HEADER
 #define MUTESERVER_HEADER
 
-#include "StreamServer.h"
+#include "stream_server.h"
 #include "timer.h"
 
-class MuteServer : public StreamServer
+class MuteServer : public stream_server
 {
 	MuteServer(const MuteServer&);
 	MuteServer& operator=(const MuteServer&);
