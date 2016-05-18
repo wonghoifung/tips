@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <map>
 
-class TcpServer;
+class event_loop;
 class InMessage;
 
 const int MAX_LOOP_BUFFER_LEN = 64*1024;
@@ -46,8 +46,8 @@ public:
 	int Send(const char *buf, int nLen);
     virtual int OnParserComplete(InMessage *)=0;
     bool Writable();
-	TcpServer * server(void){return m_pServer;}
-	virtual void server(TcpServer *p){m_pServer = p;}
+	event_loop * server(void){return m_pServer;}
+	virtual void server(event_loop *p){m_pServer = p;}
 
 protected:
 	int m_sock_fd;
@@ -56,7 +56,7 @@ protected:
     bool m_bNeedDel;
     bool m_bfull;
 	timer m_TcpTimer;
-	TcpServer* m_pServer;
+	event_loop* m_pServer;
 	char m_pRecvBuffer[RECV_BUFFER_SIZE];	
 	LoopBuffer* m_pSendLoopBuffer;
 	char m_pTmpSendBuffer[SEND_BUFFER_SIZE];

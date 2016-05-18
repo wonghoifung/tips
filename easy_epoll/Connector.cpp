@@ -10,7 +10,7 @@ Connector::~Connector()
 {
 }
 
-bool Connector::Open(TcpServer* pServer)
+bool Connector::Open(event_loop* pServer)
 {
 	if(pServer == NULL)
 		return false;

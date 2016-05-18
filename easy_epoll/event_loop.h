@@ -1,5 +1,5 @@
-#ifndef TCPSERVER_HEADER
-#define TCPSERVER_HEADER
+#ifndef EVENT_LOOP_HEADER
+#define EVENT_LOOP_HEADER
 
 #include <sys/resource.h>
 #include <sys/times.h>
@@ -17,11 +17,11 @@
 
 #include "TcpHandler.h"
 
-class TcpServer
+class event_loop
 {
 public:
-	TcpServer();
-	virtual ~TcpServer();
+	event_loop();
+	virtual ~event_loop();
 
     static void SigHandle(int signum);
 

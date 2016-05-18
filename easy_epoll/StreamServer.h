@@ -1,12 +1,12 @@
 #ifndef STREAMSERVER_HEADER
 #define STREAMSERVER_HEADER
 
-#include "TcpServer.h"
+#include "event_loop.h"
 #include "StreamHandler.h"
 #include "timer.h"
 #include <map>
 
-class StreamServer:public TcpServer
+class StreamServer:public event_loop
 {
 public:
 	StreamServer(void);

@@ -1,5 +1,5 @@
 #include "SocketApi.h"
-#include "TcpServer.h"
+#include "event_loop.h"
 #include "timer.h"
 #include "log.h"
 #include <time.h>
@@ -12,16 +12,16 @@
 
 #define MAX_DESCRIPTORS     100000
 
-bool TcpServer::m_bRun = true;	
+bool event_loop::m_bRun = true;	
 
-TcpServer::TcpServer()
+event_loop::event_loop()
 {
     m_count_fd = 0;
     m_fd_index = 0;
     fds = NULL;
 }
 
-TcpServer::~TcpServer()
+event_loop::~event_loop()
 {	
     SocketApi::SocketClose(m_listen_fd);
 
@@ -31,16 +31,16 @@ TcpServer::~TcpServer()
     free(fds);  
 }
 
-void TcpServer::SigHandle(int signum)
+void event_loop::SigHandle(int signum)
 {
     if(signum == SIGTERM || signum == SIGUSR1 || signum == SIGKILL)
     {
         log_error("recv signal: %d  will kill down \n",signum);
-        TcpServer::m_bRun = false;  
+        event_loop::m_bRun = false;  
     } 
 }
 
-bool TcpServer::InitSocket(int listen_port)
+bool event_loop::InitSocket(int listen_port)
 {
 	m_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_listen_fd == INVALID_SOCKET)
@@ -60,7 +60,7 @@ bool TcpServer::InitSocket(int listen_port)
 	return true;	
 }
 
-bool TcpServer::Run()
+bool event_loop::Run()
 {
 	int loop_times = 0;
     const int timer_check_point = 10;
@@ -129,7 +129,7 @@ bool TcpServer::Run()
     return true;
 }
 
-bool TcpServer::InitEvent()
+bool event_loop::InitEvent()
 {
     fds =  (TcpHandler**)malloc(MAX_DESCRIPTORS * sizeof(void*));
     memset(fds,0,MAX_DESCRIPTORS * sizeof(void*));
@@ -154,14 +154,14 @@ bool TcpServer::InitEvent()
 
 	m_epev_arr = (struct epoll_event*)malloc(EVENT_TOTAL_COUNT * sizeof(struct epoll_event));
 
-    signal(SIGTERM, TcpServer::SigHandle);    	
-    signal(SIGUSR1,TcpServer::SigHandle);
-	signal(SIGKILL,TcpServer::SigHandle);
+    signal(SIGTERM, event_loop::SigHandle);    	
+    signal(SIGUSR1,event_loop::SigHandle);
+	signal(SIGKILL,event_loop::SigHandle);
 
 	return true;
 }
 
-int TcpServer::handle_accept()
+int event_loop::handle_accept()
 {
 	int conn_fd;
     do 
@@ -201,7 +201,7 @@ int TcpServer::handle_accept()
 	return 0;
 }
 
-void TcpServer::handle_close(TcpHandler* pHandler)
+void event_loop::handle_close(TcpHandler* pHandler)
 {
     assert(pHandler != NULL);
     pHandler->handle_close();
@@ -215,7 +215,7 @@ void TcpServer::handle_close(TcpHandler* pHandler)
     }
 }
 
-TcpHandler* TcpServer::AllocSocketHandler(int sock_fd)
+TcpHandler* event_loop::AllocSocketHandler(int sock_fd)
 {
 	TcpHandler* sh = CreateHandler();
 	if(sh != NULL)
@@ -226,13 +226,13 @@ TcpHandler* TcpServer::AllocSocketHandler(int sock_fd)
 	}
 	return sh;
 }
-bool TcpServer::DisConnect(TcpHandler* pSocketHandler)
+bool event_loop::DisConnect(TcpHandler* pSocketHandler)
 {
     log_debug("disconnect \n");
     handle_close(pSocketHandler);
  	return true;
 }
-bool TcpServer::Register(TcpHandler* pHandler)
+bool event_loop::Register(TcpHandler* pHandler)
 {
     if(pHandler == NULL)
         return false;
@@ -245,7 +245,7 @@ bool TcpServer::Register(TcpHandler* pHandler)
 	return true;
 }
 
-void TcpServer::AddSocket(TcpHandler* s)
+void event_loop::AddSocket(TcpHandler* s)
 {
     m_count_fd++;
     m_fd_index++;
@@ -266,7 +266,7 @@ void TcpServer::AddSocket(TcpHandler* s)
     epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, s->GetFd(), &ev);
 }
 
-void TcpServer::RemoveSocket(TcpHandler* s)
+void event_loop::RemoveSocket(TcpHandler* s)
 {
     m_count_fd--;
 
@@ -284,7 +284,7 @@ void TcpServer::RemoveSocket(TcpHandler* s)
     SocketApi::SocketClose(s->GetFd());
 }
 
-void TcpServer::WantWrite(TcpHandler* s)
+void event_loop::WantWrite(TcpHandler* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
@@ -294,7 +294,7 @@ void TcpServer::WantWrite(TcpHandler* s)
     epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->GetFd(), &ev);
 }
 
-void TcpServer::WantRead(TcpHandler* s)
+void event_loop::WantRead(TcpHandler* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));

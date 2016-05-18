@@ -4,7 +4,7 @@
 #include <assert.h>
 
 StreamServer::StreamServer(void)
-:TcpServer()
+:event_loop()
 {
 	m_nMaxID = 0;
 }
