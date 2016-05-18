@@ -26,6 +26,7 @@ public:
     static void SigHandle(int signum);
 
 	bool InitSocket(int listen_port);	
+	bool InitEvent();
 	bool Run();
     
 	virtual TcpHandler* CreateHandler(void) = 0;
@@ -43,7 +44,7 @@ protected:
     void RemoveSocket(TcpHandler* s);
 
 private:
-	bool InitEvent();
+	
     void handle_close(TcpHandler* pHandler);
 
 protected:
