@@ -53,7 +53,7 @@ bool SimpleClient::connect(const std::string& host, const std::string& port) {
 }
 
 int SimpleClient::send(OutMessage* msg) {
-	return TcpHandler::Send(msg->cbuffer(), msg->size());
+	return tcpconn::Send(msg->cbuffer(), msg->size());
 }
 
 int SimpleClient::OnParserComplete(InMessage* msg) {

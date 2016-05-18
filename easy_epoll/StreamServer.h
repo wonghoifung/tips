@@ -12,7 +12,7 @@ public:
 	StreamServer(void);
 	virtual ~StreamServer(void);
 
-	virtual TcpHandler* CreateHandler(void);
+	virtual tcpconn* CreateHandler(void);
     virtual void OnConnect(StreamHandler *pHandler );
     virtual void OnDisconnect(StreamHandler *pHandler );
 	virtual int ProcessOnTimer(StreamHandler *);

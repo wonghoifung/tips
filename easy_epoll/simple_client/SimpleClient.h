@@ -1,12 +1,12 @@
 #ifndef SIMPLECLIENT_HEADER
 #define SIMPLECLIENT_HEADER
 
-#include "TcpHandler.h"
+#include "tcpconn.h"
 #include "MessageParser.h"
 #include "StreamServer.h"
 #include "Connector.h"
 
-class SimpleClient: public TcpHandler
+class SimpleClient: public tcpconn
 {
 	SimpleClient(const SimpleClient&);
 	SimpleClient& operator=(const SimpleClient&);

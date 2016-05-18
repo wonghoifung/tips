@@ -7,7 +7,7 @@ class concrete_message_parser :  public MessageParser
 	enum {	state_header=0, state_body, state_done, state_error };
 
 public:
-	concrete_message_parser(TcpHandler * h):MessageParser(h)
+	concrete_message_parser(tcpconn * h):MessageParser(h)
 	{
 		buf_ = inmsg_.buffer();
 		reset();
@@ -120,7 +120,7 @@ private:
 	InMessage inmsg_;
 };
 
-MessageParser* MessageParser::create(TcpHandler* h)
+MessageParser* MessageParser::create(tcpconn* h)
 {
 	return new concrete_message_parser(h);
 }

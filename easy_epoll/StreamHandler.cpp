@@ -9,7 +9,7 @@ namespace
 }
 
 StreamHandler::StreamHandler(int nID)
-:TcpHandler()
+:tcpconn()
 ,m_nHandlerID(nID)
 {	
 	m_nStatus = -1;
@@ -30,7 +30,7 @@ StreamHandler::~StreamHandler(void)
 
 int StreamHandler::Send(OutMessage *pPacket)
 {
-	return TcpHandler::Send(pPacket->cbuffer(), pPacket->size());
+	return tcpconn::Send(pPacket->cbuffer(), pPacket->size());
 }
 
 int StreamHandler::OnParser(char *buf, int nLen)

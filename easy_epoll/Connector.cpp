@@ -19,7 +19,7 @@ bool Connector::Open(event_loop* pServer)
 	return true;
 }
 
-bool Connector::Connect(TcpHandler* pHandler, const std::string& strAddr, int port)
+bool Connector::Connect(tcpconn* pHandler, const std::string& strAddr, int port)
 {
 	int sock_fd = SocketApi::SocketInit();
 	if( pHandler == NULL || sock_fd < 0)
@@ -48,12 +48,12 @@ bool Connector::Connect(TcpHandler* pHandler, const std::string& strAddr, int po
 	return false;
 }
 
-bool Connector::Connect(TcpHandler* pHandler, const NetAddr& addr)
+bool Connector::Connect(tcpconn* pHandler, const NetAddr& addr)
 {
 	return Connect(pHandler,addr.host,addr.port);
 }
 
-bool Connector::Register(TcpHandler* pHandler)
+bool Connector::Register(tcpconn* pHandler)
 {
 	if(m_pNetServer == NULL)
 		return false;

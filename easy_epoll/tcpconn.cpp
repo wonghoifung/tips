@@ -1,4 +1,4 @@
-#include "TcpHandler.h"
+#include "tcpconn.h"
 #include "log.h"
 #include "SocketApi.h"
 #include "event_loop.h"
@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-TcpHandler::TcpHandler()
+tcpconn::tcpconn()
 :timer_handler()
 ,m_sock_fd(0)
 ,m_fd_index(0)
@@ -23,29 +23,29 @@ TcpHandler::TcpHandler()
     m_pSendLoopBuffer = new LoopBuffer(MAX_LOOP_BUFFER_LEN);
 }
 
-TcpHandler::~TcpHandler()
+tcpconn::~tcpconn()
 {
 	if(m_pSendLoopBuffer)
 		delete m_pSendLoopBuffer;
 	m_pSendLoopBuffer = NULL;
 }
 
-void TcpHandler::SetFd(int sock_fd)
+void tcpconn::SetFd(int sock_fd)
 {
 	m_sock_fd = sock_fd;
 }
 
-int TcpHandler::GetFd()const
+int tcpconn::GetFd()const
 {
 	return m_sock_fd;
 }
 
-int TcpHandler::handle_OnConnected()
+int tcpconn::handle_OnConnected()
 {
 	return OnConnected();
 }
 
-int TcpHandler::handle_read()
+int tcpconn::handle_read()
 {
     if(m_bfull)
         return -1;
@@ -75,7 +75,7 @@ int TcpHandler::handle_read()
     return -1;
 }
 
-int TcpHandler::handle_output()
+int tcpconn::handle_output()
 {
     if(!Writable())
         return 0;
@@ -108,14 +108,14 @@ int TcpHandler::handle_output()
    return 0;
 }
 
-int TcpHandler::handle_close()
+int tcpconn::handle_close()
 {
 	m_TcpTimer.stop();
 	OnClose();
 	return 0;
 }
 
-int TcpHandler::Send(const char *buf, int nLen)
+int tcpconn::Send(const char *buf, int nLen)
 {
     if( nLen > (int)m_pSendLoopBuffer->FreeCount())
     {
@@ -133,7 +133,7 @@ int TcpHandler::Send(const char *buf, int nLen)
 	return 0;
 }
 
-bool TcpHandler::Writable()
+bool tcpconn::Writable()
 {
     return ( m_pSendLoopBuffer->DataCount()>0 ) ? true : false;
 }

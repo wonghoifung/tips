@@ -1,7 +1,7 @@
 #ifndef CONNECTOR_HEADER
 #define CONNECTOR_HEADER
 
-#include "TcpHandler.h"
+#include "tcpconn.h"
 #include "event_loop.h"
 #include "SocketApi.h"
 #include <string>
@@ -12,10 +12,10 @@ public:
 	Connector();
 	virtual ~Connector();
 	bool Open(event_loop* pServer);
-	bool Connect(TcpHandler* pHandler, const std::string& strAddr,int port);
-	bool Connect(TcpHandler* pHandler, const NetAddr& addr);
+	bool Connect(tcpconn* pHandler, const std::string& strAddr,int port);
+	bool Connect(tcpconn* pHandler, const NetAddr& addr);
 protected:
-	bool Register(TcpHandler* pHandler);
+	bool Register(tcpconn* pHandler);
 	event_loop* m_pNetServer;
 };
 

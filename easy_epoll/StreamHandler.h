@@ -1,12 +1,12 @@
 #ifndef STREAMHANDLER_HEADER
 #define STREAMHANDLER_HEADER
 
-#include "TcpHandler.h"
+#include "tcpconn.h"
 #include "Message.h"
 #include "MessageParser.h"
 #include <map>
 
-class StreamHandler:public TcpHandler				
+class StreamHandler:public tcpconn				
 {
 public:
 	explicit StreamHandler(int nID);

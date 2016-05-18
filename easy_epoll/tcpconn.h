@@ -1,5 +1,5 @@
-#ifndef TCPHANDLER_HEADER
-#define TCPHANDLER_HEADER
+#ifndef TCPCONN_HEADER
+#define TCPCONN_HEADER
 
 #define RECV_BUFFER 4096
 
@@ -16,11 +16,11 @@ const int MAX_LOOP_BUFFER_LEN = 64*1024;
 #define RECV_BUFFER_SIZE (1024*32)
 #define SEND_BUFFER_SIZE (1024*32)
 
-class TcpHandler : public timer_handler
+class tcpconn : public timer_handler
 {
 public:
-	TcpHandler();	
-	virtual ~TcpHandler();	
+	tcpconn();	
+	virtual ~tcpconn();	
 
 	void SetFd(int sock_fd);
 	int GetFd()const;

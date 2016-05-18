@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 
-#include "TcpHandler.h"
+#include "tcpconn.h"
 
 class event_loop
 {
@@ -29,29 +29,29 @@ public:
 	bool InitEvent();
 	bool Run();
     
-	virtual TcpHandler* CreateHandler(void) = 0;
+	virtual tcpconn* CreateHandler(void) = 0;
 
-	TcpHandler* AllocSocketHandler(int sock_fd);
-	bool Register(TcpHandler* pHandler);
-	bool DisConnect(TcpHandler* pSocketHandler);
+	tcpconn* AllocSocketHandler(int sock_fd);
+	bool Register(tcpconn* pHandler);
+	bool DisConnect(tcpconn* pSocketHandler);
 
-    void WantWrite(TcpHandler* s);
-    void WantRead(TcpHandler* s);
+    void WantWrite(tcpconn* s);
+    void WantRead(tcpconn* s);
 
 protected:
 	int handle_accept();
-    void AddSocket(TcpHandler* s);
-    void RemoveSocket(TcpHandler* s);
+    void AddSocket(tcpconn* s);
+    void RemoveSocket(tcpconn* s);
 
 private:
 	
-    void handle_close(TcpHandler* pHandler);
+    void handle_close(tcpconn* pHandler);
 
 protected:
     static bool m_bRun;
     int m_listen_fd;
 	int m_maxfd;
-    TcpHandler** fds;    
+    tcpconn** fds;    
     int m_count_fd;
     uint32_t m_fd_index; 
 	int m_epoll_fd;

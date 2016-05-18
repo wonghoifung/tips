@@ -94,7 +94,7 @@ bool event_loop::Run()
             }
             int fd = (uint32_t)m_epev_arr[i].data.u64; /* mask out the lower 32 bits */
             uint32_t index = (uint32_t)(m_epev_arr[i].data.u64 >> 32);
-            TcpHandler* s = fds[fd];
+            tcpconn* s = fds[fd];
             if( s == 0 || s->get_fd_index() != index )
             {                      
                 continue;       // epoll returned invalid fd 
@@ -131,7 +131,7 @@ bool event_loop::Run()
 
 bool event_loop::InitEvent()
 {
-    fds =  (TcpHandler**)malloc(MAX_DESCRIPTORS * sizeof(void*));
+    fds =  (tcpconn**)malloc(MAX_DESCRIPTORS * sizeof(void*));
     memset(fds,0,MAX_DESCRIPTORS * sizeof(void*));
 
 	struct rlimit rl;
@@ -186,7 +186,7 @@ int event_loop::handle_accept()
             continue;
         }	
         
-        TcpHandler* sh = AllocSocketHandler(conn_fd);
+        tcpconn* sh = AllocSocketHandler(conn_fd);
         if(sh == NULL)
         {
             log_error("sh is null \n");
@@ -201,7 +201,7 @@ int event_loop::handle_accept()
 	return 0;
 }
 
-void event_loop::handle_close(TcpHandler* pHandler)
+void event_loop::handle_close(tcpconn* pHandler)
 {
     assert(pHandler != NULL);
     pHandler->handle_close();
@@ -215,9 +215,9 @@ void event_loop::handle_close(TcpHandler* pHandler)
     }
 }
 
-TcpHandler* event_loop::AllocSocketHandler(int sock_fd)
+tcpconn* event_loop::AllocSocketHandler(int sock_fd)
 {
-	TcpHandler* sh = CreateHandler();
+	tcpconn* sh = CreateHandler();
 	if(sh != NULL)
 	{
         sh->SetNeedDel(true);
@@ -226,13 +226,13 @@ TcpHandler* event_loop::AllocSocketHandler(int sock_fd)
 	}
 	return sh;
 }
-bool event_loop::DisConnect(TcpHandler* pSocketHandler)
+bool event_loop::DisConnect(tcpconn* pSocketHandler)
 {
     log_debug("disconnect \n");
     handle_close(pSocketHandler);
  	return true;
 }
-bool event_loop::Register(TcpHandler* pHandler)
+bool event_loop::Register(tcpconn* pHandler)
 {
     if(pHandler == NULL)
         return false;
@@ -245,7 +245,7 @@ bool event_loop::Register(TcpHandler* pHandler)
 	return true;
 }
 
-void event_loop::AddSocket(TcpHandler* s)
+void event_loop::AddSocket(tcpconn* s)
 {
     m_count_fd++;
     m_fd_index++;
@@ -266,7 +266,7 @@ void event_loop::AddSocket(TcpHandler* s)
     epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, s->GetFd(), &ev);
 }
 
-void event_loop::RemoveSocket(TcpHandler* s)
+void event_loop::RemoveSocket(tcpconn* s)
 {
     m_count_fd--;
 
@@ -284,7 +284,7 @@ void event_loop::RemoveSocket(TcpHandler* s)
     SocketApi::SocketClose(s->GetFd());
 }
 
-void event_loop::WantWrite(TcpHandler* s)
+void event_loop::WantWrite(tcpconn* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
@@ -294,7 +294,7 @@ void event_loop::WantWrite(TcpHandler* s)
     epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->GetFd(), &ev);
 }
 
-void event_loop::WantRead(TcpHandler* s)
+void event_loop::WantRead(tcpconn* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
