@@ -32,10 +32,10 @@ inline void set_rlimit()
 
 int main(int argc, char** argv) {
 	set_rlimit();
-	init_timer();
 	init_log("SimpleServer");
 	set_log_level(7);
 	toggle_hex_level();
+	init_timer();
 
 	SimpleServer* ss = new SimpleServer();
 	if (!ss->InitSocket(6464)) {

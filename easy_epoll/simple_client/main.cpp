@@ -33,10 +33,10 @@ inline void set_rlimit()
 
 int main() {
 	set_rlimit();
-	init_timer();
 	init_log("SimpleServer");
 	set_log_level(7);
 	toggle_hex_level();
+	init_timer();
 
 	MuteServer ms;
 	if (!ms.InitEvent()) {

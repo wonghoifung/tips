@@ -5,6 +5,7 @@
 #include <sys/times.h>
 #include "timer.h"
 #include "list.h"
+#include "log.h"
 
 #define SHIFT_BITS 6
 #define TVN_BITS 8
@@ -123,7 +124,7 @@ bug:
 static inline void kdtimer_set(kdtimer_t* timer, unsigned long expires, void (*fn)(void*), void* ctx)
 {
 	timer->list.next = timer->list.prev = NULL;
-    timer->expires = times(NULL)+ expires/10;//0.01s
+    timer->expires = times(NULL) + expires/10;//0.01s
     timer->ctx = ctx;
     timer->function = fn;
     timer->base = t_base;
@@ -253,4 +254,59 @@ void run_timer()
 	kdtimer_collect();
 }
 
+static void handle_time_event(void* ptr)
+{
+    timer* t = (timer*)ptr;
+    t->on_time_event(t->tev_.time_id);
+}
 
+timer::timer() :start_(false), interval_(0), timerid_(0), handler_(0) {
+    tev_.time_id = 0;
+    tev_.timer = 0;
+    tev_.ptr = this;
+    tev_.callback = handle_time_event;
+}
+
+timer::~timer() {
+    stop();
+}
+
+void timer::set_timerid(int timer_id) {
+    tev_.time_id = timer_id;
+}
+
+void timer::start(int sec, int usec) {
+    if(start_) stop();
+    if(sec <= 0) {
+        log_error("invalid interval sec:%d", sec);
+        return;
+    }
+    interval_ = sec;
+    if(start_timer(sec, usec, &tev_) < 0) {
+        log_error("start_timer failed\n");
+        return;
+    }
+    start_ = true;
+}
+
+void timer::stop() {
+    if (start_) stop_timer(&tev_);
+}
+
+void timer::reset() {
+    stop();
+    start(interval_);
+}
+
+void set_handler(timer_handler* h, int id) {
+    timerid_ = id;
+    handler_ = h;
+}
+
+void on_time_event(int timer_id) {
+    start_ = false;
+    if(handler_ != 0)    
+        handler_->on_timeout(m_nId);
+    else
+        log_error("handler_ is null");  
+}
