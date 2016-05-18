@@ -2,12 +2,11 @@
 #define SIMPLESERVER_HEADER
 
 #include "StreamServer.h"
-#include "TimerEvent.h"
-#include "TimerOutEvent.h"
+#include "timer.h"
 
 class Peer;
 
-class SimpleServer : public StreamServer, public TimerOutEvent
+class SimpleServer : public StreamServer, public timer_handler
 {
 	SimpleServer(const SimpleServer&);
 	SimpleServer& operator=(const SimpleServer&);
@@ -18,7 +17,7 @@ public:
 	virtual int ProcessMessage(InMessage* pMessage, StreamHandler* pHandler, unsigned long dwSessionID);
     virtual void OnConnect(StreamHandler* pHandler);
     virtual void OnDisconnect(StreamHandler* pHandler);
-	virtual int ProcessOnTimerOut(int timerid);
+	virtual int on_timeout(int timerid);
 protected:
 	Peer* getPeer(StreamHandler* pHandler);
 	int removePeer(Peer* peer);
@@ -30,8 +29,8 @@ protected:
 	int handleEcho(Peer* peer, InMessage* message);
 private:
 	uint32_t svid_;
-    TimerEvent heartbeatTimer_;
-	TimerEvent updateTimer_;
+    timer heartbeatTimer_;
+	timer updateTimer_;
 };
 
 #endif

@@ -40,7 +40,8 @@ compile: $(CPP_OBJS)
 clean:
 	rm -f $(CPP_OBJS)
 	rm -f $(TARGET)
-	rm *.log
+	rm -f *.log
+	rm -f core.*
 
 install: $(TARGET)
 	cp $(TARGET) $(BUILD_DIR)

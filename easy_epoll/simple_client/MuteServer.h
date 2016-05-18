@@ -2,8 +2,7 @@
 #define MUTESERVER_HEADER
 
 #include "StreamServer.h"
-#include "TimerEvent.h"
-#include "TimerOutEvent.h"
+#include "timer.h"
 
 class MuteServer : public StreamServer
 {

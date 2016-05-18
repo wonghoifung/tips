@@ -5,14 +5,14 @@
 #include <unistd.h>
 
 static SimpleClient* sc = NULL;
-static TimerEvent timer;
+static timer gtimer;
 static void startTimer() {
-	timer.StartTimer(5);
+	gtimer.start(5);
 }
 static bool timerInit = false;
-class tmp: public TimerOutEvent {
+class tmp: public timer_handler {
 public:
-	int ProcessOnTimerOut(int tid) {
+	int on_timeout(int tid) {
 		OutMessage msg;
 		msg.begin(cmd_echo);
 		msg.write_cstring("hello world");
@@ -26,7 +26,7 @@ static bool initTimer() {
 	if (timerInit) return true;
 	static tmp handler_;
 	timerInit = true;
-	timer.SetTimeEventObj(&handler_);
+	gtimer.set_handler(&handler_);
 	return true;
 }
 

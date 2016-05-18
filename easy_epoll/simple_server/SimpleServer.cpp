@@ -43,8 +43,8 @@ static void broadcast(OutMessage* msg) {
 const std::string sys_key("1234567890");
 
 SimpleServer::SimpleServer():svid_(0) {
-	heartbeatTimer_.SetTimeEventObj(this, HEARTBEAT_TIMER);
-	updateTimer_.SetTimeEventObj(this, UPDATE_TIMER);
+	heartbeatTimer_.set_handler(this, HEARTBEAT_TIMER);
+	updateTimer_.set_handler(this, UPDATE_TIMER);
 }
 
 SimpleServer::~SimpleServer() {
@@ -54,8 +54,8 @@ SimpleServer::~SimpleServer() {
 bool SimpleServer::init() {
 	// svid_...
 
-	heartbeatTimer_.StartTimer(30);
-	updateTimer_.StartTimer(6);
+	heartbeatTimer_.start(30);
+	updateTimer_.start(6);
 	return true;
 }
 
@@ -93,18 +93,18 @@ void SimpleServer::OnDisconnect(StreamHandler* pHandler) {
 	}
 }
 
-int SimpleServer::ProcessOnTimerOut(int timerid) {
+int SimpleServer::on_timeout(int timerid) {
 	switch (timerid) {
 		case HEARTBEAT_TIMER: {
 			printf("heartbeat timer\n");
-			heartbeatTimer_.StartTimer(30);
+			heartbeatTimer_.start(30);
 			break;
 		}
 
 		case UPDATE_TIMER: {
 			// update status or cache...
 			printf("update timer\n");
-			updateTimer_.StartTimer(6);
+			updateTimer_.start(6);
 			break;
 		}
 	}
