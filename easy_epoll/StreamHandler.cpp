@@ -36,7 +36,7 @@ int StreamHandler::Send(OutMessage *pPacket)
 int StreamHandler::OnParser(char *buf, int nLen)
 {
 	m_nStatus = REQUEST;
-	m_TcpTimer.StopTimer();	
+	m_TcpTimer.stop();	
 
     if(m_pParser == NULL)
         m_pParser = MessageParser::create(this);
@@ -66,12 +66,12 @@ int StreamHandler::OnConnected(void)
     if(pServer != NULL)
         pServer->OnConnect(this);
 
-	m_TcpTimer.StartTimer(s_DisNoMsgTime);
+	m_TcpTimer.start(s_DisNoMsgTime);
 	GetRemoteAddr();
     return 0;
 }
 
-int	StreamHandler::ProcessOnTimerOut(int Timerid)
+int	StreamHandler::on_timeout(int Timerid)
 {
     StreamServer *pServer = (StreamServer*)this->server();
     int nRet = pServer->ProcessOnTimer(this);

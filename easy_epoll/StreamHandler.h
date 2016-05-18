@@ -28,7 +28,7 @@ private:
 	virtual int OnParser(char *buf, int nLen);
 	virtual int OnClose(void);
 	virtual int OnConnected(void);
-    virtual int	ProcessOnTimerOut(int Timerid);
+    virtual int	on_timeout(int Timerid);
 	void GetRemoteAddr(void);
 
 	int    m_nStatus;

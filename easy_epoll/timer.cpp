@@ -209,6 +209,7 @@ static inline void kdtimer_collect()
     run_kdtimer_list(t_base, times(NULL));
 }
 
+int stop_timer(struct time_ev* ev);
 static void on_timer(void* ctx)
 {
 	struct time_ev* ev = (struct time_ev*)ctx;
@@ -298,15 +299,16 @@ void timer::reset() {
     start(interval_);
 }
 
-void set_handler(timer_handler* h, int id) {
+void timer::set_handler(timer_handler* h, int id) {
     timerid_ = id;
     handler_ = h;
 }
 
-void on_time_event(int timer_id) {
+void timer::on_time_event(int timer_id) {
+    assert(timerid_ == timer_id);
     start_ = false;
     if(handler_ != 0)    
-        handler_->on_timeout(m_nId);
+        handler_->on_timeout(timerid_);
     else
         log_error("handler_ is null");  
 }

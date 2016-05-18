@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 
 TcpHandler::TcpHandler()
-:TimerOutEvent()
+:timer_handler()
 ,m_sock_fd(0)
 ,m_fd_index(0)
 ,m_bfull(false)
@@ -18,7 +18,7 @@ TcpHandler::TcpHandler()
     m_bNeedDel = false;
 	memset(m_pRecvBuffer,0,sizeof(m_pRecvBuffer));
 	m_pServer = NULL;
-    m_TcpTimer.SetTimeEventObj(this);
+    m_TcpTimer.set_handler(this);
 
     m_pSendLoopBuffer = new LoopBuffer(MAX_LOOP_BUFFER_LEN);
 }
@@ -110,7 +110,7 @@ int TcpHandler::handle_output()
 
 int TcpHandler::handle_close()
 {
-	m_TcpTimer.StopTimer();
+	m_TcpTimer.stop();
 	OnClose();
 	return 0;
 }

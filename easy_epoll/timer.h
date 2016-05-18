@@ -10,8 +10,6 @@ struct time_ev
 };
 
 void init_timer(void);
-int  start_timer(int sec, int usec, struct time_ev* ev);
-int  stop_timer(struct time_ev* ev);
 void run_timer(void);
 
 class timer_handler
