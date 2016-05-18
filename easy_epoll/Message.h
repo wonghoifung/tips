@@ -5,7 +5,7 @@
 #include <string>
 #include <cstdarg>
 #include <string.h>
-#include "EndianOp.h"
+#include "endianop.h"
 
 enum { c_default_version = 1, c_default_subversion = 1 };
 enum { c_header_size = 9, c_buffer_size = 1024 * 12 };
@@ -37,31 +37,31 @@ public:
     short command() {
 	    short cmd;
 	    read_header_b((char*)&cmd, sizeof(short), 2);
-	    return EndianOp(cmd);
+	    return endianop(cmd);
 	}
 
     char version() {
 	    char v;
 	    read_header_b(&v, sizeof(char), 4);
-	    return EndianOp(v);
+	    return endianop(v);
 	}
 
     char subversion() {
 	    char sv;
 	    read_header_b(&sv, sizeof(char), 5);
-	    return EndianOp(sv);
+	    return endianop(sv);
 	}
 
     short body_length() {
 	    short bodylen;
 	    read_header_b((char*)&bodylen, sizeof(short), 6);
-	    return EndianOp(bodylen);
+	    return endianop(bodylen);
 	}
 
     unsigned char check_code() {
 	    unsigned char code;
 	    read_header_b((char*)&code, sizeof(unsigned char), 8);
-	    return EndianOp(code);
+	    return endianop(code);
 	}
 
     void reset() {
@@ -82,9 +82,9 @@ protected:
     void begin_b(short cmd, char ver, char subver) {
 	    reset();
 	    const char flag[] = "GP";
-		cmd = EndianOp(cmd);
-		ver = EndianOp(ver);
-		subver = EndianOp(subver);
+		cmd = endianop(cmd);
+		ver = endianop(ver);
+		subver = endianop(subver);
 	    write_header_b(flag, sizeof(char)*2, 0);
 	    write_header_b((char*)&cmd, sizeof(short), 2);
 	    write_header_b(&ver, sizeof(char), 4);
@@ -93,10 +93,10 @@ protected:
 
     void end_b() {
 	    short bodylen = static_cast<short>(size_ - c_header_size);
-			bodylen = EndianOp(bodylen);
+			bodylen = endianop(bodylen);
 	    write_header_b((char*)&bodylen, sizeof(short), 6);
 	    unsigned char code = 0; // TODO do verification
-			code = EndianOp(code);
+			code = endianop(code);
 	    write_header_b((char*)&code, sizeof(unsigned char), 8);
 	}
 
@@ -178,67 +178,67 @@ public:
     int read_int() {
 	    int val(-1);
 	    Message::read_b((char*)&val, sizeof(int));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     int read_int_and_repack() {
 	    int val(-1);
 	    Message::read_del_b((char*)&val, sizeof(int));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     unsigned int read_uint() {
 	    unsigned int val(0);
 	    Message::read_b((char*)&val, sizeof(unsigned int));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     int64_t read_int64() {
 	    int64_t val(0);
 	    Message::read_b((char*)&val, sizeof(int64_t));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     uint64_t read_uint64() {
 	    uint64_t val(0);
 	    Message::read_b((char*)&val, sizeof(uint64_t));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     long read_long() {
 	    long val(0);
 	    Message::read_b((char*)&val, sizeof(long));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     unsigned long read_ulong() {
 	    unsigned long val(0);
 	    Message::read_b((char*)&val, sizeof(unsigned long));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     short read_short() {
 	    short val(-1);
 	    Message::read_b((char*)&val, sizeof(short));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     unsigned short read_ushort() {
 	    unsigned short val(0);
 	    Message::read_b((char*)&val, sizeof(unsigned short));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     char read_char() {
 	    char val(0);
 	    Message::read_b((char*)&val, sizeof(char));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     unsigned char  read_uchar() {
 	    unsigned char val(0);
 	    Message::read_b((char*)&val, sizeof(unsigned char));
-	    return EndianOp(val);
+	    return endianop(val);
 	}
 
     char* read_cstring() {
@@ -284,72 +284,72 @@ class OutMessage : public Message
 {
 public:
     bool write_int(int val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(int));
 	}
 
     bool write_uint(unsigned int val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(unsigned int));
 	}
 
     bool write_int64(int64_t val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(int64_t));
 	}
 
     bool write_uint64(uint64_t val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(uint64_t));
 	}
 
     bool write_long(long val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(long));
 	}
 
     bool write_ulong(unsigned long val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(unsigned long));
 	}
 
     bool write_char(char val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(char));
 	}
 
     bool write_uchar(unsigned char val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(unsigned char));
 	}
 
     bool write_short(short val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(short));
 	}
 
     bool write_ushort(unsigned short val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_b((char*)&val, sizeof(unsigned short));
 	}
 
     bool write_front_int(int val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_front_b((char*)&val, sizeof(int));
 	}
 
     bool write_front_uint(unsigned int val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_front_b((char*)&val, sizeof(unsigned int));
 	}
 
     bool write_front_char(char val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_front_b((char*)&val, sizeof(char));
 	}
 
     bool write_front_uchar(unsigned char val) {
-	  val = EndianOp(val);
+	  val = endianop(val);
 	  return Message::write_front_b((char*)&val, sizeof(unsigned char));
 	}
 

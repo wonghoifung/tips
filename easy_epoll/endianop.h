@@ -26,7 +26,7 @@
 #ifdef IS_BIG_ENDIAN
 
 	template <class T>
-	inline T EndianOp(const T value) 
+	inline T endianop(const T value) 
 	{
 		return value;
 	}
@@ -34,7 +34,7 @@
 #else /* IS_LITTLE_ENDIAN */
 
 	template <class T>
-	inline T EndianOp(const T value)
+	inline T endianop(const T value)
 	{
 		T result;
 		const size_t len = sizeof(T);
