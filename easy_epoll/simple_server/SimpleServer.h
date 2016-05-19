@@ -15,8 +15,8 @@ public:
 	~SimpleServer();
 	bool init();
 	virtual int handle_message(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID);
-    virtual void OnConnect(server_tcpconn* pHandler);
-    virtual void OnDisconnect(server_tcpconn* pHandler);
+    virtual void handle_connect(server_tcpconn* pHandler);
+    virtual void handle_disconnect(server_tcpconn* pHandler);
 	virtual int on_timeout(int timerid);
 protected:
 	Peer* getPeer(server_tcpconn* pHandler);

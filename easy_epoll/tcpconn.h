@@ -16,14 +16,19 @@ const int MAX_LOOP_BUFFER_LEN = 64*1024;
 #define RECV_BUFFER_SIZE (1024*32)
 #define SEND_BUFFER_SIZE (1024*32)
 
+// typedef int (*message_callback)(inmessage*);
+// typedef int (*connect_callback)();
+// typedef int (*close_callback)();
+// typedef int (*rawdata_callback)();
+
 class tcpconn : public timer_handler
 {
 	tcpconn(const tcpconn&);
 	tcpconn& operator=(const tcpconn&);
 
 public:
-	tcpconn();	
-	virtual ~tcpconn();	
+	tcpconn(int cid);	
+	~tcpconn();	
 
 	const int getfd() const { return sockfd_; }
 	void setfd(int fd) { sockfd_ = fd; }
@@ -43,15 +48,23 @@ public:
 	int handle_close();
 
 	int sendbuf(const char* buf, int nLen);
-    virtual int on_message(inmessage*) = 0;
     bool writable();
 	
-protected:
-	virtual int on_close(void) { return -1; }
-	virtual int on_connect(void) { return 0; }
-	virtual int on_rawdata(char*, int) { return -1; }
-	virtual int	on_timeout(int timerid) { return 0; }
+	//-------------------------
+	const int status(void) const { return status_; }
+	const int connid(void) const { return connid_; }
+	const std::string& remoteaddr(void) const { return remoteaddr_; }		
+	void* getud() { return ud_; }	
+	void setud(void* ud) { ud_ = ud; }
+	int sendmsg(outmessage* msg);
+	void setremoteaddr(void);
+	int on_message(inmessage*);
+	int on_rawdata(char* buf, int nLen);
+	int on_close(void);
+	int on_connect(void);
+	virtual int	on_timeout(int timerid); // TODO
 	
+private:
 	int sockfd_;
     uint32_t fdidx_;             
 	uint32_t socktype_;
@@ -62,6 +75,19 @@ protected:
 	char recvbuf_[RECV_BUFFER_SIZE];	
 	loopbuf* sendloopbuf_;
 	char tmpsendbuf_[SEND_BUFFER_SIZE];
+
+	//-------------------------
+	int status_;
+	int connid_;
+	std::string remoteaddr_;
+	int port_;
+	void* ud_;
+    message_parser* parser_;
+
+    // message_callback on_message_;
+    // close_callback on_close_;
+    // connect_callback on_connect_;
+    // rawdata_callback on_rawdata_;
 };
 
 #endif  

@@ -3,6 +3,7 @@
 #include "Peer.h"
 #include <assert.h>
 #include <stdio.h>
+#include <time.h>
 
 enum { HEARTBEAT_TIMER = 1, UPDATE_TIMER };
 
@@ -59,17 +60,17 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::handle_message(inmessage* pMessage, server_tcpconn* pHandler, unsigned long ssid) {
+int SimpleServer::handle_message(inmessage* pMessage, server_tcpconn* conn, unsigned long ssid) {
 	const short cmd = pMessage->command();
 
 	switch (cmd) {
 		case cmd_peer_login:
-			return handlePeerLogin(pMessage, pHandler);
+			return handlePeerLogin(pMessage, conn);
 		case cmd_req_broadcast:
 			return handleReqBroadcast(pMessage);
 	}
 
-	Peer* peer = getPeer(pHandler);
+	Peer* peer = getPeer(conn);
 	if (peer == NULL) {
 		return -1;
 	}
@@ -82,12 +83,13 @@ int SimpleServer::handle_message(inmessage* pMessage, server_tcpconn* pHandler, 
 	return 0;
 }
 
-void SimpleServer::OnConnect(server_tcpconn* pHandler) {
-
+void SimpleServer::handle_connect(server_tcpconn* conn) {
+	printf("%s connected\n", conn->remoteaddr().c_str());
 }
 
-void SimpleServer::OnDisconnect(server_tcpconn* pHandler) {
-	Peer* peer = getPeer(pHandler);
+void SimpleServer::handle_disconnect(server_tcpconn* conn) {
+	printf("%s disconnected\n", conn->remoteaddr().c_str());
+	Peer* peer = getPeer(conn);
 	if (peer) {
 		removePeer(peer);
 	}
@@ -96,14 +98,14 @@ void SimpleServer::OnDisconnect(server_tcpconn* pHandler) {
 int SimpleServer::on_timeout(int timerid) {
 	switch (timerid) {
 		case HEARTBEAT_TIMER: {
-			printf("heartbeat timer\n");
+			printf("heartbeat timer, %d\n", (int)time(NULL));
 			heartbeatTimer_.start(30);
 			break;
 		}
 
 		case UPDATE_TIMER: {
 			// update status or cache...
-			printf("update timer\n");
+			printf("update timer, %d\n", (int)time(NULL));
 			updateTimer_.start(6);
 			break;
 		}
@@ -111,10 +113,10 @@ int SimpleServer::on_timeout(int timerid) {
 	return 0;
 }
 
-Peer* SimpleServer::getPeer(server_tcpconn* pHandler) {
+Peer* SimpleServer::getPeer(server_tcpconn* conn) {
 	Peer* peer = NULL;
-	if (pHandler) {
-		void* ptr = pHandler->getud();
+	if (conn) {
+		void* ptr = conn->getud();
 		if (ptr) peer = reinterpret_cast<Peer*>(ptr);
 	}
 	return peer;
@@ -132,7 +134,7 @@ void SimpleServer::delPeer(Peer* peer) {
 	delete peer;
 }
 
-Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* pHandler) {
+Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* conn) {
 	Peer* peer = ::getPeer(peerid);
 	if (peer) {
 		int reason = 0; // relogin
@@ -145,7 +147,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* pHandler
 		peer->sendMsg(&msg);
 
 		server_tcpconn* oldhandler = peer->getStreamHandler();
-		if (oldhandler == pHandler) {
+		if (oldhandler == conn) {
 			printf("tricky thing happened\n");
 			return peer;
 		}
@@ -161,32 +163,32 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* pHandler
 	return peer;
 }
 
-Peer* SimpleServer::newPeer(uint32_t peerid, server_tcpconn* pHandler) {
-	Peer* peer = new Peer(peerid, pHandler);
+Peer* SimpleServer::newPeer(uint32_t peerid, server_tcpconn* conn) {
+	Peer* peer = new Peer(peerid, conn);
 	if (peer) {
 		// init peer...
 
 		::addPeer(peer);
-		pHandler->setud(peer);
+		conn->setud(peer);
 	}
 	return peer;
 }
 
-int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* pHandler) {
-	if (pHandler->getud()) {
+int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* conn) {
+	if (conn->getud()) {
 		printf("not a new connection\n");
 		return -1;
 	}
 	const uint32_t peerid = message->read_int();
-	Peer* peer = checkRelogin(peerid, pHandler);
+	Peer* peer = checkRelogin(peerid, conn);
 	if (peer == NULL) {
-		peer = newPeer(peerid, pHandler);
+		peer = newPeer(peerid, conn);
 		if (peer == NULL) {
 			outmessage msg;
 			msg.begin(cmd_peer_login);
 			msg.write_int(-1); // failure
 			msg.end();
-			pHandler->sendmsg(&msg);
+			conn->sendmsg(&msg);
 			return -1;
 		}
 	} else {
@@ -197,7 +199,7 @@ int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* pHandler) 
 	msg.begin(cmd_peer_login);
 	msg.write_int(0); // success
 	msg.end();
-	pHandler->sendmsg(&msg);
+	conn->sendmsg(&msg);
 	return 0;
 }
 

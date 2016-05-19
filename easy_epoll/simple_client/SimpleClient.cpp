@@ -80,7 +80,7 @@ int SimpleClient::on_rawdata(char *buf, int nLen) {
 }
 
 int SimpleClient::on_close(void) {
-	printf("SimpleClient::OnClose\n");
+	printf("SimpleClient::on_close\n");
 	return 0;
 }
 
@@ -92,7 +92,7 @@ int SimpleClient::on_connect(void) {
     {
         std::string remoteip = inet_ntoa(remote_addr.sin_addr);
         int remoteport = ntohs(remote_addr.sin_port);
-        printf("%s:%d come in\n", remoteip.c_str(), remoteport);
+        printf("%s:%d connected\n", remoteip.c_str(), remoteport);
 
         outmessage msg;
 		msg.begin(cmd_peer_login);

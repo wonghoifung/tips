@@ -19,6 +19,7 @@ class event_loop
 {
 	event_loop(const event_loop&);
 	event_loop& operator=(const event_loop&);
+
 public:
 	event_loop();
 	virtual ~event_loop();
@@ -30,7 +31,6 @@ public:
 	bool run();
     
 	virtual tcpconn* create_tcpconn(void) = 0;
-
 	tcpconn* prepare_tcpconn(int sock_fd);
 	bool manage(tcpconn* conn);
 	bool disconnect(tcpconn* conn);
@@ -42,11 +42,8 @@ protected:
 	int handle_accept();
     void addsock(tcpconn* s);
     void remsock(tcpconn* s);
-
-private:
     void handle_close(tcpconn* conn);
 
-protected:
     static bool run_;
     int listen_sockfd_;
 	int maxfd_;

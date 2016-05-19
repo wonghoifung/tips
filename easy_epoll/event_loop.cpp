@@ -182,16 +182,16 @@ int event_loop::handle_accept()
             continue;
         }	
         
-        tcpconn* sh = prepare_tcpconn(conn_fd);
-        if(sh == NULL)
+        tcpconn* c = prepare_tcpconn(conn_fd);
+        if(c == NULL)
         {
-            log_error("sh is null \n");
+            log_error("c is null \n");
             socket_close(conn_fd);
             assert(false);
             continue;
         }
-        addsock(sh);
-        sh->handle_connect();
+        addsock(c);
+        c->handle_connect();
     } while(conn_fd > 0);
 
 	return 0;

@@ -70,30 +70,30 @@ static inline void internal_add_kdtimer(timer_base_t* base, kdtimer_t* timer)
 {
     unsigned long expires = timer->expires;
     unsigned long idx = expires - base->kdtimer_jiffies;
-    printf("expires:%lu(%ld), idx:%lu(%ld)\n",expires,expires,idx,idx);
+    log_debug("expires:%lu(%ld), idx:%lu(%ld)\n",expires,expires,idx,idx);
     struct list_head* vec;
     if (idx < 1 << (SHIFT_BITS + TVR_BITS)) {
-        printf("level 1\n");
+        log_debug("level 1\n");
         int i = (expires >> SHIFT_BITS) & TVR_MASK;
         vec = base->sltv1.vec + i;
     }
     else if (idx < 1 << (SHIFT_BITS + TVR_BITS + TVN_BITS)) {
-        printf("level 2\n");
+        log_debug("level 2\n");
         int i = (expires >> (SHIFT_BITS + TVR_BITS)) & TVN_MASK;
         vec = base->sltv2.vec + i;
     }
     else if ((signed long)idx < 0) {
         // already expired
-        printf("level -1\n");
+        log_debug("level -1\n");
         vec = base->sltv1.vec + base->sltv1.index;
     }
     else if (idx <= 0xffffffffUL) {
-        printf("level 3\n");
+        log_debug("level 3\n");
         int i = (expires >> (SHIFT_BITS + TVR_BITS + TVN_BITS)) & TVN_MASK;
         vec = base->sltv3.vec + i;
     }
     else {
-        printf("level nil\n");
+        log_debug("level nil\n");
         // 64bit jiffies? not for long interval timer
         INIT_LIST_HEAD(&timer->list);
     }
@@ -305,7 +305,6 @@ void timer::set_handler(timer_handler* h, int id) {
 }
 
 void timer::on_time_event(int timer_id) {
-    assert(timerid_ == timer_id);
     start_ = false;
     if(handler_ != 0)    
         handler_->on_timeout(timerid_);

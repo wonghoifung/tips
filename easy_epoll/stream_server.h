@@ -6,7 +6,7 @@
 #include "timer.h"
 #include <map>
 
-class stream_server:public event_loop
+class stream_server : public event_loop
 {
 public:
 	stream_server();
@@ -16,7 +16,7 @@ public:
     virtual void handle_disconnect(server_tcpconn* conn);
 	virtual int handle_timeout(server_tcpconn*);
 	virtual int handle_message(inmessage* msg, server_tcpconn* conn, unsigned long ssid) = 0;
-	server_tcpconn* findconn(int nIndex);
+	server_tcpconn* findconn(int idx);
 	int genconnid();
 
 private:
