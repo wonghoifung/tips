@@ -11,14 +11,14 @@ enum { c_default_version = 1, c_default_subversion = 1 };
 enum { c_header_size = 9, c_buffer_size = 1024 * 12 };
 
 /* header: | flag_2 | cmd_2 | version_1 | subversion_1 | bodylen_2 | checkcode_1 | */
-class Message
+class message
 {
 public:
-    Message() {
+    message() {
 
     }
 
-    virtual ~Message() {
+    virtual ~message() {
 
     }
 
@@ -172,72 +172,72 @@ private:
     int readptr_;
 };
 
-class InMessage : public Message
+class InMessage : public message
 {
 public:
     int read_int() {
 	    int val(-1);
-	    Message::read_b((char*)&val, sizeof(int));
+	    message::read_b((char*)&val, sizeof(int));
 	    return endianop(val);
 	}
 
     int read_int_and_repack() {
 	    int val(-1);
-	    Message::read_del_b((char*)&val, sizeof(int));
+	    message::read_del_b((char*)&val, sizeof(int));
 	    return endianop(val);
 	}
 
     unsigned int read_uint() {
 	    unsigned int val(0);
-	    Message::read_b((char*)&val, sizeof(unsigned int));
+	    message::read_b((char*)&val, sizeof(unsigned int));
 	    return endianop(val);
 	}
 
     int64_t read_int64() {
 	    int64_t val(0);
-	    Message::read_b((char*)&val, sizeof(int64_t));
+	    message::read_b((char*)&val, sizeof(int64_t));
 	    return endianop(val);
 	}
 
     uint64_t read_uint64() {
 	    uint64_t val(0);
-	    Message::read_b((char*)&val, sizeof(uint64_t));
+	    message::read_b((char*)&val, sizeof(uint64_t));
 	    return endianop(val);
 	}
 
     long read_long() {
 	    long val(0);
-	    Message::read_b((char*)&val, sizeof(long));
+	    message::read_b((char*)&val, sizeof(long));
 	    return endianop(val);
 	}
 
     unsigned long read_ulong() {
 	    unsigned long val(0);
-	    Message::read_b((char*)&val, sizeof(unsigned long));
+	    message::read_b((char*)&val, sizeof(unsigned long));
 	    return endianop(val);
 	}
 
     short read_short() {
 	    short val(-1);
-	    Message::read_b((char*)&val, sizeof(short));
+	    message::read_b((char*)&val, sizeof(short));
 	    return endianop(val);
 	}
 
     unsigned short read_ushort() {
 	    unsigned short val(0);
-	    Message::read_b((char*)&val, sizeof(unsigned short));
+	    message::read_b((char*)&val, sizeof(unsigned short));
 	    return endianop(val);
 	}
 
     char read_char() {
 	    char val(0);
-	    Message::read_b((char*)&val, sizeof(char));
+	    message::read_b((char*)&val, sizeof(char));
 	    return endianop(val);
 	}
 
     unsigned char  read_uchar() {
 	    unsigned char val(0);
-	    Message::read_b((char*)&val, sizeof(unsigned char));
+	    message::read_b((char*)&val, sizeof(unsigned char));
 	    return endianop(val);
 	}
 
@@ -245,7 +245,7 @@ public:
 	    int len = read_int();
 	    if(len <= 0 || len >= c_buffer_size)
 	        return NULL;
-	    return Message::read_bytes_b(len);
+	    return message::read_bytes_b(len);
 	}
 
     int read_binary(char* outbuf, int maxlen) {
@@ -254,109 +254,109 @@ public:
 	        return -1;
 	    if(len > maxlen)
 	    {
-	        Message::read_undo_b(sizeof(int));
+	        message::read_undo_b(sizeof(int));
 	        return -1;
 	    }
-	    if(Message::read_b(outbuf, len))
+	    if(message::read_b(outbuf, len))
 	        return len ;
 	    return 0;
 	}
 
     bool copy(const void* inbuf, int len) {
-	    return Message::copy_b(inbuf, len);
+	    return message::copy_b(inbuf, len);
 	}
 
     void begin(short cmd, char ver = c_default_version, char subver = c_default_subversion) {
-	    Message::begin_b(cmd, ver, subver);
+	    message::begin_b(cmd, ver, subver);
 	}
 
     void end() {
-	    Message::end_b();
+	    message::end_b();
 	}
 
     /* for parser to build packet */
     bool append(const char* inbuf, int len) { 
-    	return Message::write_b(inbuf, len); 
+    	return message::write_b(inbuf, len); 
     }
 };
 
-class OutMessage : public Message
+class OutMessage : public message
 {
 public:
     bool write_int(int val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(int));
+	  return message::write_b((char*)&val, sizeof(int));
 	}
 
     bool write_uint(unsigned int val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(unsigned int));
+	  return message::write_b((char*)&val, sizeof(unsigned int));
 	}
 
     bool write_int64(int64_t val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(int64_t));
+	  return message::write_b((char*)&val, sizeof(int64_t));
 	}
 
     bool write_uint64(uint64_t val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(uint64_t));
+	  return message::write_b((char*)&val, sizeof(uint64_t));
 	}
 
     bool write_long(long val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(long));
+	  return message::write_b((char*)&val, sizeof(long));
 	}
 
     bool write_ulong(unsigned long val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(unsigned long));
+	  return message::write_b((char*)&val, sizeof(unsigned long));
 	}
 
     bool write_char(char val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(char));
+	  return message::write_b((char*)&val, sizeof(char));
 	}
 
     bool write_uchar(unsigned char val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(unsigned char));
+	  return message::write_b((char*)&val, sizeof(unsigned char));
 	}
 
     bool write_short(short val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(short));
+	  return message::write_b((char*)&val, sizeof(short));
 	}
 
     bool write_ushort(unsigned short val) {
 	  val = endianop(val);
-	  return Message::write_b((char*)&val, sizeof(unsigned short));
+	  return message::write_b((char*)&val, sizeof(unsigned short));
 	}
 
     bool write_front_int(int val) {
 	  val = endianop(val);
-	  return Message::write_front_b((char*)&val, sizeof(int));
+	  return message::write_front_b((char*)&val, sizeof(int));
 	}
 
     bool write_front_uint(unsigned int val) {
 	  val = endianop(val);
-	  return Message::write_front_b((char*)&val, sizeof(unsigned int));
+	  return message::write_front_b((char*)&val, sizeof(unsigned int));
 	}
 
     bool write_front_char(char val) {
 	  val = endianop(val);
-	  return Message::write_front_b((char*)&val, sizeof(char));
+	  return message::write_front_b((char*)&val, sizeof(char));
 	}
 
     bool write_front_uchar(unsigned char val) {
 	  val = endianop(val);
-	  return Message::write_front_b((char*)&val, sizeof(unsigned char));
+	  return message::write_front_b((char*)&val, sizeof(unsigned char));
 	}
 
     bool write_cstring(const char* cstr) {
 	  int len = (int)strlen(cstr) ;
 	  write_int(len + 1) ;
-	  return Message::write_b(cstr, len) && Message::write_zero_b();
+	  return message::write_b(cstr, len) && message::write_zero_b();
 	}
 
     bool write_string(const std::string& str) {
@@ -366,19 +366,19 @@ public:
 
     bool write_binary(const char* inbuf, int len) {
 	  write_int(len) ;
-	  return Message::write_b(inbuf, len) ;
+	  return message::write_b(inbuf, len) ;
 	}
 
     bool copy(const void* inbuf, int len) {
-	  return Message::copy_b(inbuf, len);
+	  return message::copy_b(inbuf, len);
 	}
 
     void begin(short cmd, char ver = c_default_version, char subver = c_default_subversion) {
-	  Message::begin_b(cmd, ver, subver);
+	  message::begin_b(cmd, ver, subver);
 	}
 
     void end() {
-	  Message::end_b();
+	  message::end_b();
 	}
 };
 

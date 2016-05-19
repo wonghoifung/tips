@@ -1,4 +1,4 @@
-#include "Message.h"
+#include "message.h"
 #include "MessageParser.h"
 #include "StreamHandler.h"
 

@@ -2,7 +2,7 @@
 #define STREAMHANDLER_HEADER
 
 #include "tcpconn.h"
-#include "Message.h"
+#include "message.h"
 #include "MessageParser.h"
 #include <map>
 

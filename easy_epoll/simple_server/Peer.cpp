@@ -1,5 +1,5 @@
 #include "Peer.h"
-#include "Message.h"
+#include "message.h"
 #include "StreamHandler.h"
 
 Peer::Peer(const uint32_t peerid, StreamHandler* handler):peerid_(peerid),streamhandler_(handler) {
