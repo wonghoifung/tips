@@ -49,7 +49,7 @@ public:
 
 			if(state_ == state_done)
 			{
-				handler_->OnParserComplete(&inmsg_);
+				handler_->on_message(&inmsg_);
 				reset();
 			}
 		}

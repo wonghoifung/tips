@@ -33,7 +33,7 @@ static bool initTimer() {
 SimpleClient::SimpleClient(stream_server* ss):parser_(NULL),ss_(ss) {
 	initTimer();
 	sc = this;
-	SetNeedDel(false);
+	setneeddel(false);
 }
 
 SimpleClient::~SimpleClient() {
@@ -53,10 +53,10 @@ bool SimpleClient::connect(const std::string& host, const std::string& port) {
 }
 
 int SimpleClient::send(outmessage* msg) {
-	return tcpconn::Send(msg->cbuffer(), msg->size());
+	return tcpconn::sendbuf(msg->cbuffer(), msg->size());
 }
 
-int SimpleClient::OnParserComplete(inmessage* msg) {
+int SimpleClient::on_message(inmessage* msg) {
 	const short cmd = msg->command();
 	switch (cmd) {
 		case cmd_peer_login: {
@@ -74,21 +74,21 @@ int SimpleClient::OnParserComplete(inmessage* msg) {
 	return 0;
 }
 
-int SimpleClient::OnParser(char *buf, int nLen) {
+int SimpleClient::on_rawdata(char *buf, int nLen) {
 	if (parser_ == NULL) parser_ = message_parser::create(this);
 	return parser_->parse(buf, nLen);
 }
 
-int SimpleClient::OnClose(void) {
+int SimpleClient::on_close(void) {
 	printf("SimpleClient::OnClose\n");
 	return 0;
 }
 
-int SimpleClient::OnConnected(void) {
+int SimpleClient::on_connect(void) {
 	sockaddr_in remote_addr;
     memset(&remote_addr, 0, sizeof(remote_addr));
     int len = sizeof(remote_addr);
-    if(getpeername(GetFd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
+    if(getpeername(getfd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
     {
         std::string remoteip = inet_ntoa(remote_addr.sin_addr);
         int remoteport = ntohs(remote_addr.sin_port);
@@ -103,8 +103,8 @@ int SimpleClient::OnConnected(void) {
     return 0;
 }
 
-int	SimpleClient::ProcessOnTimerOut(int Timerid) {
-	printf("SimpleClient::ProcessOnTimerOut\n");
+int	SimpleClient::on_timeout(int Timerid) {
+	printf("SimpleClient::on_timeout\n");
 	return 0;
 }
 

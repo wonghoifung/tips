@@ -186,7 +186,7 @@ int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* pHandler) 
 			msg.begin(cmd_peer_login);
 			msg.write_int(-1); // failure
 			msg.end();
-			pHandler->Send(&msg);
+			pHandler->sendmsg(&msg);
 			return -1;
 		}
 	} else {
@@ -197,7 +197,7 @@ int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* pHandler) 
 	msg.begin(cmd_peer_login);
 	msg.write_int(0); // success
 	msg.end();
-	pHandler->Send(&msg);
+	pHandler->sendmsg(&msg);
 	return 0;
 }
 

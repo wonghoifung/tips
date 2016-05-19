@@ -8,6 +8,8 @@
 
 class server_tcpconn:public tcpconn				
 {
+	server_tcpconn(const server_tcpconn&);
+	server_tcpconn& operator=(const server_tcpconn&);
 public:
 	explicit server_tcpconn(int nID);
 	virtual ~server_tcpconn(void);
@@ -21,13 +23,13 @@ public:
 	void *  GetUserData(){return m_pUserData;}	
 	void    SetUserData(void *pUserData){	m_pUserData = pUserData;}
 
-	int     Send(outmessage *pPacket);
-    virtual int OnParserComplete(inmessage *);
+	int     sendmsg(outmessage* msg);
+    virtual int on_message(inmessage *);
 
 private:
-	virtual int OnParser(char *buf, int nLen);
-	virtual int OnClose(void);
-	virtual int OnConnected(void);
+	virtual int on_rawdata(char *buf, int nLen);
+	virtual int on_close(void);
+	virtual int on_connect(void);
     virtual int	on_timeout(int Timerid);
 	void GetRemoteAddr(void);
 

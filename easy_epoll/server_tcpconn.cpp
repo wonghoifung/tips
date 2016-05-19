@@ -28,15 +28,15 @@ server_tcpconn::~server_tcpconn(void)
     }
 }
 
-int server_tcpconn::Send(outmessage *pPacket)
+int server_tcpconn::sendmsg(outmessage *pPacket)
 {
-	return tcpconn::Send(pPacket->cbuffer(), pPacket->size());
+	return tcpconn::sendbuf(pPacket->cbuffer(), pPacket->size());
 }
 
-int server_tcpconn::OnParser(char *buf, int nLen)
+int server_tcpconn::on_rawdata(char *buf, int nLen)
 {
 	m_nStatus = REQUEST;
-	m_TcpTimer.stop();	
+	tcptimer_.stop();	
 
     if(m_pParser == NULL)
         m_pParser = message_parser::create(this);
@@ -44,13 +44,13 @@ int server_tcpconn::OnParser(char *buf, int nLen)
 	return m_pParser->parse(buf, nLen);
 }
 
-int server_tcpconn::OnParserComplete(inmessage *pPacket)
+int server_tcpconn::on_message(inmessage *pPacket)
 {
 	stream_server *pServer = (stream_server *)this->evloop();
 	return pServer->ProcessMessage(pPacket, this, m_nHandlerID);
 }
 
-int server_tcpconn::OnClose(void)
+int server_tcpconn::on_close(void)
 {
 	m_nStatus = CLOSE;	
     stream_server *pServer = (stream_server*)this->evloop();
@@ -59,14 +59,14 @@ int server_tcpconn::OnClose(void)
     return 0;
 }
 
-int server_tcpconn::OnConnected(void)
+int server_tcpconn::on_connect(void)
 {
 	m_nStatus = CONNECT;
     stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
         pServer->OnConnect(this);
 
-	m_TcpTimer.start(s_DisNoMsgTime);
+	tcptimer_.start(s_DisNoMsgTime);
 	GetRemoteAddr();
     return 0;
 }
@@ -83,7 +83,7 @@ void server_tcpconn::GetRemoteAddr(void)
 	sockaddr_in remote_addr;
 	memset(&remote_addr, 0, sizeof(remote_addr));
 	int len = sizeof(remote_addr);
-	if(getpeername(GetFd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
+	if(getpeername(getfd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
 	{
 		m_addrremote = inet_ntoa(remote_addr.sin_addr);
 		m_nPort = ntohs(remote_addr.sin_port);

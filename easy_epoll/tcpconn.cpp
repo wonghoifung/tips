@@ -11,49 +11,39 @@
 
 tcpconn::tcpconn()
 :timer_handler()
-,m_sock_fd(0)
-,m_fd_index(0)
-,m_bfull(false)
+,sockfd_(0)
+,fdidx_(0)
+,full_(false)
 {
-    m_bNeedDel = false;
-	memset(m_pRecvBuffer,0,sizeof(m_pRecvBuffer));
+    needdel_ = false;
+	memset(recvbuf_,0,sizeof(recvbuf_));
 	evloop_ = NULL;
-    m_TcpTimer.set_handler(this);
+    tcptimer_.set_handler(this);
 
-    m_pSendLoopBuffer = new loopbuf(MAX_LOOP_BUFFER_LEN);
+    sendloopbuf_ = new loopbuf(MAX_LOOP_BUFFER_LEN);
 }
 
 tcpconn::~tcpconn()
 {
-	if(m_pSendLoopBuffer)
-		delete m_pSendLoopBuffer;
-	m_pSendLoopBuffer = NULL;
+	if(sendloopbuf_)
+		delete sendloopbuf_;
+	sendloopbuf_ = NULL;
 }
 
-void tcpconn::SetFd(int sock_fd)
+int tcpconn::handle_connect()
 {
-	m_sock_fd = sock_fd;
-}
-
-int tcpconn::GetFd()const
-{
-	return m_sock_fd;
-}
-
-int tcpconn::handle_OnConnected()
-{
-	return OnConnected();
+	return on_connect();
 }
 
 int tcpconn::handle_read()
 {
-    if(m_bfull)
+    if(full_)
         return -1;
 
-    const int buff_size = sizeof(m_pRecvBuffer);
+    const int buff_size = sizeof(recvbuf_);
     while(1) 
     {
-        int nRecv = recv(m_sock_fd,m_pRecvBuffer,buff_size,0);
+        int nRecv = recv(sockfd_,recvbuf_,buff_size,0);
         if(nRecv < 0)
         {
             if(EAGAIN == errno || EWOULDBLOCK == errno)
@@ -66,7 +56,7 @@ int tcpconn::handle_read()
         {
             return -1;
         }
-        int ret = OnParser(m_pRecvBuffer, nRecv);
+        int ret = on_rawdata(recvbuf_, nRecv);
         if(ret != 0)
             return -1;
         if(nRecv < buff_size)
@@ -75,57 +65,57 @@ int tcpconn::handle_read()
     return -1;
 }
 
-int tcpconn::handle_output()
+int tcpconn::handle_write()
 {
     if(!Writable())
         return 0;
-    if(m_bfull)
+    if(full_)
         return -1;
 
     int nPeekLen = 0;
     int nHaveSendLen = 0;
     do 
     {
-        nPeekLen = m_pSendLoopBuffer->Peek(m_pTmpSendBuffer,sizeof(m_pTmpSendBuffer));
-        nHaveSendLen = sockapi::SocketSend(GetFd(),m_pTmpSendBuffer, nPeekLen);
+        nPeekLen = sendloopbuf_->Peek(tmpsendbuf_,sizeof(tmpsendbuf_));
+        nHaveSendLen = sockapi::SocketSend(getfd(),tmpsendbuf_, nPeekLen);
 
-        //Send data block
+        //sendbuf data block
         if( nHaveSendLen < 0 ) 
         {
             if(errno != EWOULDBLOCK && errno != EINTR)
             {
-                m_pSendLoopBuffer->Erase(nPeekLen);            
+                sendloopbuf_->Erase(nPeekLen);            
                 return -1;
             }
             return 0;
         }
         else
         {
-            m_pSendLoopBuffer->Erase(nHaveSendLen);
+            sendloopbuf_->Erase(nHaveSendLen);
         }
-     }while (nHaveSendLen>0 && m_pSendLoopBuffer->DataCount()>0);
+     }while (nHaveSendLen>0 && sendloopbuf_->DataCount()>0);
 
    return 0;
 }
 
 int tcpconn::handle_close()
 {
-	m_TcpTimer.stop();
-	OnClose();
+	tcptimer_.stop();
+	on_close();
 	return 0;
 }
 
-int tcpconn::Send(const char *buf, int nLen)
+int tcpconn::sendbuf(const char *buf, int nLen)
 {
-    if( nLen > (int)m_pSendLoopBuffer->FreeCount())
+    if( nLen > (int)sendloopbuf_->FreeCount())
     {
         log_debug("SendLoopBuff not enough\n");
-        m_bfull = true;
+        full_ = true;
         return -1;
     }
     else        
-	    m_pSendLoopBuffer->Put((char *)buf, nLen);
-    handle_output();   
+	    sendloopbuf_->Put((char *)buf, nLen);
+    handle_write();   
 
     if(Writable())
         evloop_->WantWrite(this);
@@ -135,7 +125,7 @@ int tcpconn::Send(const char *buf, int nLen)
 
 bool tcpconn::Writable()
 {
-    return ( m_pSendLoopBuffer->DataCount()>0 ) ? true : false;
+    return ( sendloopbuf_->DataCount()>0 ) ? true : false;
 }
 
 

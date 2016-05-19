@@ -12,6 +12,6 @@ Peer::~Peer() {
 
 void Peer::sendMsg(outmessage* msg) {
 	if (streamhandler_) {
-		streamhandler_->Send(msg);
+		streamhandler_->sendmsg(msg);
 	}
 }

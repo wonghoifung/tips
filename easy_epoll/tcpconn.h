@@ -18,48 +18,50 @@ const int MAX_LOOP_BUFFER_LEN = 64*1024;
 
 class tcpconn : public timer_handler
 {
+	tcpconn(const tcpconn&);
+	tcpconn& operator=(const tcpconn&);
+
 public:
 	tcpconn();	
 	virtual ~tcpconn();	
 
-	void SetFd(int sock_fd);
-	int GetFd()const;
+	const int getfd() const { return sockfd_; }
+	void setfd(int fd) { sockfd_ = fd; }
 
-    uint32_t get_fd_index() { return m_fd_index;}
-    void set_fd_index(uint32_t index) { m_fd_index = index;}
+    const uint32_t getfdidx() const { return fdidx_; }
+    void setfdidx(uint32_t index) { fdidx_ = index; }
   
-    bool GetNeedDel() { return m_bNeedDel; }
-    void SetNeedDel(bool bDel) { m_bNeedDel = bDel; }
+    const bool getneeddel() const { return needdel_; }
+    void setneeddel(bool d) { needdel_ = d; }
 
-	int handle_OnConnected();
-	int handle_read();
-	int handle_output();
-	int handle_close();
-
-protected:
-	virtual int OnClose(void) {return -1;}
-	virtual int OnConnected(void) {return 0;}
-	virtual int OnParser(char*, int) {return -1;}
-	virtual int	on_timeout(int Timerid) {return 0;};	
-
-public:	
-	int Send(const char *buf, int nLen);
-    virtual int OnParserComplete(inmessage *)=0;
-    bool Writable();
 	event_loop* evloop() { return evloop_; }
 	void evloop(event_loop* p) { evloop_ = p; }
 
+	int handle_connect();
+	int handle_read();
+	int handle_write();
+	int handle_close();
+
+	int sendbuf(const char* buf, int nLen);
+    virtual int on_message(inmessage*) = 0;
+    bool Writable();
+	
 protected:
-	int m_sock_fd;
-    uint32_t m_fd_index;             
-	uint32_t m_SocketType;
-    bool m_bNeedDel;
-    bool m_bfull;
-	timer m_TcpTimer;
+	virtual int on_close(void) { return -1; }
+	virtual int on_connect(void) { return 0; }
+	virtual int on_rawdata(char*, int) { return -1; }
+	virtual int	on_timeout(int timerid) { return 0; }
+	
+	int sockfd_;
+    uint32_t fdidx_;             
+	uint32_t socktype_;
+    bool needdel_;
+    bool full_;
+	timer tcptimer_;
 	event_loop* evloop_;
-	char m_pRecvBuffer[RECV_BUFFER_SIZE];	
-	loopbuf* m_pSendLoopBuffer;
-	char m_pTmpSendBuffer[SEND_BUFFER_SIZE];
+	char recvbuf_[RECV_BUFFER_SIZE];	
+	loopbuf* sendloopbuf_;
+	char tmpsendbuf_[SEND_BUFFER_SIZE];
 };
 
 #endif  

@@ -41,7 +41,7 @@ bool stream_client::Connect(tcpconn* conn, const std::string& strAddr, int port)
             sockapi::SocketClose(sock_fd);
             return false;
         }
-        conn->SetFd(sock_fd);
+        conn->setfd(sock_fd);
 		return Register(conn);			
 	}
 	sockapi::SocketClose(sock_fd);	

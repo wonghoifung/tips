@@ -17,11 +17,11 @@ public:
 	bool connect(const std::string& host, const std::string& port);
  	int send(outmessage* msg);
 
-	virtual int OnParserComplete(inmessage *);
-	virtual int OnParser(char *buf, int nLen);
-	virtual int OnClose(void);
-	virtual int OnConnected(void);
-    virtual int	ProcessOnTimerOut(int Timerid);
+	virtual int on_message(inmessage *);
+	virtual int on_rawdata(char *buf, int nLen);
+	virtual int on_close(void);
+	virtual int on_connect(void);
+    virtual int	on_timeout(int Timerid);
 
 private:
 	stream_client connector_;

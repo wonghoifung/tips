@@ -95,7 +95,7 @@ bool event_loop::Run()
             int fd = (uint32_t)m_epev_arr[i].data.u64; /* mask out the lower 32 bits */
             uint32_t index = (uint32_t)(m_epev_arr[i].data.u64 >> 32);
             tcpconn* s = fds[fd];
-            if( s == 0 || s->get_fd_index() != index )
+            if( s == 0 || s->getfdidx() != index )
             {                      
                 continue;       // epoll returned invalid fd 
             }
@@ -116,7 +116,7 @@ bool event_loop::Run()
             }
             else if( m_epev_arr[i].events & EPOLLOUT )
             {
-                if( s->handle_output() == -1 )
+                if( s->handle_write() == -1 )
                 {
                     handle_close(s);
                     continue;
@@ -195,7 +195,7 @@ int event_loop::handle_accept()
             continue;
         }
         AddSocket(sh);
-        sh->handle_OnConnected();
+        sh->handle_connect();
     } while(conn_fd > 0);
 
 	return 0;
@@ -208,7 +208,7 @@ void event_loop::handle_close(tcpconn* pHandler)
 
     RemoveSocket(pHandler);
 
-    if(pHandler->GetNeedDel())
+    if(pHandler->getneeddel())
     {
         delete pHandler;
         pHandler = NULL;
@@ -220,8 +220,8 @@ tcpconn* event_loop::AllocSocketHandler(int sock_fd)
 	tcpconn* sh = CreateHandler();
 	if(sh != NULL)
 	{
-        sh->SetNeedDel(true);
-		sh->SetFd(sock_fd);		
+        sh->setneeddel(true);
+		sh->setfd(sock_fd);		
 		sh->evloop(this);
 	}
 	return sh;
@@ -240,7 +240,7 @@ bool event_loop::Register(tcpconn* pHandler)
     AddSocket(pHandler);
 
     pHandler->evloop(this);
-    pHandler->handle_OnConnected();	
+    pHandler->handle_connect();	
 
 	return true;
 }
@@ -250,56 +250,56 @@ void event_loop::AddSocket(tcpconn* s)
     m_count_fd++;
     m_fd_index++;
 
-    s->set_fd_index(m_fd_index);
+    s->setfdidx(m_fd_index);
 
-    assert( s->GetFd() < MAX_DESCRIPTORS );
-    assert(fds[s->GetFd()] == 0);
-    fds[s->GetFd()] = s;
+    assert( s->getfd() < MAX_DESCRIPTORS );
+    assert(fds[s->getfd()] == 0);
+    fds[s->getfd()] = s;
     
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
 
     /* store the generation counter in the upper 32 bits, the fd in the lower 32 bits */
-    ev.data.u64 = (uint64_t)(uint32_t)(s->GetFd()) | ((uint64_t)(uint32_t)(s->get_fd_index()) << 32);
+    ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events = EPOLLIN;
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, s->GetFd(), &ev);
+    epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, s->getfd(), &ev);
 }
 
 void event_loop::RemoveSocket(tcpconn* s)
 {
     m_count_fd--;
 
-    assert(fds[s->GetFd()] == s);
-    fds[s->GetFd()] = 0;
+    assert(fds[s->getfd()] == s);
+    fds[s->getfd()] = 0;
 
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
-    ev.data.u64 = (uint64_t)(uint32_t)(s->GetFd()) | ((uint64_t)(uint32_t)(s->get_fd_index()) << 32);
+    ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events =  EPOLLOUT | EPOLLIN;
 
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_DEL, s->GetFd(), &ev);
+    epoll_ctl(m_epoll_fd, EPOLL_CTL_DEL, s->getfd(), &ev);
 
-    sockapi::SocketClose(s->GetFd());
+    sockapi::SocketClose(s->getfd());
 }
 
 void event_loop::WantWrite(tcpconn* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
-    ev.data.u64 = (uint64_t)(uint32_t)(s->GetFd()) | ((uint64_t)(uint32_t)(s->get_fd_index()) << 32);
+    ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events = EPOLLOUT ;
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->GetFd(), &ev);
+    epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->getfd(), &ev);
 }
 
 void event_loop::WantRead(tcpconn* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
-    ev.data.u64 = (uint64_t)(uint32_t)(s->GetFd()) | ((uint64_t)(uint32_t)(s->get_fd_index()) << 32);
+    ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events = EPOLLIN ;
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->GetFd(), &ev);
+    epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->getfd(), &ev);
 }
