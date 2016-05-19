@@ -1,16 +1,16 @@
-#include "Connector.h"
+#include "stream_client.h"
 #include "SocketApi.h"
 
-Connector::Connector()
+stream_client::stream_client()
 {
 	m_pNetServer = NULL;
 }
 
-Connector::~Connector()
+stream_client::~stream_client()
 {
 }
 
-bool Connector::Open(event_loop* pServer)
+bool stream_client::Open(event_loop* pServer)
 {
 	if(pServer == NULL)
 		return false;
@@ -19,7 +19,7 @@ bool Connector::Open(event_loop* pServer)
 	return true;
 }
 
-bool Connector::Connect(tcpconn* pHandler, const std::string& strAddr, int port)
+bool stream_client::Connect(tcpconn* pHandler, const std::string& strAddr, int port)
 {
 	int sock_fd = SocketApi::SocketInit();
 	if( pHandler == NULL || sock_fd < 0)
@@ -48,12 +48,12 @@ bool Connector::Connect(tcpconn* pHandler, const std::string& strAddr, int port)
 	return false;
 }
 
-bool Connector::Connect(tcpconn* pHandler, const NetAddr& addr)
+bool stream_client::Connect(tcpconn* pHandler, const NetAddr& addr)
 {
 	return Connect(pHandler,addr.host,addr.port);
 }
 
-bool Connector::Register(tcpconn* pHandler)
+bool stream_client::Register(tcpconn* pHandler)
 {
 	if(m_pNetServer == NULL)
 		return false;
