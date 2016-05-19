@@ -39,7 +39,7 @@ int StreamHandler::OnParser(char *buf, int nLen)
 	m_TcpTimer.stop();	
 
     if(m_pParser == NULL)
-        m_pParser = MessageParser::create(this);
+        m_pParser = message_parser::create(this);
 
 	return m_pParser->parse(buf, nLen);
 }

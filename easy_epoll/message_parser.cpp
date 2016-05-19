@@ -1,13 +1,13 @@
 #include "message.h"
-#include "MessageParser.h"
+#include "message_parser.h"
 #include "StreamHandler.h"
 
-class concrete_message_parser :  public MessageParser
+class concrete_message_parser :  public message_parser
 {
 	enum {	state_header=0, state_body, state_done, state_error };
 
 public:
-	concrete_message_parser(tcpconn * h):MessageParser(h)
+	concrete_message_parser(tcpconn * h):message_parser(h)
 	{
 		buf_ = inmsg_.buffer();
 		reset();
@@ -120,7 +120,7 @@ private:
 	inmessage inmsg_;
 };
 
-MessageParser* MessageParser::create(tcpconn* h)
+message_parser* message_parser::create(tcpconn* h)
 {
 	return new concrete_message_parser(h);
 }

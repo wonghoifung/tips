@@ -2,7 +2,7 @@
 #define SIMPLECLIENT_HEADER
 
 #include "tcpconn.h"
-#include "MessageParser.h"
+#include "message_parser.h"
 #include "stream_server.h"
 #include "Connector.h"
 
@@ -25,7 +25,7 @@ public:
 
 private:
 	Connector connector_;
-	MessageParser* parser_;
+	message_parser* parser_;
 	stream_server* ss_;
 };
 

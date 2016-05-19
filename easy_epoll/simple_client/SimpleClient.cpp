@@ -75,7 +75,7 @@ int SimpleClient::OnParserComplete(inmessage* msg) {
 }
 
 int SimpleClient::OnParser(char *buf, int nLen) {
-	if (parser_ == NULL) parser_ = MessageParser::create(this);
+	if (parser_ == NULL) parser_ = message_parser::create(this);
 	return parser_->parse(buf, nLen);
 }
 

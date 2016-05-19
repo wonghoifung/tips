@@ -3,7 +3,7 @@
 
 #include "tcpconn.h"
 #include "message.h"
-#include "MessageParser.h"
+#include "message_parser.h"
 #include <map>
 
 class StreamHandler:public tcpconn				
@@ -36,7 +36,7 @@ private:
 	std::string m_addrremote;
 	int    m_nPort;
 	void * m_pUserData;
-    MessageParser * m_pParser;
+    message_parser* m_pParser;
 };
 
 #endif
