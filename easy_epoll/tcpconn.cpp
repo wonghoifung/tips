@@ -67,7 +67,7 @@ int tcpconn::handle_read()
 
 int tcpconn::handle_write()
 {
-    if(!Writable())
+    if(!writable())
         return 0;
     if(full_)
         return -1;
@@ -117,15 +117,15 @@ int tcpconn::sendbuf(const char *buf, int nLen)
 	    sendloopbuf_->Put((char *)buf, nLen);
     handle_write();   
 
-    if(Writable())
+    if(writable())
         evloop_->WantWrite(this);
 
 	return 0;
 }
 
-bool tcpconn::Writable()
+bool tcpconn::writable()
 {
-    return ( sendloopbuf_->DataCount()>0 ) ? true : false;
+    return sendloopbuf_->DataCount() > 0;
 }
 
 

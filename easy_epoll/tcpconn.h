@@ -44,7 +44,7 @@ public:
 
 	int sendbuf(const char* buf, int nLen);
     virtual int on_message(inmessage*) = 0;
-    bool Writable();
+    bool writable();
 	
 protected:
 	virtual int on_close(void) { return -1; }

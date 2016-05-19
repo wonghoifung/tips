@@ -19,15 +19,17 @@
 
 class event_loop
 {
+	event_loop(const event_loop&);
+	event_loop& operator=(const event_loop&);
 public:
 	event_loop();
 	virtual ~event_loop();
 
-    static void SigHandle(int signum);
+    static void handle_signal(int signum);
 
-	bool InitSocket(int listen_port);	
-	bool InitEvent();
-	bool Run();
+	bool init_server(int listen_port);	
+	bool init_event();
+	bool run();
     
 	virtual tcpconn* CreateHandler(void) = 0;
 
@@ -44,18 +46,17 @@ protected:
     void RemoveSocket(tcpconn* s);
 
 private:
-	
     void handle_close(tcpconn* pHandler);
 
 protected:
-    static bool m_bRun;
-    int m_listen_fd;
-	int m_maxfd;
-    tcpconn** fds;    
-    int m_count_fd;
-    uint32_t m_fd_index; 
-	int m_epoll_fd;
-	struct epoll_event* m_epev_arr; 
+    static bool run_;
+    int listen_sockfd_;
+	int maxfd_;
+    tcpconn** fdconns_;    
+    int fdcount_;
+    uint32_t fdidx_; 
+	int epollfd_;
+	struct epoll_event* epevarr_; 
 };
 
 #endif

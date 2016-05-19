@@ -12,62 +12,58 @@
 
 #define MAX_DESCRIPTORS     100000
 
-bool event_loop::m_bRun = true;	
+bool event_loop::run_ = true;	
 
-event_loop::event_loop()
+event_loop::event_loop():fdconns_(NULL),fdcount_(0),fdidx_(0),epevarr_(NULL)
 {
-    m_count_fd = 0;
-    m_fd_index = 0;
-    fds = NULL;
+
 }
 
 event_loop::~event_loop()
 {	
-    sockapi::SocketClose(m_listen_fd);
-
-    sockapi::SocketClose(m_epoll_fd);
-    free(m_epev_arr);
-
-    free(fds);  
+    sockapi::SocketClose(listen_sockfd_);
+    sockapi::SocketClose(epollfd_);
+    free(epevarr_);
+    free(fdconns_);  
 }
 
-void event_loop::SigHandle(int signum)
+void event_loop::handle_signal(int signum)
 {
     if(signum == SIGTERM || signum == SIGUSR1 || signum == SIGKILL)
     {
         log_error("recv signal: %d  will kill down \n",signum);
-        event_loop::m_bRun = false;  
+        event_loop::run_ = false;  
     } 
 }
 
-bool event_loop::InitSocket(int listen_port)
+bool event_loop::init_server(int listen_port)
 {
-	m_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_listen_fd == INVALID_SOCKET)
+	listen_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
+	if (listen_sockfd_ == INVALID_SOCKET)
 		return false;
 
-    sockapi::SocketReUse(m_listen_fd);
-	sockapi::SocketNoBlock(m_listen_fd);
+    sockapi::SocketReUse(listen_sockfd_);
+	sockapi::SocketNoBlock(listen_sockfd_);
 
-    int ret = sockapi::ServerListen(m_listen_fd,listen_port);
+    int ret = sockapi::ServerListen(listen_sockfd_,listen_port);
     if(ret < 0)
         return false;
 
-	if( !InitEvent())
+	if( !init_event())
         return false;
 
 	log_debug("Server start running, listen port:%d\n", listen_port);
 	return true;	
 }
 
-bool event_loop::Run()
+bool event_loop::run()
 {
 	int loop_times = 0;
     const int timer_check_point = 10;
 
-    while(m_bRun) 
+    while(run_) 
     {
-        int res = epoll_wait(m_epoll_fd, m_epev_arr, EVENT_TOTAL_COUNT, 100);
+        int res = epoll_wait(epollfd_, epevarr_, EVENT_TOTAL_COUNT, 100);
         if ( res < 0) {
             if (EINTR == errno)
                 continue;
@@ -87,41 +83,41 @@ bool event_loop::Run()
         
         for(int i=0; i<res; i++)
         {
-            if(m_epev_arr[i].data.fd == m_listen_fd)
+            if(epevarr_[i].data.fd == listen_sockfd_)
             {
                 handle_accept();
                 continue;
             }
-            int fd = (uint32_t)m_epev_arr[i].data.u64; /* mask out the lower 32 bits */
-            uint32_t index = (uint32_t)(m_epev_arr[i].data.u64 >> 32);
-            tcpconn* s = fds[fd];
+            int fd = (uint32_t)epevarr_[i].data.u64; /* mask out the lower 32 bits */
+            uint32_t index = (uint32_t)(epevarr_[i].data.u64 >> 32);
+            tcpconn* s = fdconns_[fd];
             if( s == 0 || s->getfdidx() != index )
             {                      
                 continue;       // epoll returned invalid fd 
             }
-            if( m_epev_arr[i].events & ( EPOLLHUP | EPOLLERR ))
+            if( epevarr_[i].events & ( EPOLLHUP | EPOLLERR ))
             {    
                 handle_close(s);
                 continue;
             }
-            else if(m_epev_arr[i].events & EPOLLIN )
+            else if(epevarr_[i].events & EPOLLIN )
             {               
                 if( s->handle_read() == -1 )
                 {
                     handle_close(s);
                     continue;
                 }
-                if( s->Writable() )
+                if( s->writable() )
                     WantWrite(s);
             }
-            else if( m_epev_arr[i].events & EPOLLOUT )
+            else if( epevarr_[i].events & EPOLLOUT )
             {
                 if( s->handle_write() == -1 )
                 {
                     handle_close(s);
                     continue;
                 }
-                if( !s->Writable() )
+                if( !s->writable() )
                     WantRead(s);
             }
         }
@@ -129,10 +125,10 @@ bool event_loop::Run()
     return true;
 }
 
-bool event_loop::InitEvent()
+bool event_loop::init_event()
 {
-    fds =  (tcpconn**)malloc(MAX_DESCRIPTORS * sizeof(void*));
-    memset(fds,0,MAX_DESCRIPTORS * sizeof(void*));
+    fdconns_ =  (tcpconn**)malloc(MAX_DESCRIPTORS * sizeof(void*));
+    memset(fdconns_,0,MAX_DESCRIPTORS * sizeof(void*));
 
 	struct rlimit rl;
 	int nfiles = MAX_DESCRIPTORS;
@@ -144,19 +140,19 @@ bool event_loop::InitEvent()
         nfiles = MAX_DESCRIPTORS;
 
 	log_debug("epoll create files:%d\n", nfiles);
-	if (-1 == (m_epoll_fd = epoll_create(nfiles)))
+	if (-1 == (epollfd_ = epoll_create(nfiles)))
 		return false;
 	
 	struct epoll_event ev;
-	ev.data.fd = m_listen_fd;
+	ev.data.fd = listen_sockfd_;
 	ev.events = EPOLLIN | EPOLLET;
-	epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_listen_fd, &ev);
+	epoll_ctl(epollfd_, EPOLL_CTL_ADD, listen_sockfd_, &ev);
 
-	m_epev_arr = (struct epoll_event*)malloc(EVENT_TOTAL_COUNT * sizeof(struct epoll_event));
+	epevarr_ = (struct epoll_event*)malloc(EVENT_TOTAL_COUNT * sizeof(struct epoll_event));
 
-    signal(SIGTERM, event_loop::SigHandle);    	
-    signal(SIGUSR1,event_loop::SigHandle);
-	signal(SIGKILL,event_loop::SigHandle);
+    signal(SIGTERM, event_loop::handle_signal);    	
+    signal(SIGUSR1,event_loop::handle_signal);
+	signal(SIGKILL,event_loop::handle_signal);
 
 	return true;
 }
@@ -166,7 +162,7 @@ int event_loop::handle_accept()
 	int conn_fd;
     do 
     {
-        if((conn_fd = sockapi::ServerAccept(m_listen_fd)) == INVALID_SOCKET)
+        if((conn_fd = sockapi::ServerAccept(listen_sockfd_)) == INVALID_SOCKET)
         {
             break;
         }
@@ -247,14 +243,14 @@ bool event_loop::Register(tcpconn* pHandler)
 
 void event_loop::AddSocket(tcpconn* s)
 {
-    m_count_fd++;
-    m_fd_index++;
+    fdcount_++;
+    fdidx_++;
 
-    s->setfdidx(m_fd_index);
+    s->setfdidx(fdidx_);
 
     assert( s->getfd() < MAX_DESCRIPTORS );
-    assert(fds[s->getfd()] == 0);
-    fds[s->getfd()] = s;
+    assert(fdconns_[s->getfd()] == 0);
+    fdconns_[s->getfd()] = s;
     
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
@@ -263,15 +259,15 @@ void event_loop::AddSocket(tcpconn* s)
     ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events = EPOLLIN;
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, s->getfd(), &ev);
+    epoll_ctl(epollfd_, EPOLL_CTL_ADD, s->getfd(), &ev);
 }
 
 void event_loop::RemoveSocket(tcpconn* s)
 {
-    m_count_fd--;
+    fdcount_--;
 
-    assert(fds[s->getfd()] == s);
-    fds[s->getfd()] = 0;
+    assert(fdconns_[s->getfd()] == s);
+    fdconns_[s->getfd()] = 0;
 
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
@@ -279,7 +275,7 @@ void event_loop::RemoveSocket(tcpconn* s)
 
     ev.events =  EPOLLOUT | EPOLLIN;
 
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_DEL, s->getfd(), &ev);
+    epoll_ctl(epollfd_, EPOLL_CTL_DEL, s->getfd(), &ev);
 
     sockapi::SocketClose(s->getfd());
 }
@@ -291,7 +287,7 @@ void event_loop::WantWrite(tcpconn* s)
     ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events = EPOLLOUT ;
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->getfd(), &ev);
+    epoll_ctl(epollfd_, EPOLL_CTL_MOD, s->getfd(), &ev);
 }
 
 void event_loop::WantRead(tcpconn* s)
@@ -301,5 +297,5 @@ void event_loop::WantRead(tcpconn* s)
     ev.data.u64 = (uint64_t)(uint32_t)(s->getfd()) | ((uint64_t)(uint32_t)(s->getfdidx()) << 32);
 
     ev.events = EPOLLIN ;
-    epoll_ctl(m_epoll_fd, EPOLL_CTL_MOD, s->getfd(), &ev);
+    epoll_ctl(epollfd_, EPOLL_CTL_MOD, s->getfd(), &ev);
 }

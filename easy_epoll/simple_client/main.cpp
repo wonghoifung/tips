@@ -39,7 +39,7 @@ int main() {
 	init_timer();
 
 	MuteServer ms;
-	if (!ms.InitEvent()) {
+	if (!ms.init_event()) {
 		printf("cannot init event\n");
 		exit(0);
 	}
@@ -47,7 +47,7 @@ int main() {
 	SimpleClient* sc = new SimpleClient(&ms);
 	sc->connect("127.0.0.1", "6464");
 
-	ms.Run();
+	ms.run();
 
 	return 0;
 }

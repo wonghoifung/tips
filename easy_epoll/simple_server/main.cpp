@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 	init_timer();
 
 	SimpleServer* ss = new SimpleServer();
-	if (!ss->InitSocket(6464)) {
+	if (!ss->init_server(6464)) {
 		log_error("cannot start server socket");
 		return 0;
 	}
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 		log_error("init failed");
 		return 0;
 	}
-	ss->Run();
+	ss->run();
 	delete ss;
 	ss=NULL;
 	return 0;
