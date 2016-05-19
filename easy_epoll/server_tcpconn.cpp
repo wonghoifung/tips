@@ -47,7 +47,7 @@ int server_tcpconn::on_rawdata(char *buf, int nLen)
 int server_tcpconn::on_message(inmessage *pPacket)
 {
 	stream_server *pServer = (stream_server *)this->evloop();
-	return pServer->ProcessMessage(pPacket, this, connid_);
+	return pServer->handle_message(pPacket, this, connid_);
 }
 
 int server_tcpconn::on_close(void)
@@ -67,18 +67,18 @@ int server_tcpconn::on_connect(void)
         pServer->OnConnect(this);
 
 	tcptimer_.start(s_DisNoMsgTime);
-	GetRemoteAddr();
+	setremoteaddr();
     return 0;
 }
 
 int	server_tcpconn::on_timeout(int Timerid)
 {
     stream_server *pServer = (stream_server*)this->evloop();
-    int nRet = pServer->ProcessOnTimer(this);
+    int nRet = pServer->handle_timeout(this);
     return nRet;
 }
 
-void server_tcpconn::GetRemoteAddr(void)
+void server_tcpconn::setremoteaddr(void)
 {
 	sockaddr_in remote_addr;
 	memset(&remote_addr, 0, sizeof(remote_addr));

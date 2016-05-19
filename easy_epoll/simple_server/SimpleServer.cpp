@@ -59,7 +59,7 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::ProcessMessage(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID) {
+int SimpleServer::handle_message(inmessage* pMessage, server_tcpconn* pHandler, unsigned long ssid) {
 	const short cmd = pMessage->command();
 
 	switch (cmd) {

@@ -3,77 +3,77 @@
 #include <stdarg.h>
 #include <assert.h>
 
-stream_server::stream_server(void)
+stream_server::stream_server()
 :event_loop()
 {
-	m_nMaxID = 0;
+	maxid_ = 0;
 }
 
-stream_server::~stream_server(void)
+stream_server::~stream_server()
 {
 }
 
-tcpconn * stream_server::create_tcpconn(void)
+tcpconn * stream_server::create_tcpconn()
 {
 	server_tcpconn* conn = NULL;
-    int uid = GetUseID();
+    int uid = genconnid();
 	conn = new server_tcpconn(uid);
 	return conn;
 }
 
-void  stream_server::OnConnect(server_tcpconn *pHandler )
+void  stream_server::OnConnect(server_tcpconn* conn)
 {
-    int id = pHandler->connid();
-    if(m_HandlerMap.find(id) == m_HandlerMap.end())
+    int id = conn->connid();
+    if(connmap_.find(id) == connmap_.end())
     {
-        m_HandlerMap.insert(std::map<int, server_tcpconn*>::value_type(id,pHandler));
+        connmap_.insert(std::map<int, server_tcpconn*>::value_type(id,conn));
     }
     else
     {
-        log_debug("stream_server::ProcessConnected Error %d\r\n", pHandler->connid());
+        log_debug("stream_server::ProcessConnected Error %d\r\n", conn->connid());
         assert(false);
     }
 }
 
-void  stream_server::OnDisconnect(server_tcpconn *pHandler )
+void  stream_server::OnDisconnect(server_tcpconn* conn)
 {
-    int id = pHandler->connid();
-    std::map<int, server_tcpconn*>::iterator iter = m_HandlerMap.find(id);
-    if(iter != m_HandlerMap.end())
+    int id = conn->connid();
+    std::map<int, server_tcpconn*>::iterator iter = connmap_.find(id);
+    if(iter != connmap_.end())
     {
-        m_HandlerMap.erase(iter);
+        connmap_.erase(iter);
     }
     else
     {
-        log_debug("stream_server::ProcessClose Error %d\r\n",pHandler->connid());
+        log_debug("stream_server::ProcessClose Error %d\r\n",conn->connid());
         assert(false);
     }
 }
 
-int stream_server::ProcessOnTimer(server_tcpconn *pHandler)
+int stream_server::handle_timeout(server_tcpconn* conn)
 {
     log_debug("connect 30s and no packet,disconnect \n");
-    disconnect(pHandler);
+    disconnect(conn);
 	return 0;
 }
 
-server_tcpconn * stream_server::FindHandler(int nIndex)
+server_tcpconn* stream_server::findconn(int nIndex)
 {
-	std::map<int, server_tcpconn*>::iterator iter = m_HandlerMap.find(nIndex);
+	std::map<int, server_tcpconn*>::iterator iter = connmap_.find(nIndex);
 
-	if(iter != m_HandlerMap.end())
+	if(iter != connmap_.end())
 	{
 		return iter->second;
 	}
 	return NULL;
 }
 
-int stream_server::GetUseID(void)
+int stream_server::genconnid()
 {
-    ++m_nMaxID;
-    while(m_HandlerMap.find(m_nMaxID) != m_HandlerMap.end())
+    ++maxid_;
+    while (connmap_.find(maxid_) != connmap_.end())
     {
-        ++m_nMaxID;
+        ++maxid_;
     }
-	return m_nMaxID;
+	return maxid_;
 }

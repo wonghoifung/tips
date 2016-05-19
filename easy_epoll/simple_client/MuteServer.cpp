@@ -13,8 +13,8 @@ bool MuteServer::init() {
 	return true;
 }
 
-int MuteServer::ProcessMessage(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID) {
-	printf("MuteServer::ProcessMessage\n");
+int MuteServer::handle_message(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID) {
+	printf("MuteServer::handle_message\n");
 	return 0;
 }
 

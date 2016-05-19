@@ -15,23 +15,21 @@ public:
 	virtual ~server_tcpconn(void);
 
 	const int status(void) const { return status_; }
-
 	const int connid(void) const { return connid_; }
-
 	const std::string& remoteaddr(void) const { return remoteaddr_; }		
 	
 	void* getud() { return ud_; }	
-	void setud(void* pUserData) { ud_ = pUserData; }
+	void setud(void* ud) { ud_ = ud; }
 
-	int     sendmsg(outmessage* msg);
-    virtual int on_message(inmessage *);
+	int sendmsg(outmessage* msg);
+    virtual int on_message(inmessage*);
 
 private:
-	virtual int on_rawdata(char *buf, int nLen);
+	virtual int on_rawdata(char* buf, int nLen);
 	virtual int on_close(void);
 	virtual int on_connect(void);
     virtual int	on_timeout(int Timerid);
-	void GetRemoteAddr(void);
+	void setremoteaddr(void);
 
 	int status_;
 	int connid_;

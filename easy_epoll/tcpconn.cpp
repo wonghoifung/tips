@@ -110,7 +110,7 @@ int tcpconn::sendbuf(const char *buf, int nLen)
 {
     if( nLen > (int)sendloopbuf_->FreeCount())
     {
-        log_debug("SendLoopBuff not enough\n");
+        log_debug("sendloopbuf_ not enough\n");
         full_ = true;
         return -1;
     }
