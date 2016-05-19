@@ -15,7 +15,7 @@ public:
 	bool connect(tcpconn* conn, const std::string& strAddr, int port);
 	bool connect(tcpconn* conn, const address& addr);
 protected:
-	bool Register(tcpconn* conn);
+	bool register_to_evloop(tcpconn* conn);
 	event_loop* evloop_;
 };
 

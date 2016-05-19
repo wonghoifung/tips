@@ -42,7 +42,7 @@ bool stream_client::connect(tcpconn* conn, const std::string& strAddr, int port)
             return false;
         }
         conn->setfd(sock_fd);
-		return Register(conn);			
+		return register_to_evloop(conn);			
 	}
 	socket_close(sock_fd);	
 	return false;
@@ -53,7 +53,7 @@ bool stream_client::connect(tcpconn* conn, const address& addr)
 	return connect(conn,addr.host,addr.port);
 }
 
-bool stream_client::Register(tcpconn* conn)
+bool stream_client::register_to_evloop(tcpconn* conn)
 {
 	if(evloop_ == NULL)
 		return false;
