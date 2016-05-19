@@ -222,7 +222,7 @@ tcpconn* event_loop::AllocSocketHandler(int sock_fd)
 	{
         sh->SetNeedDel(true);
 		sh->SetFd(sock_fd);		
-		sh->server(this);
+		sh->evloop(this);
 	}
 	return sh;
 }
@@ -239,7 +239,7 @@ bool event_loop::Register(tcpconn* pHandler)
 
     AddSocket(pHandler);
 
-    pHandler->server(this);
+    pHandler->evloop(this);
     pHandler->handle_OnConnected();	
 
 	return true;

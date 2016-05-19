@@ -46,14 +46,14 @@ int StreamHandler::OnParser(char *buf, int nLen)
 
 int StreamHandler::OnParserComplete(InMessage *pPacket)
 {
-	stream_server *pServer = (stream_server *)this->server();
+	stream_server *pServer = (stream_server *)this->evloop();
 	return pServer->ProcessMessage(pPacket, this, m_nHandlerID);
 }
 
 int StreamHandler::OnClose(void)
 {
 	m_nStatus = CLOSE;	
-    stream_server *pServer = (stream_server*)this->server();
+    stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
         pServer->OnDisconnect(this);
     return 0;
@@ -62,7 +62,7 @@ int StreamHandler::OnClose(void)
 int StreamHandler::OnConnected(void)
 {
 	m_nStatus = CONNECT;
-    stream_server *pServer = (stream_server*)this->server();
+    stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
         pServer->OnConnect(this);
 
@@ -73,7 +73,7 @@ int StreamHandler::OnConnected(void)
 
 int	StreamHandler::on_timeout(int Timerid)
 {
-    stream_server *pServer = (stream_server*)this->server();
+    stream_server *pServer = (stream_server*)this->evloop();
     int nRet = pServer->ProcessOnTimer(this);
     return nRet;
 }

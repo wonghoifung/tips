@@ -17,7 +17,7 @@ tcpconn::tcpconn()
 {
     m_bNeedDel = false;
 	memset(m_pRecvBuffer,0,sizeof(m_pRecvBuffer));
-	m_pServer = NULL;
+	evloop_ = NULL;
     m_TcpTimer.set_handler(this);
 
     m_pSendLoopBuffer = new loopbuf(MAX_LOOP_BUFFER_LEN);
@@ -128,7 +128,7 @@ int tcpconn::Send(const char *buf, int nLen)
     handle_output();   
 
     if(Writable())
-        m_pServer->WantWrite(this);
+        evloop_->WantWrite(this);
 
 	return 0;
 }

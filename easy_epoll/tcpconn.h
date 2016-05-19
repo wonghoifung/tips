@@ -46,8 +46,8 @@ public:
 	int Send(const char *buf, int nLen);
     virtual int OnParserComplete(InMessage *)=0;
     bool Writable();
-	event_loop * server(void){return m_pServer;}
-	virtual void server(event_loop *p){m_pServer = p;}
+	event_loop* evloop() { return evloop_; }
+	void evloop(event_loop* p) { evloop_ = p; }
 
 protected:
 	int m_sock_fd;
@@ -56,7 +56,7 @@ protected:
     bool m_bNeedDel;
     bool m_bfull;
 	timer m_TcpTimer;
-	event_loop* m_pServer;
+	event_loop* evloop_;
 	char m_pRecvBuffer[RECV_BUFFER_SIZE];	
 	loopbuf* m_pSendLoopBuffer;
 	char m_pTmpSendBuffer[SEND_BUFFER_SIZE];
