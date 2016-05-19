@@ -13,7 +13,7 @@ public:
 	virtual ~stream_client();
 	bool Open(event_loop* pServer);
 	bool Connect(tcpconn* conn, const std::string& strAddr,int port);
-	bool Connect(tcpconn* conn, const NetAddr& addr);
+	bool Connect(tcpconn* conn, const address& addr);
 protected:
 	bool Register(tcpconn* conn);
 	event_loop* evloop_;

@@ -11,10 +11,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 #include <map>
 #include <vector>
-
 #include "tcpconn.h"
 
 class event_loop
@@ -34,8 +32,8 @@ public:
 	virtual tcpconn* create_tcpconn(void) = 0;
 
 	tcpconn* prepare_tcpconn(int sock_fd);
-	bool manage(tcpconn* pHandler);
-	bool disconnect(tcpconn* pSocketHandler);
+	bool manage(tcpconn* conn);
+	bool disconnect(tcpconn* conn);
 
     void towrite(tcpconn* s);
     void toread(tcpconn* s);
@@ -46,7 +44,7 @@ protected:
     void remsock(tcpconn* s);
 
 private:
-    void handle_close(tcpconn* pHandler);
+    void handle_close(tcpconn* conn);
 
 protected:
     static bool run_;

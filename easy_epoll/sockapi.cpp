@@ -13,7 +13,7 @@ sockapi::~sockapi(void)
 {
 }
 
-int sockapi::ServerListen(int fd, int port)
+int sockapi::server_listen(int fd, int port)
 {
 	struct sockaddr_in addr;
 	memset( &addr , 0,sizeof(addr) );
@@ -36,7 +36,7 @@ int sockapi::ServerListen(int fd, int port)
 	return 0;
 }
 
-int sockapi::ServerAccept(int fd)
+int sockapi::server_accept(int fd)
 {
 	struct sockaddr_in clientaddr;
 	socklen_t clilen;
@@ -55,24 +55,22 @@ int sockapi::ServerAccept(int fd)
 	}
 }
 
-int sockapi::SocketSend(int fd, const char* buf, size_t len)
+int sockapi::socket_send(int fd, const char* buf, size_t len)
 {
-	int ret	= send( fd, buf, len, 0);
-    return ret;
+	return send( fd, buf, len, 0);
 }
 
-int sockapi::SocketRecv(int fd , void* buf , size_t len )
+int sockapi::socket_recv(int fd , void* buf , size_t len)
 {
-	int ret = recv( fd, (char*)buf, len, 0 );
-    return ret;
+	return recv( fd, (char*)buf, len, 0);
 }
 
-void sockapi::SocketClose( int fd )
+void sockapi::socket_close( int fd )
 {
 	close(fd);
 }
 
-int sockapi::ClientConnect(int fd, const char* ip , int port )
+int sockapi::client_connect(int fd, const char* ip , int port )
 {
 	struct sockaddr_in remote;
 	memset(&remote, 0,sizeof(remote));
@@ -88,7 +86,7 @@ int sockapi::ClientConnect(int fd, const char* ip , int port )
 	return 0;
 }
 
-int sockapi::SocketNoBlock(int fd)
+int sockapi::socket_nonblock(int fd)
 {
 	int opts = fcntl(fd, F_GETFL);
 	if( opts < 0 )
@@ -100,13 +98,13 @@ int sockapi::SocketNoBlock(int fd)
 	return 0;
 }
 
-int sockapi::SocketReUse(int fd)
+int sockapi::socket_reuse(int fd)
 {
 	int opt = 1;
 	return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));	
 }
 
-int sockapi::SetTcpKeepLive( int fd )
+int sockapi::socket_keepalive( int fd )
 {
     int keepAlive = 1;
     int keepIdle = 60;
@@ -124,7 +122,7 @@ int sockapi::SetTcpKeepLive( int fd )
         return -1;
 }
 
-int sockapi::SocketInit(void)
+int sockapi::socket_create(void)
 {
 	int fd = socket(AF_INET , SOCK_STREAM , 0);
 
@@ -135,7 +133,7 @@ int sockapi::SocketInit(void)
 	return fd;
 }
 
-void sockapi::SetSocketMem(int fd,int iSize)
+void sockapi::socket_buffer(int fd,int iSize)
 {
     int opt = iSize;
     socklen_t optlen = sizeof(opt);
@@ -143,7 +141,7 @@ void sockapi::SetSocketMem(int fd,int iSize)
     setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &opt, optlen);
 }
 
-int sockapi::ConnNoblock(int fd, const char* ip, int port)
+int sockapi::socket_nonblock_connect(int fd, const char* ip, int port)
 {
 	struct sockaddr_in remote;
 	memset( &remote, 0,sizeof(remote));
@@ -153,7 +151,7 @@ int sockapi::ConnNoblock(int fd, const char* ip, int port)
 	
 	if(fd > 0)
 	{
-		if(0 == sockapi::SocketNoBlock(fd))
+		if(0 == sockapi::socket_nonblock(fd))
 		{
 			if(0 > connect(fd, (struct sockaddr*)&remote, sizeof(remote)))
 			{	
@@ -178,7 +176,7 @@ int sockapi::ConnNoblock(int fd, const char* ip, int port)
 	return -1;
 }
 
-int sockapi::WaitForConnect(int seconds)
+int sockapi::socket_wait_connect(int seconds)
 {
 	if(sockapi::maxnums <= 0)
 	{
@@ -219,7 +217,7 @@ int sockapi::WaitForConnect(int seconds)
 	
 		for(iter = sockapi::sessions.begin(); iter != sockapi::sessions.end(); ++iter)
 		{
-			SocketClose(*iter);
+			socket_close(*iter);
 		}		
 		log_debug("Notice: Select Time Out!!!\n");
 		sockapi::sessions.clear();
@@ -241,7 +239,7 @@ int sockapi::WaitForConnect(int seconds)
 				log_debug("Error: Can not Connect To Server Ad Fd %d\n", *iter);
 				iter = sockapi::sessions.erase(iter);
 				--sockapi::maxnums;
-				SocketClose(*iter);
+				socket_close(*iter);
 			}
 			else
 			{

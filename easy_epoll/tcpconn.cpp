@@ -43,7 +43,8 @@ int tcpconn::handle_read()
     const int buff_size = sizeof(recvbuf_);
     while(1) 
     {
-        int nRecv = recv(sockfd_,recvbuf_,buff_size,0);
+        // int nRecv = recv(sockfd_,recvbuf_,buff_size,0);
+        int nRecv = sockapi::socket_recv(sockfd_,recvbuf_,buff_size);
         if(nRecv < 0)
         {
             if(EAGAIN == errno || EWOULDBLOCK == errno)
@@ -77,7 +78,7 @@ int tcpconn::handle_write()
     do 
     {
         nPeekLen = sendloopbuf_->Peek(tmpsendbuf_,sizeof(tmpsendbuf_));
-        nHaveSendLen = sockapi::SocketSend(getfd(),tmpsendbuf_, nPeekLen);
+        nHaveSendLen = sockapi::socket_send(getfd(),tmpsendbuf_, nPeekLen);
 
         //sendbuf data block
         if( nHaveSendLen < 0 ) 

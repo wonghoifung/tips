@@ -21,8 +21,8 @@ event_loop::event_loop():fdconns_(NULL),fdcount_(0),fdidx_(0),epevarr_(NULL)
 
 event_loop::~event_loop()
 {	
-    sockapi::SocketClose(listen_sockfd_);
-    sockapi::SocketClose(epollfd_);
+    sockapi::socket_close(listen_sockfd_);
+    sockapi::socket_close(epollfd_);
     free(epevarr_);
     free(fdconns_);  
 }
@@ -42,10 +42,10 @@ bool event_loop::init_server(int listen_port)
 	if (listen_sockfd_ == INVALID_SOCKET)
 		return false;
 
-    sockapi::SocketReUse(listen_sockfd_);
-	sockapi::SocketNoBlock(listen_sockfd_);
+    sockapi::socket_reuse(listen_sockfd_);
+	sockapi::socket_nonblock(listen_sockfd_);
 
-    int ret = sockapi::ServerListen(listen_sockfd_,listen_port);
+    int ret = sockapi::server_listen(listen_sockfd_,listen_port);
     if(ret < 0)
         return false;
 
@@ -162,22 +162,22 @@ int event_loop::handle_accept()
 	int conn_fd;
     do 
     {
-        if((conn_fd = sockapi::ServerAccept(listen_sockfd_)) == INVALID_SOCKET)
+        if((conn_fd = sockapi::server_accept(listen_sockfd_)) == INVALID_SOCKET)
         {
             break;
         }
-        sockapi::SetSocketMem(conn_fd,16*1024);
-        if(sockapi::SocketNoBlock(conn_fd) < 0)
+        sockapi::socket_buffer(conn_fd,16*1024);
+        if(sockapi::socket_nonblock(conn_fd) < 0)
         {
             log_error("SetNonblock faild \n");
-            sockapi::SocketClose(conn_fd);
+            sockapi::socket_close(conn_fd);
             assert(false);
             continue;
         }
-        if(sockapi::SetTcpKeepLive(conn_fd) < 0)
+        if(sockapi::socket_keepalive(conn_fd) < 0)
         {
-            log_error("SetTcpKeepLive faild \n");
-            sockapi::SocketClose(conn_fd);
+            log_error("socket_keepalive faild \n");
+            sockapi::socket_close(conn_fd);
             assert(false);
             continue;
         }	
@@ -186,7 +186,7 @@ int event_loop::handle_accept()
         if(sh == NULL)
         {
             log_error("sh is null \n");
-            sockapi::SocketClose(conn_fd);
+            sockapi::socket_close(conn_fd);
             assert(false);
             continue;
         }
@@ -197,17 +197,17 @@ int event_loop::handle_accept()
 	return 0;
 }
 
-void event_loop::handle_close(tcpconn* pHandler)
+void event_loop::handle_close(tcpconn* conn)
 {
-    assert(pHandler != NULL);
-    pHandler->handle_close();
+    assert(conn != NULL);
+    conn->handle_close();
 
-    remsock(pHandler);
+    remsock(conn);
 
-    if(pHandler->getneeddel())
+    if(conn->getneeddel())
     {
-        delete pHandler;
-        pHandler = NULL;
+        delete conn;
+        conn = NULL;
     }
 }
 
@@ -223,22 +223,22 @@ tcpconn* event_loop::prepare_tcpconn(int sock_fd)
 	return sh;
 }
 
-bool event_loop::disconnect(tcpconn* pSocketHandler)
+bool event_loop::disconnect(tcpconn* conn)
 {
     log_debug("disconnect \n");
-    handle_close(pSocketHandler);
+    handle_close(conn);
  	return true;
 }
 
-bool event_loop::manage(tcpconn* pHandler)
+bool event_loop::manage(tcpconn* conn)
 {
-    if(pHandler == NULL)
+    if(conn == NULL)
         return false;
 
-    addsock(pHandler);
+    addsock(conn);
 
-    pHandler->evloop(this);
-    pHandler->handle_connect();	
+    conn->evloop(this);
+    conn->handle_connect();	
 
 	return true;
 }
@@ -279,7 +279,7 @@ void event_loop::remsock(tcpconn* s)
 
     epoll_ctl(epollfd_, EPOLL_CTL_DEL, s->getfd(), &ev);
 
-    sockapi::SocketClose(s->getfd());
+    sockapi::socket_close(s->getfd());
 }
 
 void event_loop::towrite(tcpconn* s)

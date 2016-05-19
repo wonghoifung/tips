@@ -13,29 +13,27 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/select.h>
-
 #include <vector>
 #include <iostream>
 #include <string>
-
 #include "log.h"
 
 #define MAX_LISTEN_QUEUE 100000
 
-struct NetAddr
+struct address
 {
-	int     port;
-	std::string  host;
-    NetAddr(){
+	int port;
+	std::string host;
+    address() {
         host = "";
         port = 0;
     }
-	NetAddr(const NetAddr &addr){
+	address(const address& addr) {
         host = addr.host;
         port = addr.port;}
-	NetAddr & operator=(const NetAddr& addr){
+	address& operator=(const address& addr) {
 		host = addr.host;
-        port=addr.port;
+        port = addr.port;
         return *this;
 	}
 };
@@ -55,19 +53,19 @@ public:
 
 	sockapi(void);
 	~sockapi(void);
-	static int ServerListen(int fd , int port);
-	static int ServerAccept(int fd);
-	static int SocketSend(int fd, const char* buf, size_t len);
-	static int SocketRecv(int fd , void* buf , size_t len );
-	static void SocketClose(int fd);
-	static int ClientConnect(int fd, const char* ip , int port );
-	static int SocketNoBlock(int fd);
-	static int SocketReUse(int fd);
-    static int SetTcpKeepLive(int fd);
-	static int SocketInit(void);
-    static void SetSocketMem(int fd,int iSize);
-	static int ConnNoblock(int fd,const char* ip, int port);
-	static int WaitForConnect(int seconds);
+	static int server_listen(int fd , int port);
+	static int server_accept(int fd);
+	static int socket_send(int fd, const char* buf, size_t len);
+	static int socket_recv(int fd , void* buf , size_t len );
+	static void socket_close(int fd);
+	static int client_connect(int fd, const char* ip , int port );
+	static int socket_nonblock(int fd);
+	static int socket_reuse(int fd);
+    static int socket_keepalive(int fd);
+	static int socket_create(void);
+    static void socket_buffer(int fd,int iSize);
+	static int socket_nonblock_connect(int fd,const char* ip, int port);
+	static int socket_wait_connect(int seconds);
 };
 
 #endif
