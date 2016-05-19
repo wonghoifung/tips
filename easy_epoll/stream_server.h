@@ -2,7 +2,7 @@
 #define STREAM_SERVER_HEADER
 
 #include "event_loop.h"
-#include "StreamHandler.h"
+#include "server_tcpconn.h"
 #include "timer.h"
 #include <map>
 
@@ -13,16 +13,16 @@ public:
 	virtual ~stream_server(void);
 
 	virtual tcpconn* CreateHandler(void);
-    virtual void OnConnect(StreamHandler *pHandler );
-    virtual void OnDisconnect(StreamHandler *pHandler );
-	virtual int ProcessOnTimer(StreamHandler *);
-	virtual int ProcessMessage(inmessage *pPacket, StreamHandler *pHandler, unsigned long dwSessionID) = 0;
-	StreamHandler* FindHandler(int nIndex);
+    virtual void OnConnect(server_tcpconn *pHandler );
+    virtual void OnDisconnect(server_tcpconn *pHandler );
+	virtual int ProcessOnTimer(server_tcpconn *);
+	virtual int ProcessMessage(inmessage *pPacket, server_tcpconn *pHandler, unsigned long dwSessionID) = 0;
+	server_tcpconn* FindHandler(int nIndex);
 	int GetUseID(void);
 
 private:
     int m_nMaxID;
-    std::map<int, StreamHandler*> m_HandlerMap;
+    std::map<int, server_tcpconn*> m_HandlerMap;
 };
 
 #endif

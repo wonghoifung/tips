@@ -1,4 +1,4 @@
-#include "StreamHandler.h"
+#include "server_tcpconn.h"
 #include "stream_server.h"
 #include "sockapi.h"
 #include <time.h>
@@ -8,7 +8,7 @@ namespace
     static const int s_DisNoMsgTime = 30;
 }
 
-StreamHandler::StreamHandler(int nID)
+server_tcpconn::server_tcpconn(int nID)
 :tcpconn()
 ,m_nHandlerID(nID)
 {	
@@ -19,7 +19,7 @@ StreamHandler::StreamHandler(int nID)
     m_pParser = NULL;
 }
 
-StreamHandler::~StreamHandler(void)
+server_tcpconn::~server_tcpconn(void)
 {
     if (m_pParser != NULL)
     {
@@ -28,12 +28,12 @@ StreamHandler::~StreamHandler(void)
     }
 }
 
-int StreamHandler::Send(outmessage *pPacket)
+int server_tcpconn::Send(outmessage *pPacket)
 {
 	return tcpconn::Send(pPacket->cbuffer(), pPacket->size());
 }
 
-int StreamHandler::OnParser(char *buf, int nLen)
+int server_tcpconn::OnParser(char *buf, int nLen)
 {
 	m_nStatus = REQUEST;
 	m_TcpTimer.stop();	
@@ -44,13 +44,13 @@ int StreamHandler::OnParser(char *buf, int nLen)
 	return m_pParser->parse(buf, nLen);
 }
 
-int StreamHandler::OnParserComplete(inmessage *pPacket)
+int server_tcpconn::OnParserComplete(inmessage *pPacket)
 {
 	stream_server *pServer = (stream_server *)this->evloop();
 	return pServer->ProcessMessage(pPacket, this, m_nHandlerID);
 }
 
-int StreamHandler::OnClose(void)
+int server_tcpconn::OnClose(void)
 {
 	m_nStatus = CLOSE;	
     stream_server *pServer = (stream_server*)this->evloop();
@@ -59,7 +59,7 @@ int StreamHandler::OnClose(void)
     return 0;
 }
 
-int StreamHandler::OnConnected(void)
+int server_tcpconn::OnConnected(void)
 {
 	m_nStatus = CONNECT;
     stream_server *pServer = (stream_server*)this->evloop();
@@ -71,14 +71,14 @@ int StreamHandler::OnConnected(void)
     return 0;
 }
 
-int	StreamHandler::on_timeout(int Timerid)
+int	server_tcpconn::on_timeout(int Timerid)
 {
     stream_server *pServer = (stream_server*)this->evloop();
     int nRet = pServer->ProcessOnTimer(this);
     return nRet;
 }
 
-void StreamHandler::GetRemoteAddr(void)
+void server_tcpconn::GetRemoteAddr(void)
 {
 	sockaddr_in remote_addr;
 	memset(&remote_addr, 0, sizeof(remote_addr));

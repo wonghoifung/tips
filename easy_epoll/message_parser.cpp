@@ -1,6 +1,6 @@
 #include "message.h"
 #include "message_parser.h"
-#include "StreamHandler.h"
+#include "server_tcpconn.h"
 
 class concrete_message_parser :  public message_parser
 {

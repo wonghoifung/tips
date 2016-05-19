@@ -1,16 +1,16 @@
-#ifndef STREAMHANDLER_HEADER
-#define STREAMHANDLER_HEADER
+#ifndef SERVER_TCPCONN_HEADER
+#define SERVER_TCPCONN_HEADER
 
 #include "tcpconn.h"
 #include "message.h"
 #include "message_parser.h"
 #include <map>
 
-class StreamHandler:public tcpconn				
+class server_tcpconn:public tcpconn				
 {
 public:
-	explicit StreamHandler(int nID);
-	virtual ~StreamHandler(void);
+	explicit server_tcpconn(int nID);
+	virtual ~server_tcpconn(void);
 
 	int GetChunkStatus(void){return m_nStatus;}
 

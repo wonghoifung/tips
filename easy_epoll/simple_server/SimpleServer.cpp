@@ -59,7 +59,7 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::ProcessMessage(inmessage* pMessage, StreamHandler* pHandler, unsigned long dwSessionID) {
+int SimpleServer::ProcessMessage(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID) {
 	const short cmd = pMessage->command();
 
 	switch (cmd) {
@@ -82,11 +82,11 @@ int SimpleServer::ProcessMessage(inmessage* pMessage, StreamHandler* pHandler, u
 	return 0;
 }
 
-void SimpleServer::OnConnect(StreamHandler* pHandler) {
+void SimpleServer::OnConnect(server_tcpconn* pHandler) {
 
 }
 
-void SimpleServer::OnDisconnect(StreamHandler* pHandler) {
+void SimpleServer::OnDisconnect(server_tcpconn* pHandler) {
 	Peer* peer = getPeer(pHandler);
 	if (peer) {
 		removePeer(peer);
@@ -111,7 +111,7 @@ int SimpleServer::on_timeout(int timerid) {
 	return 0;
 }
 
-Peer* SimpleServer::getPeer(StreamHandler* pHandler) {
+Peer* SimpleServer::getPeer(server_tcpconn* pHandler) {
 	Peer* peer = NULL;
 	if (pHandler) {
 		void* ptr = pHandler->GetUserData();
@@ -132,7 +132,7 @@ void SimpleServer::delPeer(Peer* peer) {
 	delete peer;
 }
 
-Peer* SimpleServer::checkRelogin(const uint32_t peerid, StreamHandler* pHandler) {
+Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* pHandler) {
 	Peer* peer = ::getPeer(peerid);
 	if (peer) {
 		int reason = 0; // relogin
@@ -144,7 +144,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, StreamHandler* pHandler)
 		msg.end();
 		peer->sendMsg(&msg);
 
-		StreamHandler* oldhandler = peer->getStreamHandler();
+		server_tcpconn* oldhandler = peer->getStreamHandler();
 		if (oldhandler == pHandler) {
 			printf("tricky thing happened\n");
 			return peer;
@@ -161,7 +161,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, StreamHandler* pHandler)
 	return peer;
 }
 
-Peer* SimpleServer::newPeer(uint32_t peerid, StreamHandler* pHandler) {
+Peer* SimpleServer::newPeer(uint32_t peerid, server_tcpconn* pHandler) {
 	Peer* peer = new Peer(peerid, pHandler);
 	if (peer) {
 		// init peer...
@@ -172,7 +172,7 @@ Peer* SimpleServer::newPeer(uint32_t peerid, StreamHandler* pHandler) {
 	return peer;
 }
 
-int SimpleServer::handlePeerLogin(inmessage* message, StreamHandler* pHandler) {
+int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* pHandler) {
 	if (pHandler->GetUserData()) {
 		printf("not a new connection\n");
 		return -1;

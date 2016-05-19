@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-class StreamHandler;
+class server_tcpconn;
 class outmessage;
 
 class Peer 
@@ -12,15 +12,15 @@ class Peer
 	Peer& operator=(const Peer&);
 	
 public:
-	Peer(const uint32_t peerid, StreamHandler* handler);
+	Peer(const uint32_t peerid, server_tcpconn* handler);
 	~Peer();
 	const uint32_t getPeerId() const { return peerid_; }
-	void setStreamHandler(StreamHandler* handler) { streamhandler_ = handler; }
-	StreamHandler* getStreamHandler() { return streamhandler_; }
+	void setStreamHandler(server_tcpconn* handler) { streamhandler_ = handler; }
+	server_tcpconn* getStreamHandler() { return streamhandler_; }
 	void sendMsg(outmessage* msg);
 private:
 	const uint32_t peerid_;
-	StreamHandler* streamhandler_;
+	server_tcpconn* streamhandler_;
 };
 
 #endif

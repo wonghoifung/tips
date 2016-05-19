@@ -3,26 +3,26 @@
 
 stream_client::stream_client()
 {
-	m_pNetServer = NULL;
+	evloop_ = NULL;
 }
 
 stream_client::~stream_client()
 {
 }
 
-bool stream_client::Open(event_loop* pServer)
+bool stream_client::Open(event_loop* evloop)
 {
-	if(pServer == NULL)
+	if(evloop == NULL)
 		return false;
 
-	m_pNetServer = pServer;
+	evloop_ = evloop;
 	return true;
 }
 
-bool stream_client::Connect(tcpconn* pHandler, const std::string& strAddr, int port)
+bool stream_client::Connect(tcpconn* conn, const std::string& strAddr, int port)
 {
 	int sock_fd = sockapi::SocketInit();
-	if( pHandler == NULL || sock_fd < 0)
+	if( conn == NULL || sock_fd < 0)
 	{	
 		return false;
 	}
@@ -41,22 +41,22 @@ bool stream_client::Connect(tcpconn* pHandler, const std::string& strAddr, int p
             sockapi::SocketClose(sock_fd);
             return false;
         }
-        pHandler->SetFd(sock_fd);
-		return Register(pHandler);			
+        conn->SetFd(sock_fd);
+		return Register(conn);			
 	}
 	sockapi::SocketClose(sock_fd);	
 	return false;
 }
 
-bool stream_client::Connect(tcpconn* pHandler, const NetAddr& addr)
+bool stream_client::Connect(tcpconn* conn, const NetAddr& addr)
 {
-	return Connect(pHandler,addr.host,addr.port);
+	return Connect(conn,addr.host,addr.port);
 }
 
-bool stream_client::Register(tcpconn* pHandler)
+bool stream_client::Register(tcpconn* conn)
 {
-	if(m_pNetServer == NULL)
+	if(evloop_ == NULL)
 		return false;
-	return m_pNetServer->Register(pHandler);
+	return evloop_->Register(conn);
 }
 

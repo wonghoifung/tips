@@ -15,18 +15,18 @@ stream_server::~stream_server(void)
 
 tcpconn * stream_server::CreateHandler(void)
 {
-	StreamHandler *pNewHandler = NULL;
+	server_tcpconn *pNewHandler = NULL;
     int nHandlerID = GetUseID();
-	pNewHandler = new StreamHandler(nHandlerID);
+	pNewHandler = new server_tcpconn(nHandlerID);
 	return pNewHandler;
 }
 
-void  stream_server::OnConnect(StreamHandler *pHandler )
+void  stream_server::OnConnect(server_tcpconn *pHandler )
 {
     int id = pHandler->GetHandlerID();
     if(m_HandlerMap.find(id) == m_HandlerMap.end())
     {
-        m_HandlerMap.insert(std::map<int, StreamHandler*>::value_type(id,pHandler));
+        m_HandlerMap.insert(std::map<int, server_tcpconn*>::value_type(id,pHandler));
     }
     else
     {
@@ -35,10 +35,10 @@ void  stream_server::OnConnect(StreamHandler *pHandler )
     }
 }
 
-void  stream_server::OnDisconnect(StreamHandler *pHandler )
+void  stream_server::OnDisconnect(server_tcpconn *pHandler )
 {
     int id = pHandler->GetHandlerID();
-    std::map<int, StreamHandler*>::iterator iter = m_HandlerMap.find(id);
+    std::map<int, server_tcpconn*>::iterator iter = m_HandlerMap.find(id);
     if(iter != m_HandlerMap.end())
     {
         m_HandlerMap.erase(iter);
@@ -50,16 +50,16 @@ void  stream_server::OnDisconnect(StreamHandler *pHandler )
     }
 }
 
-int stream_server::ProcessOnTimer(StreamHandler *pHandler)
+int stream_server::ProcessOnTimer(server_tcpconn *pHandler)
 {
     log_debug("connect 30s and no packet,disconnect \n");
     DisConnect(pHandler);
 	return 0;
 }
 
-StreamHandler * stream_server::FindHandler(int nIndex)
+server_tcpconn * stream_server::FindHandler(int nIndex)
 {
-	std::map<int, StreamHandler*>::iterator iter = m_HandlerMap.find(nIndex);
+	std::map<int, server_tcpconn*>::iterator iter = m_HandlerMap.find(nIndex);
 
 	if(iter != m_HandlerMap.end())
 	{
