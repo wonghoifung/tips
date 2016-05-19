@@ -11,9 +11,9 @@ class stream_client
 public:
 	stream_client();
 	virtual ~stream_client();
-	bool Open(event_loop* pServer);
-	bool Connect(tcpconn* conn, const std::string& strAddr,int port);
-	bool Connect(tcpconn* conn, const address& addr);
+	bool set_evloop(event_loop* pServer);
+	bool connect(tcpconn* conn, const std::string& strAddr, int port);
+	bool connect(tcpconn* conn, const address& addr);
 protected:
 	bool Register(tcpconn* conn);
 	event_loop* evloop_;

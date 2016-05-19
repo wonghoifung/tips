@@ -11,7 +11,6 @@ class stream_server:public event_loop
 public:
 	stream_server();
 	virtual ~stream_server();
-
 	virtual tcpconn* create_tcpconn();
     virtual void handle_connect(server_tcpconn* conn);
     virtual void handle_disconnect(server_tcpconn* conn);

@@ -44,8 +44,8 @@ SimpleClient::~SimpleClient() {
 }
 
 bool SimpleClient::connect(const std::string& host, const std::string& port) {
-	connector_.Open(ss_);
-	bool ret = connector_.Connect(this, host, atoi(port.c_str()));
+	connector_.set_evloop(ss_);
+	bool ret = connector_.connect(this, host, atoi(port.c_str()));
 	if (!ret) {
 		printf("connect error\n");
 	}

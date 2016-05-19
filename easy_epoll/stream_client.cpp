@@ -10,7 +10,7 @@ stream_client::~stream_client()
 {
 }
 
-bool stream_client::Open(event_loop* evloop)
+bool stream_client::set_evloop(event_loop* evloop)
 {
 	if(evloop == NULL)
 		return false;
@@ -19,7 +19,7 @@ bool stream_client::Open(event_loop* evloop)
 	return true;
 }
 
-bool stream_client::Connect(tcpconn* conn, const std::string& strAddr, int port)
+bool stream_client::connect(tcpconn* conn, const std::string& strAddr, int port)
 {
 	int sock_fd = socket_create();
 	if( conn == NULL || sock_fd < 0)
@@ -48,9 +48,9 @@ bool stream_client::Connect(tcpconn* conn, const std::string& strAddr, int port)
 	return false;
 }
 
-bool stream_client::Connect(tcpconn* conn, const address& addr)
+bool stream_client::connect(tcpconn* conn, const address& addr)
 {
-	return Connect(conn,addr.host,addr.port);
+	return connect(conn,addr.host,addr.port);
 }
 
 bool stream_client::Register(tcpconn* conn)
