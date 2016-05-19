@@ -21,7 +21,7 @@ tcpconn * stream_server::create_tcpconn()
 	return conn;
 }
 
-void  stream_server::OnConnect(server_tcpconn* conn)
+void  stream_server::handle_connect(server_tcpconn* conn)
 {
     int id = conn->connid();
     if(connmap_.find(id) == connmap_.end())
@@ -35,7 +35,7 @@ void  stream_server::OnConnect(server_tcpconn* conn)
     }
 }
 
-void  stream_server::OnDisconnect(server_tcpconn* conn)
+void  stream_server::handle_disconnect(server_tcpconn* conn)
 {
     int id = conn->connid();
     std::map<int, server_tcpconn*>::iterator iter = connmap_.find(id);

@@ -13,8 +13,8 @@ public:
 	virtual ~stream_server();
 
 	virtual tcpconn* create_tcpconn();
-    virtual void OnConnect(server_tcpconn* conn);
-    virtual void OnDisconnect(server_tcpconn* conn);
+    virtual void handle_connect(server_tcpconn* conn);
+    virtual void handle_disconnect(server_tcpconn* conn);
 	virtual int handle_timeout(server_tcpconn*);
 	virtual int handle_message(inmessage* msg, server_tcpconn* conn, unsigned long ssid) = 0;
 	server_tcpconn* findconn(int nIndex);

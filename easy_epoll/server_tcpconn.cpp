@@ -55,7 +55,7 @@ int server_tcpconn::on_close(void)
 	status_ = CLOSE;	
     stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
-        pServer->OnDisconnect(this);
+        pServer->handle_disconnect(this);
     return 0;
 }
 
@@ -64,7 +64,7 @@ int server_tcpconn::on_connect(void)
 	status_ = CONNECT;
     stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
-        pServer->OnConnect(this);
+        pServer->handle_connect(this);
 
 	tcptimer_.start(s_DisNoMsgTime);
 	setremoteaddr();
