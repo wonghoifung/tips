@@ -1,10 +1,10 @@
-#ifndef LOOPBUFFER_HEADER
-#define LOOPBUFFER_HEADER
+#ifndef LOOPBUF_HEADER
+#define LOOPBUF_HEADER
 
 #include <stdlib.h>
 #include <string.h>
 
-class LoopBuffer  
+class loopbuf  
 {
 public:
 	char* buf_;
@@ -14,9 +14,9 @@ public:
 	char* tptr_;
 	unsigned long count_;
 
-	LoopBuffer();
-	LoopBuffer(unsigned long bufsize);
-	virtual ~LoopBuffer();
+	loopbuf();
+	loopbuf(unsigned long bufsize);
+	virtual ~loopbuf();
 	void InitMember();
 	void Init(unsigned long bufsize);
 	void Reset();

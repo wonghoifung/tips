@@ -20,7 +20,7 @@ tcpconn::tcpconn()
 	m_pServer = NULL;
     m_TcpTimer.set_handler(this);
 
-    m_pSendLoopBuffer = new LoopBuffer(MAX_LOOP_BUFFER_LEN);
+    m_pSendLoopBuffer = new loopbuf(MAX_LOOP_BUFFER_LEN);
 }
 
 tcpconn::~tcpconn()

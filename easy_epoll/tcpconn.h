@@ -4,7 +4,7 @@
 #define RECV_BUFFER 4096
 
 #include "timer.h"
-#include "LoopBuffer.h"
+#include "loopbuf.h"
 #include <stdint.h>
 #include <map>
 
@@ -58,7 +58,7 @@ protected:
 	timer m_TcpTimer;
 	event_loop* m_pServer;
 	char m_pRecvBuffer[RECV_BUFFER_SIZE];	
-	LoopBuffer* m_pSendLoopBuffer;
+	loopbuf* m_pSendLoopBuffer;
 	char m_pTmpSendBuffer[SEND_BUFFER_SIZE];
 };
 
