@@ -10,21 +10,21 @@ namespace
 
 server_tcpconn::server_tcpconn(int nID)
 :tcpconn()
-,m_nHandlerID(nID)
+,connid_(nID)
 {	
-	m_nStatus = -1;
-	m_addrremote = "";
-	m_nPort = 0;
-	m_pUserData = NULL;
-    m_pParser = NULL;
+	status_ = -1;
+	remoteaddr_ = "";
+	port_ = 0;
+	ud_ = NULL;
+    parser_ = NULL;
 }
 
 server_tcpconn::~server_tcpconn(void)
 {
-    if (m_pParser != NULL)
+    if (parser_ != NULL)
     {
-        delete m_pParser;
-        m_pParser = NULL;
+        delete parser_;
+        parser_ = NULL;
     }
 }
 
@@ -35,24 +35,24 @@ int server_tcpconn::sendmsg(outmessage *pPacket)
 
 int server_tcpconn::on_rawdata(char *buf, int nLen)
 {
-	m_nStatus = REQUEST;
+	status_ = REQUEST;
 	tcptimer_.stop();	
 
-    if(m_pParser == NULL)
-        m_pParser = message_parser::create(this);
+    if(parser_ == NULL)
+        parser_ = message_parser::create(this);
 
-	return m_pParser->parse(buf, nLen);
+	return parser_->parse(buf, nLen);
 }
 
 int server_tcpconn::on_message(inmessage *pPacket)
 {
 	stream_server *pServer = (stream_server *)this->evloop();
-	return pServer->ProcessMessage(pPacket, this, m_nHandlerID);
+	return pServer->ProcessMessage(pPacket, this, connid_);
 }
 
 int server_tcpconn::on_close(void)
 {
-	m_nStatus = CLOSE;	
+	status_ = CLOSE;	
     stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
         pServer->OnDisconnect(this);
@@ -61,7 +61,7 @@ int server_tcpconn::on_close(void)
 
 int server_tcpconn::on_connect(void)
 {
-	m_nStatus = CONNECT;
+	status_ = CONNECT;
     stream_server *pServer = (stream_server*)this->evloop();
     if(pServer != NULL)
         pServer->OnConnect(this);
@@ -85,7 +85,7 @@ void server_tcpconn::GetRemoteAddr(void)
 	int len = sizeof(remote_addr);
 	if(getpeername(getfd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
 	{
-		m_addrremote = inet_ntoa(remote_addr.sin_addr);
-		m_nPort = ntohs(remote_addr.sin_port);
+		remoteaddr_ = inet_ntoa(remote_addr.sin_addr);
+		port_ = ntohs(remote_addr.sin_port);
 	}
 }

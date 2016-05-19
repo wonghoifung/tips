@@ -21,30 +21,30 @@ bool stream_client::Open(event_loop* evloop)
 
 bool stream_client::Connect(tcpconn* conn, const std::string& strAddr, int port)
 {
-	int sock_fd = sockapi::socket_create();
+	int sock_fd = socket_create();
 	if( conn == NULL || sock_fd < 0)
 	{	
 		return false;
 	}
-	if(sockapi::client_connect(sock_fd, strAddr.c_str(), port) == 0)
+	if(socket_block_connect(sock_fd, strAddr.c_str(), port) == 0)
 	{	
-        sockapi::socket_buffer(sock_fd,16*1024);
-        if(sockapi::socket_nonblock(sock_fd) < 0)
+        socket_buffer(sock_fd,16*1024);
+        if(socket_nonblock(sock_fd) < 0)
         {
             log_error("SetNonblock faild \n");
-            sockapi::socket_close(sock_fd);
+            socket_close(sock_fd);
             return false;
         }
-        if(sockapi::socket_keepalive(sock_fd) < 0)
+        if(socket_keepalive(sock_fd) < 0)
         {
             log_error("socket_keepalive faild \n");
-            sockapi::socket_close(sock_fd);
+            socket_close(sock_fd);
             return false;
         }
         conn->setfd(sock_fd);
 		return Register(conn);			
 	}
-	sockapi::socket_close(sock_fd);	
+	socket_close(sock_fd);	
 	return false;
 }
 

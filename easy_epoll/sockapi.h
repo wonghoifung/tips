@@ -45,27 +45,18 @@ enum STATUS
     CLOSE
 };
 
-class sockapi
-{
-public:
-	static std::vector<int> sessions;
-	static int maxnums;
-
-	sockapi(void);
-	~sockapi(void);
-	static int server_listen(int fd , int port);
-	static int server_accept(int fd);
-	static int socket_send(int fd, const char* buf, size_t len);
-	static int socket_recv(int fd , void* buf , size_t len );
-	static void socket_close(int fd);
-	static int client_connect(int fd, const char* ip , int port );
-	static int socket_nonblock(int fd);
-	static int socket_reuse(int fd);
-    static int socket_keepalive(int fd);
-	static int socket_create(void);
-    static void socket_buffer(int fd,int iSize);
-	static int socket_nonblock_connect(int fd,const char* ip, int port);
-	static int socket_wait_connect(int seconds);
-};
+int socket_listen(int fd , int port);
+int socket_accept(int fd);
+int socket_send(int fd, const char* buf, size_t len);
+int socket_recv(int fd , void* buf , size_t len );
+void socket_close(int fd);
+int socket_block_connect(int fd, const char* ip , int port );
+int socket_nonblock(int fd);
+int socket_reuse(int fd);
+int socket_keepalive(int fd);
+int socket_create(void);
+void socket_buffer(int fd,int iSize);
+int socket_nonblock_connect(int fd,const char* ip, int port);
+int socket_wait_connect(int seconds);
 
 #endif

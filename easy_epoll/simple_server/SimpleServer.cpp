@@ -114,7 +114,7 @@ int SimpleServer::on_timeout(int timerid) {
 Peer* SimpleServer::getPeer(server_tcpconn* pHandler) {
 	Peer* peer = NULL;
 	if (pHandler) {
-		void* ptr = pHandler->GetUserData();
+		void* ptr = pHandler->getud();
 		if (ptr) peer = reinterpret_cast<Peer*>(ptr);
 	}
 	return peer;
@@ -128,7 +128,7 @@ int SimpleServer::removePeer(Peer* peer) {
 
 void SimpleServer::delPeer(Peer* peer) {
 	::delPeer(peer->getPeerId());
-	peer->getStreamHandler()->SetUserData(NULL);
+	peer->getStreamHandler()->setud(NULL);
 	delete peer;
 }
 
@@ -167,13 +167,13 @@ Peer* SimpleServer::newPeer(uint32_t peerid, server_tcpconn* pHandler) {
 		// init peer...
 
 		::addPeer(peer);
-		pHandler->SetUserData(peer);
+		pHandler->setud(peer);
 	}
 	return peer;
 }
 
 int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* pHandler) {
-	if (pHandler->GetUserData()) {
+	if (pHandler->getud()) {
 		printf("not a new connection\n");
 		return -1;
 	}

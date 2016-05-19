@@ -14,14 +14,14 @@ public:
 	explicit server_tcpconn(int nID);
 	virtual ~server_tcpconn(void);
 
-	int GetChunkStatus(void){return m_nStatus;}
+	const int status(void) const { return status_; }
 
-	int GetHandlerID(void){return m_nHandlerID;}
+	const int connid(void) const { return connid_; }
 
-	std::string GetAddr(void){return m_addrremote;}		
+	const std::string& remoteaddr(void) const { return remoteaddr_; }		
 	
-	void *  GetUserData(){return m_pUserData;}	
-	void    SetUserData(void *pUserData){	m_pUserData = pUserData;}
+	void* getud() { return ud_; }	
+	void setud(void* pUserData) { ud_ = pUserData; }
 
 	int     sendmsg(outmessage* msg);
     virtual int on_message(inmessage *);
@@ -33,12 +33,12 @@ private:
     virtual int	on_timeout(int Timerid);
 	void GetRemoteAddr(void);
 
-	int    m_nStatus;
-	int    m_nHandlerID;
-	std::string m_addrremote;
-	int    m_nPort;
-	void * m_pUserData;
-    message_parser* m_pParser;
+	int status_;
+	int connid_;
+	std::string remoteaddr_;
+	int port_;
+	void* ud_;
+    message_parser* parser_;
 };
 
 #endif

@@ -23,21 +23,21 @@ tcpconn * stream_server::create_tcpconn(void)
 
 void  stream_server::OnConnect(server_tcpconn *pHandler )
 {
-    int id = pHandler->GetHandlerID();
+    int id = pHandler->connid();
     if(m_HandlerMap.find(id) == m_HandlerMap.end())
     {
         m_HandlerMap.insert(std::map<int, server_tcpconn*>::value_type(id,pHandler));
     }
     else
     {
-        log_debug("stream_server::ProcessConnected Error %d\r\n", pHandler->GetHandlerID());
+        log_debug("stream_server::ProcessConnected Error %d\r\n", pHandler->connid());
         assert(false);
     }
 }
 
 void  stream_server::OnDisconnect(server_tcpconn *pHandler )
 {
-    int id = pHandler->GetHandlerID();
+    int id = pHandler->connid();
     std::map<int, server_tcpconn*>::iterator iter = m_HandlerMap.find(id);
     if(iter != m_HandlerMap.end())
     {
@@ -45,7 +45,7 @@ void  stream_server::OnDisconnect(server_tcpconn *pHandler )
     }
     else
     {
-        log_debug("stream_server::ProcessClose Error %d\r\n",pHandler->GetHandlerID());
+        log_debug("stream_server::ProcessClose Error %d\r\n",pHandler->connid());
         assert(false);
     }
 }
