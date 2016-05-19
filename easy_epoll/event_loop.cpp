@@ -223,7 +223,7 @@ tcpconn* event_loop::prepare_tcpconn(int sock_fd)
 	return sh;
 }
 
-bool event_loop::DisConnect(tcpconn* pSocketHandler)
+bool event_loop::disconnect(tcpconn* pSocketHandler)
 {
     log_debug("disconnect \n");
     handle_close(pSocketHandler);

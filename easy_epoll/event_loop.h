@@ -35,7 +35,7 @@ public:
 
 	tcpconn* prepare_tcpconn(int sock_fd);
 	bool manage(tcpconn* pHandler);
-	bool DisConnect(tcpconn* pSocketHandler);
+	bool disconnect(tcpconn* pSocketHandler);
 
     void WantWrite(tcpconn* s);
     void WantRead(tcpconn* s);

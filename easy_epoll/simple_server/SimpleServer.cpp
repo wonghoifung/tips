@@ -153,7 +153,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* pHandler
 		removePeer(peer);
 
 		if (oldhandler) {
-			DisConnect(oldhandler);
+			disconnect(oldhandler);
 		}
 
 		return NULL;

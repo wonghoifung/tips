@@ -53,7 +53,7 @@ void  stream_server::OnDisconnect(server_tcpconn *pHandler )
 int stream_server::ProcessOnTimer(server_tcpconn *pHandler)
 {
     log_debug("connect 30s and no packet,disconnect \n");
-    DisConnect(pHandler);
+    disconnect(pHandler);
 	return 0;
 }
 
