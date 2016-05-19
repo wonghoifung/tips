@@ -28,7 +28,7 @@ StreamHandler::~StreamHandler(void)
     }
 }
 
-int StreamHandler::Send(OutMessage *pPacket)
+int StreamHandler::Send(outmessage *pPacket)
 {
 	return tcpconn::Send(pPacket->cbuffer(), pPacket->size());
 }

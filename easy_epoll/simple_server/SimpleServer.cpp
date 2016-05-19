@@ -33,7 +33,7 @@ static bool delPeer(uint32_t peerid) {
 	}
 	return false;
 }
-static void broadcast(OutMessage* msg) {
+static void broadcast(outmessage* msg) {
 	pmap::iterator it = peers.begin();
 	for (; it != peers.end(); ++it) {
 		it->second->sendMsg(msg);
@@ -137,7 +137,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, StreamHandler* pHandler)
 	if (peer) {
 		int reason = 0; // relogin
 
-		OutMessage msg;
+		outmessage msg;
 		msg.begin(cmd_kick);
 		msg.write_int(peerid);
 		msg.write_int(reason);
@@ -182,7 +182,7 @@ int SimpleServer::handlePeerLogin(inmessage* message, StreamHandler* pHandler) {
 	if (peer == NULL) {
 		peer = newPeer(peerid, pHandler);
 		if (peer == NULL) {
-			OutMessage msg;
+			outmessage msg;
 			msg.begin(cmd_peer_login);
 			msg.write_int(-1); // failure
 			msg.end();
@@ -193,7 +193,7 @@ int SimpleServer::handlePeerLogin(inmessage* message, StreamHandler* pHandler) {
 		return -1;
 	}
 
-	OutMessage msg;
+	outmessage msg;
 	msg.begin(cmd_peer_login);
 	msg.write_int(0); // success
 	msg.end();
@@ -205,7 +205,7 @@ int SimpleServer::handleReqBroadcast(inmessage* message) {
 	if (sys_key == message->read_cstring()) {
 		const int type = message->read_int();
 		const std::string content = message->read_cstring();
-		OutMessage msg;
+		outmessage msg;
 		msg.begin(cmd_broadcast);
 		msg.write_int(type);
 		msg.write_string(content);
@@ -218,7 +218,7 @@ int SimpleServer::handleReqBroadcast(inmessage* message) {
 int SimpleServer::handleEcho(Peer* peer, inmessage* message) {
 	const std::string content = message->read_cstring();
 	printf("receive: %s\n", content.c_str());
-	OutMessage msg;
+	outmessage msg;
 	msg.begin(cmd_echo);
 	msg.write_string(content);
 	msg.end();

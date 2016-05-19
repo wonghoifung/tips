@@ -10,7 +10,7 @@ Peer::~Peer() {
 
 }
 
-void Peer::sendMsg(OutMessage* msg) {
+void Peer::sendMsg(outmessage* msg) {
 	if (streamhandler_) {
 		streamhandler_->Send(msg);
 	}

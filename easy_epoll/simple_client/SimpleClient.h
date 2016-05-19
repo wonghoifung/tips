@@ -15,7 +15,7 @@ public:
 	SimpleClient(stream_server* ss);
 	~SimpleClient();
 	bool connect(const std::string& host, const std::string& port);
- 	int send(OutMessage* msg);
+ 	int send(outmessage* msg);
 
 	virtual int OnParserComplete(inmessage *);
 	virtual int OnParser(char *buf, int nLen);

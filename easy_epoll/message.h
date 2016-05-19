@@ -280,7 +280,7 @@ public:
     }
 };
 
-class OutMessage : public message
+class outmessage : public message
 {
 public:
     bool write_int(int val) {

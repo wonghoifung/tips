@@ -13,7 +13,7 @@ static bool timerInit = false;
 class tmp: public timer_handler {
 public:
 	int on_timeout(int tid) {
-		OutMessage msg;
+		outmessage msg;
 		msg.begin(cmd_echo);
 		msg.write_cstring("hello world");
 		msg.end();
@@ -52,7 +52,7 @@ bool SimpleClient::connect(const std::string& host, const std::string& port) {
 	return ret;
 }
 
-int SimpleClient::send(OutMessage* msg) {
+int SimpleClient::send(outmessage* msg) {
 	return tcpconn::Send(msg->cbuffer(), msg->size());
 }
 
@@ -94,7 +94,7 @@ int SimpleClient::OnConnected(void) {
         int remoteport = ntohs(remote_addr.sin_port);
         printf("%s:%d come in\n", remoteip.c_str(), remoteport);
 
-        OutMessage msg;
+        outmessage msg;
 		msg.begin(cmd_peer_login);
 		msg.write_int((int)getpid());
 		msg.end();

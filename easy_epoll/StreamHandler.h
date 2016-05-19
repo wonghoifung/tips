@@ -21,7 +21,7 @@ public:
 	void *  GetUserData(){return m_pUserData;}	
 	void    SetUserData(void *pUserData){	m_pUserData = pUserData;}
 
-	int     Send(OutMessage *pPacket);
+	int     Send(outmessage *pPacket);
     virtual int OnParserComplete(inmessage *);
 
 private:

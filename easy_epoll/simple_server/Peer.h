@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 class StreamHandler;
-class OutMessage;
+class outmessage;
 
 class Peer 
 {
@@ -17,7 +17,7 @@ public:
 	const uint32_t getPeerId() const { return peerid_; }
 	void setStreamHandler(StreamHandler* handler) { streamhandler_ = handler; }
 	StreamHandler* getStreamHandler() { return streamhandler_; }
-	void sendMsg(OutMessage* msg);
+	void sendMsg(outmessage* msg);
 private:
 	const uint32_t peerid_;
 	StreamHandler* streamhandler_;
