@@ -1,6 +1,6 @@
 #include "tcpconn.h"
 #include "log.h"
-#include "SocketApi.h"
+#include "sockapi.h"
 #include "event_loop.h"
 #include <stdio.h>
 #include <string.h>
@@ -87,7 +87,7 @@ int tcpconn::handle_output()
     do 
     {
         nPeekLen = m_pSendLoopBuffer->Peek(m_pTmpSendBuffer,sizeof(m_pTmpSendBuffer));
-        nHaveSendLen = SocketApi::SocketSend(GetFd(),m_pTmpSendBuffer, nPeekLen);
+        nHaveSendLen = sockapi::SocketSend(GetFd(),m_pTmpSendBuffer, nPeekLen);
 
         //Send data block
         if( nHaveSendLen < 0 ) 

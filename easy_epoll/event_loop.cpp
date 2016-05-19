@@ -1,4 +1,4 @@
-#include "SocketApi.h"
+#include "sockapi.h"
 #include "event_loop.h"
 #include "timer.h"
 #include "log.h"
@@ -23,9 +23,9 @@ event_loop::event_loop()
 
 event_loop::~event_loop()
 {	
-    SocketApi::SocketClose(m_listen_fd);
+    sockapi::SocketClose(m_listen_fd);
 
-    SocketApi::SocketClose(m_epoll_fd);
+    sockapi::SocketClose(m_epoll_fd);
     free(m_epev_arr);
 
     free(fds);  
@@ -46,10 +46,10 @@ bool event_loop::InitSocket(int listen_port)
 	if (m_listen_fd == INVALID_SOCKET)
 		return false;
 
-    SocketApi::SocketReUse(m_listen_fd);
-	SocketApi::SocketNoBlock(m_listen_fd);
+    sockapi::SocketReUse(m_listen_fd);
+	sockapi::SocketNoBlock(m_listen_fd);
 
-    int ret = SocketApi::ServerListen(m_listen_fd,listen_port);
+    int ret = sockapi::ServerListen(m_listen_fd,listen_port);
     if(ret < 0)
         return false;
 
@@ -166,22 +166,22 @@ int event_loop::handle_accept()
 	int conn_fd;
     do 
     {
-        if((conn_fd = SocketApi::ServerAccept(m_listen_fd)) == INVALID_SOCKET)
+        if((conn_fd = sockapi::ServerAccept(m_listen_fd)) == INVALID_SOCKET)
         {
             break;
         }
-        SocketApi::SetSocketMem(conn_fd,16*1024);
-        if(SocketApi::SocketNoBlock(conn_fd) < 0)
+        sockapi::SetSocketMem(conn_fd,16*1024);
+        if(sockapi::SocketNoBlock(conn_fd) < 0)
         {
             log_error("SetNonblock faild \n");
-            SocketApi::SocketClose(conn_fd);
+            sockapi::SocketClose(conn_fd);
             assert(false);
             continue;
         }
-        if(SocketApi::SetTcpKeepLive(conn_fd) < 0)
+        if(sockapi::SetTcpKeepLive(conn_fd) < 0)
         {
             log_error("SetTcpKeepLive faild \n");
-            SocketApi::SocketClose(conn_fd);
+            sockapi::SocketClose(conn_fd);
             assert(false);
             continue;
         }	
@@ -190,7 +190,7 @@ int event_loop::handle_accept()
         if(sh == NULL)
         {
             log_error("sh is null \n");
-            SocketApi::SocketClose(conn_fd);
+            sockapi::SocketClose(conn_fd);
             assert(false);
             continue;
         }
@@ -281,7 +281,7 @@ void event_loop::RemoveSocket(tcpconn* s)
 
     epoll_ctl(m_epoll_fd, EPOLL_CTL_DEL, s->GetFd(), &ev);
 
-    SocketApi::SocketClose(s->GetFd());
+    sockapi::SocketClose(s->GetFd());
 }
 
 void event_loop::WantWrite(tcpconn* s)

@@ -3,7 +3,7 @@
 
 #include "tcpconn.h"
 #include "event_loop.h"
-#include "SocketApi.h"
+#include "sockapi.h"
 #include <string>
 
 class stream_client 

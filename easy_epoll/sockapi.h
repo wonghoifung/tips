@@ -1,5 +1,5 @@
-#ifndef SOCKETAPI_HEADER
-#define SOCKETAPI_HEADER
+#ifndef SOCKAPI_HEADER
+#define SOCKAPI_HEADER
 
 #include <unistd.h>
 #include <stdio.h>
@@ -47,14 +47,14 @@ enum STATUS
     CLOSE
 };
 
-class SocketApi
+class sockapi
 {
 public:
 	static std::vector<int> sessions;
 	static int maxnums;
 
-	SocketApi(void);
-	~SocketApi(void);
+	sockapi(void);
+	~sockapi(void);
 	static int ServerListen(int fd , int port);
 	static int ServerAccept(int fd);
 	static int SocketSend(int fd, const char* buf, size_t len);

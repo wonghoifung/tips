@@ -1,19 +1,19 @@
-#include "SocketApi.h"
+#include "sockapi.h"
 #include <netinet/tcp.h>
 #include <netinet/ip.h>
 
-std::vector<int> SocketApi::sessions;
-int SocketApi::maxnums = 0;
+std::vector<int> sockapi::sessions;
+int sockapi::maxnums = 0;
 
-SocketApi::SocketApi(void)
+sockapi::sockapi(void)
 {
 }
 
-SocketApi::~SocketApi(void)
+sockapi::~sockapi(void)
 {
 }
 
-int SocketApi::ServerListen(int fd, int port)
+int sockapi::ServerListen(int fd, int port)
 {
 	struct sockaddr_in addr;
 	memset( &addr , 0,sizeof(addr) );
@@ -36,7 +36,7 @@ int SocketApi::ServerListen(int fd, int port)
 	return 0;
 }
 
-int SocketApi::ServerAccept(int fd)
+int sockapi::ServerAccept(int fd)
 {
 	struct sockaddr_in clientaddr;
 	socklen_t clilen;
@@ -55,24 +55,24 @@ int SocketApi::ServerAccept(int fd)
 	}
 }
 
-int SocketApi::SocketSend(int fd, const char* buf, size_t len)
+int sockapi::SocketSend(int fd, const char* buf, size_t len)
 {
 	int ret	= send( fd, buf, len, 0);
     return ret;
 }
 
-int SocketApi::SocketRecv(int fd , void* buf , size_t len )
+int sockapi::SocketRecv(int fd , void* buf , size_t len )
 {
 	int ret = recv( fd, (char*)buf, len, 0 );
     return ret;
 }
 
-void SocketApi::SocketClose( int fd )
+void sockapi::SocketClose( int fd )
 {
 	close(fd);
 }
 
-int SocketApi::ClientConnect(int fd, const char* ip , int port )
+int sockapi::ClientConnect(int fd, const char* ip , int port )
 {
 	struct sockaddr_in remote;
 	memset(&remote, 0,sizeof(remote));
@@ -88,7 +88,7 @@ int SocketApi::ClientConnect(int fd, const char* ip , int port )
 	return 0;
 }
 
-int SocketApi::SocketNoBlock(int fd)
+int sockapi::SocketNoBlock(int fd)
 {
 	int opts = fcntl(fd, F_GETFL);
 	if( opts < 0 )
@@ -100,13 +100,13 @@ int SocketApi::SocketNoBlock(int fd)
 	return 0;
 }
 
-int SocketApi::SocketReUse(int fd)
+int sockapi::SocketReUse(int fd)
 {
 	int opt = 1;
 	return setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));	
 }
 
-int SocketApi::SetTcpKeepLive( int fd )
+int sockapi::SetTcpKeepLive( int fd )
 {
     int keepAlive = 1;
     int keepIdle = 60;
@@ -124,7 +124,7 @@ int SocketApi::SetTcpKeepLive( int fd )
         return -1;
 }
 
-int SocketApi::SocketInit(void)
+int sockapi::SocketInit(void)
 {
 	int fd = socket(AF_INET , SOCK_STREAM , 0);
 
@@ -135,7 +135,7 @@ int SocketApi::SocketInit(void)
 	return fd;
 }
 
-void SocketApi::SetSocketMem(int fd,int iSize)
+void sockapi::SetSocketMem(int fd,int iSize)
 {
     int opt = iSize;
     socklen_t optlen = sizeof(opt);
@@ -143,7 +143,7 @@ void SocketApi::SetSocketMem(int fd,int iSize)
     setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &opt, optlen);
 }
 
-int SocketApi::ConnNoblock(int fd, const char* ip, int port)
+int sockapi::ConnNoblock(int fd, const char* ip, int port)
 {
 	struct sockaddr_in remote;
 	memset( &remote, 0,sizeof(remote));
@@ -153,7 +153,7 @@ int SocketApi::ConnNoblock(int fd, const char* ip, int port)
 	
 	if(fd > 0)
 	{
-		if(0 == SocketApi::SocketNoBlock(fd))
+		if(0 == sockapi::SocketNoBlock(fd))
 		{
 			if(0 > connect(fd, (struct sockaddr*)&remote, sizeof(remote)))
 			{	
@@ -162,8 +162,8 @@ int SocketApi::ConnNoblock(int fd, const char* ip, int port)
 					return -1;
 				}  
 			}
-			SocketApi::sessions.push_back(fd);
-			SocketApi::maxnums++;
+			sockapi::sessions.push_back(fd);
+			sockapi::maxnums++;
 			return 0;
 		}
 		else
@@ -178,12 +178,12 @@ int SocketApi::ConnNoblock(int fd, const char* ip, int port)
 	return -1;
 }
 
-int SocketApi::WaitForConnect(int seconds)
+int sockapi::WaitForConnect(int seconds)
 {
-	if(SocketApi::maxnums <= 0)
+	if(sockapi::maxnums <= 0)
 	{
 		log_debug("Notice: Finish\n");
-		SocketApi::maxnums = 0;
+		sockapi::maxnums = 0;
 		return 0;
 	}
 	
@@ -198,8 +198,8 @@ int SocketApi::WaitForConnect(int seconds)
 	FD_ZERO(&readset);
 	FD_ZERO(&writeset);
 	
-	std::vector<int>::iterator iter = SocketApi::sessions.begin();
-	for(; iter != SocketApi::sessions.end(); ++iter)
+	std::vector<int>::iterator iter = sockapi::sessions.begin();
+	for(; iter != sockapi::sessions.end(); ++iter)
 	{
 		FD_SET(*iter, &readset);
 		FD_SET(*iter, &writeset);
@@ -217,13 +217,13 @@ int SocketApi::WaitForConnect(int seconds)
 	if(0 == (n = select(maxfd + 1, &readset, &writeset, NULL, seconds ? &tval : NULL)))
 	{
 	
-		for(iter = SocketApi::sessions.begin(); iter != SocketApi::sessions.end(); ++iter)
+		for(iter = sockapi::sessions.begin(); iter != sockapi::sessions.end(); ++iter)
 		{
 			SocketClose(*iter);
 		}		
 		log_debug("Notice: Select Time Out!!!\n");
-		SocketApi::sessions.clear();
-		SocketApi::maxnums = 0;
+		sockapi::sessions.clear();
+		sockapi::maxnums = 0;
 		return 0;
 	}
 	else if(n < 0)
@@ -232,22 +232,22 @@ int SocketApi::WaitForConnect(int seconds)
 		return -1;
 	}
 	
-	for(iter = SocketApi::sessions.begin(); iter != SocketApi::sessions.end();)
+	for(iter = sockapi::sessions.begin(); iter != sockapi::sessions.end();)
 	{
 		if(FD_ISSET(*iter, &readset) || FD_ISSET(*iter, &writeset))
 		{
 			if(getsockopt(*iter, SOL_SOCKET, SO_ERROR, (char*)&error, &errlen) < 0)
 			{
 				log_debug("Error: Can not Connect To Server Ad Fd %d\n", *iter);
-				iter = SocketApi::sessions.erase(iter);
-				--SocketApi::maxnums;
+				iter = sockapi::sessions.erase(iter);
+				--sockapi::maxnums;
 				SocketClose(*iter);
 			}
 			else
 			{
 				int rtfd = *iter;
-				iter = SocketApi::sessions.erase(iter);
-				--SocketApi::maxnums;
+				iter = sockapi::sessions.erase(iter);
+				--sockapi::maxnums;
 				if(error != 0)
 				{
 					log_debug("Error: Connect To Server Ad Fd %d Faile %s\n", *iter, strerror(error));

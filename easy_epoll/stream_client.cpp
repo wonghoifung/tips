@@ -1,5 +1,5 @@
 #include "stream_client.h"
-#include "SocketApi.h"
+#include "sockapi.h"
 
 stream_client::stream_client()
 {
@@ -21,30 +21,30 @@ bool stream_client::Open(event_loop* pServer)
 
 bool stream_client::Connect(tcpconn* pHandler, const std::string& strAddr, int port)
 {
-	int sock_fd = SocketApi::SocketInit();
+	int sock_fd = sockapi::SocketInit();
 	if( pHandler == NULL || sock_fd < 0)
 	{	
 		return false;
 	}
-	if(SocketApi::ClientConnect(sock_fd, strAddr.c_str(), port) == 0)
+	if(sockapi::ClientConnect(sock_fd, strAddr.c_str(), port) == 0)
 	{	
-        SocketApi::SetSocketMem(sock_fd,16*1024);
-        if(SocketApi::SocketNoBlock(sock_fd) < 0)
+        sockapi::SetSocketMem(sock_fd,16*1024);
+        if(sockapi::SocketNoBlock(sock_fd) < 0)
         {
             log_error("SetNonblock faild \n");
-            SocketApi::SocketClose(sock_fd);
+            sockapi::SocketClose(sock_fd);
             return false;
         }
-        if(SocketApi::SetTcpKeepLive(sock_fd) < 0)
+        if(sockapi::SetTcpKeepLive(sock_fd) < 0)
         {
             log_error("SetTcpKeepLive faild \n");
-            SocketApi::SocketClose(sock_fd);
+            sockapi::SocketClose(sock_fd);
             return false;
         }
         pHandler->SetFd(sock_fd);
 		return Register(pHandler);			
 	}
-	SocketApi::SocketClose(sock_fd);	
+	sockapi::SocketClose(sock_fd);	
 	return false;
 }
 

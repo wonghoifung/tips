@@ -1,5 +1,5 @@
 #include "SimpleClient.h"
-#include "SocketApi.h"
+#include "sockapi.h"
 #include "commands.h"
 #include <sys/types.h>
 #include <unistd.h>
