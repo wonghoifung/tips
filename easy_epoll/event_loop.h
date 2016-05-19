@@ -37,8 +37,8 @@ public:
 	bool manage(tcpconn* pHandler);
 	bool disconnect(tcpconn* pSocketHandler);
 
-    void WantWrite(tcpconn* s);
-    void WantRead(tcpconn* s);
+    void towrite(tcpconn* s);
+    void toread(tcpconn* s);
 
 protected:
 	int handle_accept();

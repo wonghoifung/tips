@@ -108,7 +108,7 @@ bool event_loop::run()
                     continue;
                 }
                 if( s->writable() )
-                    WantWrite(s);
+                    towrite(s);
             }
             else if( epevarr_[i].events & EPOLLOUT )
             {
@@ -118,7 +118,7 @@ bool event_loop::run()
                     continue;
                 }
                 if( !s->writable() )
-                    WantRead(s);
+                    toread(s);
             }
         }
     }
@@ -282,7 +282,7 @@ void event_loop::RemoveSocket(tcpconn* s)
     sockapi::SocketClose(s->getfd());
 }
 
-void event_loop::WantWrite(tcpconn* s)
+void event_loop::towrite(tcpconn* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
@@ -292,7 +292,7 @@ void event_loop::WantWrite(tcpconn* s)
     epoll_ctl(epollfd_, EPOLL_CTL_MOD, s->getfd(), &ev);
 }
 
-void event_loop::WantRead(tcpconn* s)
+void event_loop::toread(tcpconn* s)
 {
     struct epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));

@@ -118,7 +118,7 @@ int tcpconn::sendbuf(const char *buf, int nLen)
     handle_write();   
 
     if(writable())
-        evloop_->WantWrite(this);
+        evloop_->towrite(this);
 
 	return 0;
 }
