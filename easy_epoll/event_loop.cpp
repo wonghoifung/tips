@@ -182,7 +182,7 @@ int event_loop::handle_accept()
             continue;
         }	
         
-        tcpconn* sh = AllocSocketHandler(conn_fd);
+        tcpconn* sh = prepare_tcpconn(conn_fd);
         if(sh == NULL)
         {
             log_error("sh is null \n");
@@ -211,7 +211,7 @@ void event_loop::handle_close(tcpconn* pHandler)
     }
 }
 
-tcpconn* event_loop::AllocSocketHandler(int sock_fd)
+tcpconn* event_loop::prepare_tcpconn(int sock_fd)
 {
 	tcpconn* sh = create_tcpconn();
 	if(sh != NULL)
@@ -222,13 +222,15 @@ tcpconn* event_loop::AllocSocketHandler(int sock_fd)
 	}
 	return sh;
 }
+
 bool event_loop::DisConnect(tcpconn* pSocketHandler)
 {
     log_debug("disconnect \n");
     handle_close(pSocketHandler);
  	return true;
 }
-bool event_loop::Register(tcpconn* pHandler)
+
+bool event_loop::manage(tcpconn* pHandler)
 {
     if(pHandler == NULL)
         return false;

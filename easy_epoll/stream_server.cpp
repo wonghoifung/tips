@@ -15,10 +15,10 @@ stream_server::~stream_server(void)
 
 tcpconn * stream_server::create_tcpconn(void)
 {
-	server_tcpconn *pNewHandler = NULL;
-    int nHandlerID = GetUseID();
-	pNewHandler = new server_tcpconn(nHandlerID);
-	return pNewHandler;
+	server_tcpconn* conn = NULL;
+    int uid = GetUseID();
+	conn = new server_tcpconn(uid);
+	return conn;
 }
 
 void  stream_server::OnConnect(server_tcpconn *pHandler )

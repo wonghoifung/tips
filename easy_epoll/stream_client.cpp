@@ -57,6 +57,6 @@ bool stream_client::Register(tcpconn* conn)
 {
 	if(evloop_ == NULL)
 		return false;
-	return evloop_->Register(conn);
+	return evloop_->manage(conn);
 }
 

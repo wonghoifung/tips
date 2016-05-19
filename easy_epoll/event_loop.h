@@ -33,8 +33,8 @@ public:
     
 	virtual tcpconn* create_tcpconn(void) = 0;
 
-	tcpconn* AllocSocketHandler(int sock_fd);
-	bool Register(tcpconn* pHandler);
+	tcpconn* prepare_tcpconn(int sock_fd);
+	bool manage(tcpconn* pHandler);
 	bool DisConnect(tcpconn* pSocketHandler);
 
     void WantWrite(tcpconn* s);
