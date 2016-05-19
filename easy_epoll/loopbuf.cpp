@@ -2,13 +2,13 @@
 
 loopbuf::loopbuf()
 {
-	InitMember();
+	init_with_zero();
 }
 
 loopbuf::loopbuf(unsigned long bufsize) 
 {
-	InitMember();
-	Init(bufsize); 
+	init_with_zero();
+	init_with_size(bufsize); 
 }
 
 loopbuf::~loopbuf() 
@@ -20,7 +20,7 @@ loopbuf::~loopbuf()
 	}
 }
 
-void loopbuf::InitMember()
+void loopbuf::init_with_zero()
 {
 	buf_ = 0;	
 	wptr_ = 0;
@@ -30,7 +30,7 @@ void loopbuf::InitMember()
 	count_ = 0;
 }
 
-void loopbuf::Init(unsigned long bufsize)
+void loopbuf::init_with_size(unsigned long bufsize)
 {		
 	bufsize++;
 	buf_ = (char*)malloc(bufsize);
@@ -41,14 +41,14 @@ void loopbuf::Init(unsigned long bufsize)
 	count_ = bufsize;
 }
 
-void loopbuf::Reset()
+void loopbuf::reset()
 {
 	hptr_ = buf_;
 	tptr_ = hptr_ + count_;
 	wptr_ = rptr_ = hptr_;
 }
 
-unsigned long loopbuf::Put(char* buf, unsigned long size)
+unsigned long loopbuf::put(char* buf, unsigned long size)
 {
 	char* readptr	= rptr_;
 	unsigned long part	= tptr_ - wptr_;
@@ -87,7 +87,7 @@ unsigned long loopbuf::Put(char* buf, unsigned long size)
 	}
 }
 
-unsigned long loopbuf::Get(char* buf, unsigned long size) 
+unsigned long loopbuf::get(char* buf, unsigned long size) 
 {
 	char* writeptr	= wptr_;
 	unsigned long part	= tptr_ - rptr_;
@@ -126,7 +126,7 @@ unsigned long loopbuf::Get(char* buf, unsigned long size)
 	}
 }
 
-unsigned long loopbuf::Peek(char* buf, unsigned long size)
+unsigned long loopbuf::peek(char* buf, unsigned long size)
 {
 	char* writeptr	= wptr_;
 	unsigned long part	= tptr_ - rptr_;
@@ -162,7 +162,7 @@ unsigned long loopbuf::Peek(char* buf, unsigned long size)
 	}
 }
 
-unsigned long loopbuf::Erase(unsigned long size)
+unsigned long loopbuf::erase(unsigned long size)
 {
 	char* writeptr	= wptr_;
 	unsigned long part	= tptr_ - rptr_;
@@ -194,12 +194,12 @@ unsigned long loopbuf::Erase(unsigned long size)
 	}
 }
 
-unsigned long loopbuf::Count() 
+unsigned long loopbuf::count() 
 { 
 	return count_ - 1; 
 }
 
-unsigned long loopbuf::FreeCount() 
+unsigned long loopbuf::freecount() 
 {
 	char* writeptr	= wptr_;
 	char* readptr	= rptr_;
@@ -213,7 +213,7 @@ unsigned long loopbuf::FreeCount()
 	}
 }
 
-unsigned long loopbuf::DataCount()
+unsigned long loopbuf::datacount()
 {
 	char* writeptr	= wptr_;
 	char* readptr	= rptr_;

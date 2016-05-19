@@ -17,16 +17,16 @@ public:
 	loopbuf();
 	loopbuf(unsigned long bufsize);
 	virtual ~loopbuf();
-	void InitMember();
-	void Init(unsigned long bufsize);
-	void Reset();
-	unsigned long Put(char* buf, unsigned long size);
-	unsigned long Get(char* buf, unsigned long size);
-	unsigned long Peek(char* buf, unsigned long size);
-	unsigned long Erase(unsigned long size);
-	unsigned long Count(); 
-	unsigned long FreeCount();
-	unsigned long DataCount();	
+	void init_with_zero();
+	void init_with_size(unsigned long bufsize);
+	void reset();
+	unsigned long put(char* buf, unsigned long size);
+	unsigned long get(char* buf, unsigned long size);
+	unsigned long peek(char* buf, unsigned long size);
+	unsigned long erase(unsigned long size);
+	unsigned long count(); 
+	unsigned long freecount();
+	unsigned long datacount();	
 };
 
 #endif

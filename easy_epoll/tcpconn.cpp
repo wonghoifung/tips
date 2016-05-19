@@ -77,7 +77,7 @@ int tcpconn::handle_write()
     int nHaveSendLen = 0;
     do 
     {
-        nPeekLen = sendloopbuf_->Peek(tmpsendbuf_,sizeof(tmpsendbuf_));
+        nPeekLen = sendloopbuf_->peek(tmpsendbuf_,sizeof(tmpsendbuf_));
         nHaveSendLen = socket_send(getfd(),tmpsendbuf_, nPeekLen);
 
         //sendbuf data block
@@ -85,16 +85,16 @@ int tcpconn::handle_write()
         {
             if(errno != EWOULDBLOCK && errno != EINTR)
             {
-                sendloopbuf_->Erase(nPeekLen);            
+                sendloopbuf_->erase(nPeekLen);            
                 return -1;
             }
             return 0;
         }
         else
         {
-            sendloopbuf_->Erase(nHaveSendLen);
+            sendloopbuf_->erase(nHaveSendLen);
         }
-     }while (nHaveSendLen>0 && sendloopbuf_->DataCount()>0);
+     }while (nHaveSendLen>0 && sendloopbuf_->datacount()>0);
 
    return 0;
 }
@@ -108,14 +108,14 @@ int tcpconn::handle_close()
 
 int tcpconn::sendbuf(const char *buf, int nLen)
 {
-    if( nLen > (int)sendloopbuf_->FreeCount())
+    if( nLen > (int)sendloopbuf_->freecount())
     {
         log_debug("sendloopbuf_ not enough\n");
         full_ = true;
         return -1;
     }
     else        
-	    sendloopbuf_->Put((char *)buf, nLen);
+	    sendloopbuf_->put((char *)buf, nLen);
     handle_write();   
 
     if(writable())
@@ -126,7 +126,7 @@ int tcpconn::sendbuf(const char *buf, int nLen)
 
 bool tcpconn::writable()
 {
-    return sendloopbuf_->DataCount() > 0;
+    return sendloopbuf_->datacount() > 0;
 }
 
 
