@@ -44,7 +44,7 @@ int StreamHandler::OnParser(char *buf, int nLen)
 	return m_pParser->parse(buf, nLen);
 }
 
-int StreamHandler::OnParserComplete(InMessage *pPacket)
+int StreamHandler::OnParserComplete(inmessage *pPacket)
 {
 	stream_server *pServer = (stream_server *)this->evloop();
 	return pServer->ProcessMessage(pPacket, this, m_nHandlerID);

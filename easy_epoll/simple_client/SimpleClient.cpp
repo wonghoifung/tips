@@ -56,7 +56,7 @@ int SimpleClient::send(OutMessage* msg) {
 	return tcpconn::Send(msg->cbuffer(), msg->size());
 }
 
-int SimpleClient::OnParserComplete(InMessage* msg) {
+int SimpleClient::OnParserComplete(inmessage* msg) {
 	const short cmd = msg->command();
 	switch (cmd) {
 		case cmd_peer_login: {

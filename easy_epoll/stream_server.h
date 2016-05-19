@@ -16,7 +16,7 @@ public:
     virtual void OnConnect(StreamHandler *pHandler );
     virtual void OnDisconnect(StreamHandler *pHandler );
 	virtual int ProcessOnTimer(StreamHandler *);
-	virtual int ProcessMessage(InMessage *pPacket, StreamHandler *pHandler, unsigned long dwSessionID) = 0;
+	virtual int ProcessMessage(inmessage *pPacket, StreamHandler *pHandler, unsigned long dwSessionID) = 0;
 	StreamHandler* FindHandler(int nIndex);
 	int GetUseID(void);
 

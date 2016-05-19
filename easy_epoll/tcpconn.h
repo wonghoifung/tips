@@ -9,7 +9,7 @@
 #include <map>
 
 class event_loop;
-class InMessage;
+class inmessage;
 
 const int MAX_LOOP_BUFFER_LEN = 64*1024;
 
@@ -44,7 +44,7 @@ protected:
 
 public:	
 	int Send(const char *buf, int nLen);
-    virtual int OnParserComplete(InMessage *)=0;
+    virtual int OnParserComplete(inmessage *)=0;
     bool Writable();
 	event_loop* evloop() { return evloop_; }
 	void evloop(event_loop* p) { evloop_ = p; }

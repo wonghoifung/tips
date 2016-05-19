@@ -59,7 +59,7 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::ProcessMessage(InMessage* pMessage, StreamHandler* pHandler, unsigned long dwSessionID) {
+int SimpleServer::ProcessMessage(inmessage* pMessage, StreamHandler* pHandler, unsigned long dwSessionID) {
 	const short cmd = pMessage->command();
 
 	switch (cmd) {
@@ -172,7 +172,7 @@ Peer* SimpleServer::newPeer(uint32_t peerid, StreamHandler* pHandler) {
 	return peer;
 }
 
-int SimpleServer::handlePeerLogin(InMessage* message, StreamHandler* pHandler) {
+int SimpleServer::handlePeerLogin(inmessage* message, StreamHandler* pHandler) {
 	if (pHandler->GetUserData()) {
 		printf("not a new connection\n");
 		return -1;
@@ -201,7 +201,7 @@ int SimpleServer::handlePeerLogin(InMessage* message, StreamHandler* pHandler) {
 	return 0;
 }
 
-int SimpleServer::handleReqBroadcast(InMessage* message) {
+int SimpleServer::handleReqBroadcast(inmessage* message) {
 	if (sys_key == message->read_cstring()) {
 		const int type = message->read_int();
 		const std::string content = message->read_cstring();
@@ -215,7 +215,7 @@ int SimpleServer::handleReqBroadcast(InMessage* message) {
 	return 0;
 }
 
-int SimpleServer::handleEcho(Peer* peer, InMessage* message) {
+int SimpleServer::handleEcho(Peer* peer, inmessage* message) {
 	const std::string content = message->read_cstring();
 	printf("receive: %s\n", content.c_str());
 	OutMessage msg;

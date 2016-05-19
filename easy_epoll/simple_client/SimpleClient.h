@@ -17,7 +17,7 @@ public:
 	bool connect(const std::string& host, const std::string& port);
  	int send(OutMessage* msg);
 
-	virtual int OnParserComplete(InMessage *);
+	virtual int OnParserComplete(inmessage *);
 	virtual int OnParser(char *buf, int nLen);
 	virtual int OnClose(void);
 	virtual int OnConnected(void);

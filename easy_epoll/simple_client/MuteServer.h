@@ -12,7 +12,7 @@ public:
 	MuteServer();
 	~MuteServer();
 	bool init();
-	virtual int ProcessMessage(InMessage* pMessage, StreamHandler* pHandler, unsigned long dwSessionID);
+	virtual int ProcessMessage(inmessage* pMessage, StreamHandler* pHandler, unsigned long dwSessionID);
     virtual void OnConnect(StreamHandler* pHandler);
     virtual void OnDisconnect(StreamHandler* pHandler);
 };

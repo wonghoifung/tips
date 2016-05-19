@@ -172,7 +172,7 @@ private:
     int readptr_;
 };
 
-class InMessage : public message
+class inmessage : public message
 {
 public:
     int read_int() {

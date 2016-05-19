@@ -22,7 +22,7 @@ public:
 	void    SetUserData(void *pUserData){	m_pUserData = pUserData;}
 
 	int     Send(OutMessage *pPacket);
-    virtual int OnParserComplete(InMessage *);
+    virtual int OnParserComplete(inmessage *);
 
 private:
 	virtual int OnParser(char *buf, int nLen);

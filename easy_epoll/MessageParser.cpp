@@ -117,7 +117,7 @@ private:
 	size_t	pos_;
 	size_t bodylen_;
 	char *buf_;
-	InMessage inmsg_;
+	inmessage inmsg_;
 };
 
 MessageParser* MessageParser::create(tcpconn* h)
