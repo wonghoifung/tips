@@ -213,7 +213,7 @@ void event_loop::handle_close(tcpconn* pHandler)
 
 tcpconn* event_loop::AllocSocketHandler(int sock_fd)
 {
-	tcpconn* sh = CreateHandler();
+	tcpconn* sh = create_tcpconn();
 	if(sh != NULL)
 	{
         sh->setneeddel(true);

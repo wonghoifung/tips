@@ -31,7 +31,7 @@ public:
 	bool init_event();
 	bool run();
     
-	virtual tcpconn* CreateHandler(void) = 0;
+	virtual tcpconn* create_tcpconn(void) = 0;
 
 	tcpconn* AllocSocketHandler(int sock_fd);
 	bool Register(tcpconn* pHandler);

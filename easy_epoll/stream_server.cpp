@@ -13,7 +13,7 @@ stream_server::~stream_server(void)
 {
 }
 
-tcpconn * stream_server::CreateHandler(void)
+tcpconn * stream_server::create_tcpconn(void)
 {
 	server_tcpconn *pNewHandler = NULL;
     int nHandlerID = GetUseID();
