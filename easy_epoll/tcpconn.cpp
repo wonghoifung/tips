@@ -31,9 +31,14 @@ tcpconn::tcpconn(int cid)
 
 tcpconn::~tcpconn()
 {
-	if(sendloopbuf_)
+	if (sendloopbuf_) {
 		delete sendloopbuf_;
-	sendloopbuf_ = NULL;
+	   sendloopbuf_ = NULL;
+    }
+    if (parser_) {
+        delete parser_;
+        parser_ = NULL;
+    }
 }
 
 int tcpconn::handle_connect()
