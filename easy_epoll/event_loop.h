@@ -42,8 +42,8 @@ public:
 
 protected:
 	int handle_accept();
-    void AddSocket(tcpconn* s);
-    void RemoveSocket(tcpconn* s);
+    void addsock(tcpconn* s);
+    void remsock(tcpconn* s);
 
 private:
     void handle_close(tcpconn* pHandler);

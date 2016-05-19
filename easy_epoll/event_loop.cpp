@@ -190,7 +190,7 @@ int event_loop::handle_accept()
             assert(false);
             continue;
         }
-        AddSocket(sh);
+        addsock(sh);
         sh->handle_connect();
     } while(conn_fd > 0);
 
@@ -202,7 +202,7 @@ void event_loop::handle_close(tcpconn* pHandler)
     assert(pHandler != NULL);
     pHandler->handle_close();
 
-    RemoveSocket(pHandler);
+    remsock(pHandler);
 
     if(pHandler->getneeddel())
     {
@@ -235,7 +235,7 @@ bool event_loop::manage(tcpconn* pHandler)
     if(pHandler == NULL)
         return false;
 
-    AddSocket(pHandler);
+    addsock(pHandler);
 
     pHandler->evloop(this);
     pHandler->handle_connect();	
@@ -243,7 +243,7 @@ bool event_loop::manage(tcpconn* pHandler)
 	return true;
 }
 
-void event_loop::AddSocket(tcpconn* s)
+void event_loop::addsock(tcpconn* s)
 {
     fdcount_++;
     fdidx_++;
@@ -264,7 +264,7 @@ void event_loop::AddSocket(tcpconn* s)
     epoll_ctl(epollfd_, EPOLL_CTL_ADD, s->getfd(), &ev);
 }
 
-void event_loop::RemoveSocket(tcpconn* s)
+void event_loop::remsock(tcpconn* s)
 {
     fdcount_--;
 
