@@ -15,18 +15,18 @@ stream_server::~stream_server()
 
 tcpconn* stream_server::create_tcpconn()
 {
-	server_tcpconn* conn = NULL;
+	tcpconn* conn = NULL;
     int uid = genconnid();
-	conn = new server_tcpconn(uid);
+	conn = new tcpconn(uid);
 	return conn;
 }
 
-void stream_server::handle_connect(server_tcpconn* conn)
+void stream_server::handle_connect(tcpconn* conn)
 {
     int id = conn->connid();
     if(connmap_.find(id) == connmap_.end())
     {
-        connmap_.insert(std::map<int, server_tcpconn*>::value_type(id,conn));
+        connmap_.insert(std::map<int, tcpconn*>::value_type(id,conn));
     }
     else
     {
@@ -35,10 +35,10 @@ void stream_server::handle_connect(server_tcpconn* conn)
     }
 }
 
-void stream_server::handle_disconnect(server_tcpconn* conn)
+void stream_server::handle_disconnect(tcpconn* conn)
 {
     int id = conn->connid();
-    std::map<int, server_tcpconn*>::iterator iter = connmap_.find(id);
+    std::map<int, tcpconn*>::iterator iter = connmap_.find(id);
     if(iter != connmap_.end())
     {
         connmap_.erase(iter);
@@ -50,16 +50,16 @@ void stream_server::handle_disconnect(server_tcpconn* conn)
     }
 }
 
-int stream_server::handle_timeout(server_tcpconn* conn)
+int stream_server::handle_timeout(tcpconn* conn)
 {
     log_debug("connect 30s and no packet,disconnect \n");
     disconnect(conn);
 	return 0;
 }
 
-server_tcpconn* stream_server::findconn(int idx)
+tcpconn* stream_server::findconn(int idx)
 {
-	std::map<int, server_tcpconn*>::iterator iter = connmap_.find(idx);
+	std::map<int, tcpconn*>::iterator iter = connmap_.find(idx);
 
 	if(iter != connmap_.end())
 	{

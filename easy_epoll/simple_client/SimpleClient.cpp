@@ -1,6 +1,7 @@
 #include "SimpleClient.h"
 #include "sockapi.h"
 #include "commands.h"
+#include "message.h"
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -30,7 +31,7 @@ static bool initTimer() {
 	return true;
 }
 
-SimpleClient::SimpleClient(stream_server* ss):parser_(NULL),ss_(ss) {
+SimpleClient::SimpleClient(stream_server* ss):tcpconn(1),parser_(NULL),ss_(ss) {
 	initTimer();
 	sc = this;
 	setneeddel(false);

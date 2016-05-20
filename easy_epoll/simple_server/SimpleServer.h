@@ -14,17 +14,17 @@ public:
 	SimpleServer();
 	~SimpleServer();
 	bool init();
-	virtual int handle_message(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID);
-    virtual void handle_connect(server_tcpconn* pHandler);
-    virtual void handle_disconnect(server_tcpconn* pHandler);
+	virtual int handle_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID);
+    virtual void handle_connect(tcpconn* pHandler);
+    virtual void handle_disconnect(tcpconn* pHandler);
 	virtual int on_timeout(int timerid);
 protected:
-	Peer* getPeer(server_tcpconn* pHandler);
+	Peer* getPeer(tcpconn* pHandler);
 	int removePeer(Peer* peer);
 	void delPeer(Peer* peer);
-	Peer* checkRelogin(const uint32_t peerid, server_tcpconn* pHandler);
-	Peer* newPeer(uint32_t peerid, server_tcpconn* pHandler);
-	int handlePeerLogin(inmessage* message, server_tcpconn* pHandler);
+	Peer* checkRelogin(const uint32_t peerid, tcpconn* pHandler);
+	Peer* newPeer(uint32_t peerid, tcpconn* pHandler);
+	int handlePeerLogin(inmessage* message, tcpconn* pHandler);
 	int handleReqBroadcast(inmessage* message);
 	int handleEcho(Peer* peer, inmessage* message);
 private:

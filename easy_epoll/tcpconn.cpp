@@ -2,6 +2,8 @@
 #include "log.h"
 #include "sockapi.h"
 #include "event_loop.h"
+#include "message.h"
+#include "stream_server.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -140,7 +142,7 @@ bool tcpconn::writable()
 }
 //-----------------------
 int tcpconn::sendmsg(outmessage* msg) {
-    return sendbuf(pPacket->cbuffer(), pPacket->size());
+    return sendbuf(msg->cbuffer(), msg->size());
 }
 void tcpconn::setremoteaddr(void) {
     sockaddr_in remote_addr;
@@ -152,9 +154,9 @@ void tcpconn::setremoteaddr(void) {
         port_ = ntohs(remote_addr.sin_port);
     }
 }
-int tcpconn::on_message(inmessage*) {
+int tcpconn::on_message(inmessage* msg) {
     stream_server *pServer = (stream_server *)this->evloop();
-    return pServer->handle_message(pPacket, this, connid_);
+    return pServer->handle_message(msg, this, connid_);
 }
 int tcpconn::on_rawdata(char* buf, int nLen) {
     status_ = REQUEST;
@@ -178,7 +180,7 @@ int tcpconn::on_connect(void) {
     if(pServer != NULL)
         pServer->handle_connect(this);
 
-    tcptimer_.start(s_DisNoMsgTime);
+    tcptimer_.start(30);
     setremoteaddr();
     return 0;
 }

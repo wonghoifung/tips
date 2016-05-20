@@ -12,9 +12,9 @@ public:
 	MuteServer();
 	~MuteServer();
 	bool init();
-	virtual int handle_message(inmessage* pMessage, server_tcpconn* pHandler, unsigned long dwSessionID);
-    virtual void OnConnect(server_tcpconn* pHandler);
-    virtual void OnDisconnect(server_tcpconn* pHandler);
+	virtual int handle_message(inmessage* pMessage, tcpconn* conn, unsigned long dwSessionID);
+    virtual void OnConnect(tcpconn* conn);
+    virtual void OnDisconnect(tcpconn* conn);
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "SimpleServer.h"
 #include "commands.h"
+#include "message.h"
 #include "Peer.h"
 #include <assert.h>
 #include <stdio.h>
@@ -60,7 +61,7 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::handle_message(inmessage* pMessage, server_tcpconn* conn, unsigned long ssid) {
+int SimpleServer::handle_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
 	const short cmd = pMessage->command();
 
 	switch (cmd) {
@@ -83,11 +84,11 @@ int SimpleServer::handle_message(inmessage* pMessage, server_tcpconn* conn, unsi
 	return 0;
 }
 
-void SimpleServer::handle_connect(server_tcpconn* conn) {
+void SimpleServer::handle_connect(tcpconn* conn) {
 	printf("%s connected\n", conn->remoteaddr().c_str());
 }
 
-void SimpleServer::handle_disconnect(server_tcpconn* conn) {
+void SimpleServer::handle_disconnect(tcpconn* conn) {
 	printf("%s disconnected\n", conn->remoteaddr().c_str());
 	Peer* peer = getPeer(conn);
 	if (peer) {
@@ -113,7 +114,7 @@ int SimpleServer::on_timeout(int timerid) {
 	return 0;
 }
 
-Peer* SimpleServer::getPeer(server_tcpconn* conn) {
+Peer* SimpleServer::getPeer(tcpconn* conn) {
 	Peer* peer = NULL;
 	if (conn) {
 		void* ptr = conn->getud();
@@ -134,7 +135,7 @@ void SimpleServer::delPeer(Peer* peer) {
 	delete peer;
 }
 
-Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* conn) {
+Peer* SimpleServer::checkRelogin(const uint32_t peerid, tcpconn* conn) {
 	Peer* peer = ::getPeer(peerid);
 	if (peer) {
 		int reason = 0; // relogin
@@ -146,7 +147,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* conn) {
 		msg.end();
 		peer->sendMsg(&msg);
 
-		server_tcpconn* oldhandler = peer->getStreamHandler();
+		tcpconn* oldhandler = peer->getStreamHandler();
 		if (oldhandler == conn) {
 			printf("tricky thing happened\n");
 			return peer;
@@ -163,7 +164,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, server_tcpconn* conn) {
 	return peer;
 }
 
-Peer* SimpleServer::newPeer(uint32_t peerid, server_tcpconn* conn) {
+Peer* SimpleServer::newPeer(uint32_t peerid, tcpconn* conn) {
 	Peer* peer = new Peer(peerid, conn);
 	if (peer) {
 		// init peer...
@@ -174,7 +175,7 @@ Peer* SimpleServer::newPeer(uint32_t peerid, server_tcpconn* conn) {
 	return peer;
 }
 
-int SimpleServer::handlePeerLogin(inmessage* message, server_tcpconn* conn) {
+int SimpleServer::handlePeerLogin(inmessage* message, tcpconn* conn) {
 	if (conn->getud()) {
 		printf("not a new connection\n");
 		return -1;

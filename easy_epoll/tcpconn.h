@@ -5,11 +5,14 @@
 
 #include "timer.h"
 #include "loopbuf.h"
+#include "message_parser.h"
 #include <stdint.h>
 #include <map>
+#include <string>
 
 class event_loop;
 class inmessage;
+class outmessage;
 
 const int MAX_LOOP_BUFFER_LEN = 64*1024;
 
