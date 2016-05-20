@@ -6,7 +6,7 @@
 #include "timer.h"
 #include <map>
 
-class stream_server : public event_loop
+class stream_server : public event_handler
 {
 public:
 	stream_server();

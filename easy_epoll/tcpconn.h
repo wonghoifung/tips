@@ -19,10 +19,7 @@ const int MAX_LOOP_BUFFER_LEN = 64*1024;
 #define RECV_BUFFER_SIZE (1024*32)
 #define SEND_BUFFER_SIZE (1024*32)
 
-// typedef int (*message_callback)(inmessage*);
-// typedef int (*connect_callback)();
-// typedef int (*close_callback)();
-// typedef int (*rawdata_callback)();
+class tcpconn;
 
 class tcpconn : public timer_handler
 {
@@ -61,10 +58,10 @@ public:
 	void setud(void* ud) { ud_ = ud; }
 	int sendmsg(outmessage* msg);
 	void setremoteaddr(void);
-	virtual int on_message(inmessage*);
-	virtual int on_rawdata(char* buf, int nLen);
-	virtual int on_close(void);
-	virtual int on_connect(void);
+	int on_message(inmessage*);
+	int on_rawdata(char* buf, int nLen);
+	int on_close(void);
+	int on_connect(void);
 	virtual int	on_timeout(int timerid); // TODO
 	
 private:
@@ -86,11 +83,6 @@ private:
 	int port_;
 	void* ud_;
     message_parser* parser_;
-
-    // message_callback on_message_;
-    // close_callback on_close_;
-    // connect_callback on_connect_;
-    // rawdata_callback on_rawdata_;
 };
 
 #endif  

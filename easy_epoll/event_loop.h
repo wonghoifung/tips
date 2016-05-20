@@ -54,5 +54,20 @@ protected:
 	struct epoll_event* epevarr_; 
 };
 
+class event_handler : public event_loop
+{
+	event_handler(const event_handler&);
+	event_handler& operator=(const event_handler&);
+	
+public:
+	event_handler() {}
+	virtual ~event_handler() {}
+
+    virtual void handle_connect(tcpconn* conn) = 0;
+    virtual void handle_disconnect(tcpconn* conn) = 0;
+	virtual int handle_timeout(tcpconn*) = 0;
+	virtual int handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid) = 0;
+};
+
 #endif
 

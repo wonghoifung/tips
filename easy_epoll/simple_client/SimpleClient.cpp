@@ -47,6 +47,10 @@ SimpleClient::~SimpleClient() {
 	}
 }
 
+tcpconn* SimpleClient::create_tcpconn(void) {
+	return new tcpconn(1);
+}
+
 bool SimpleClient::init() {
 	return true;
 }

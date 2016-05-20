@@ -4,7 +4,7 @@
 #include <assert.h>
 
 stream_server::stream_server()
-:event_loop()
+:event_handler()
 {
 	maxid_ = 0;
 }

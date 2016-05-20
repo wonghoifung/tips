@@ -3,7 +3,6 @@
 #include "sockapi.h"
 #include "event_loop.h"
 #include "message.h"
-#include "stream_server.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -155,8 +154,8 @@ void tcpconn::setremoteaddr(void) {
     }
 }
 int tcpconn::on_message(inmessage* msg) {
-    stream_server *pServer = (stream_server *)this->evloop();
-    return pServer->handle_message(msg, this, connid_);
+    event_handler* h = (event_handler*)this->evloop();
+    return h->handle_message(msg, this, connid_);
 }
 int tcpconn::on_rawdata(char* buf, int nLen) {
     status_ = REQUEST;
@@ -169,23 +168,23 @@ int tcpconn::on_rawdata(char* buf, int nLen) {
 }
 int tcpconn::on_close(void) {
     status_ = CLOSE;    
-    stream_server *pServer = (stream_server*)this->evloop();
-    if(pServer != NULL)
-        pServer->handle_disconnect(this);
+    event_handler *h = (event_handler*)this->evloop();
+    if(h != NULL)
+        h->handle_disconnect(this);
     return 0;
 }
 int tcpconn::on_connect(void) {
     status_ = CONNECT;
-    stream_server *pServer = (stream_server*)this->evloop();
-    if(pServer != NULL)
-        pServer->handle_connect(this);
+    event_handler *h = (event_handler*)this->evloop();
+    if(h != NULL)
+        h->handle_connect(this);
 
     tcptimer_.start(30);
     setremoteaddr();
     return 0;
 }
 int tcpconn::on_timeout(int timerid) {
-    stream_server *pServer = (stream_server*)this->evloop();
-    int nRet = pServer->handle_timeout(this);
+    event_handler *h = (event_handler*)this->evloop();
+    int nRet = h->handle_timeout(this);
     return nRet;
 }
