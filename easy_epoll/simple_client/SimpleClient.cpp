@@ -1,4 +1,4 @@
-#include "MuteServer.h"
+#include "SimpleClient.h"
 #include "sockapi.h"
 #include "commands.h"
 #include "message.h"
@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-static MuteServer* sc = NULL;
+static SimpleClient* sc = NULL;
 static timer gtimer;
 static void startTimer() {
 	gtimer.start(5);
@@ -33,25 +33,25 @@ static bool initTimer() {
 	return true;
 }
 
-MuteServer::MuteServer() {
+SimpleClient::SimpleClient() {
 	initTimer();
 	sc = this;
 	conn_ = new tcpconn(1);
 	conn_->setneeddel(false);// TODO
 }
 
-MuteServer::~MuteServer() {
+SimpleClient::~SimpleClient() {
 	if (conn_) {
 		delete conn_;
 		conn_ = NULL;
 	}
 }
 
-bool MuteServer::init() {
+bool SimpleClient::init() {
 	return true;
 }
 
-bool MuteServer::connect(const std::string& host, const std::string& port) {
+bool SimpleClient::connect(const std::string& host, const std::string& port) {
 	printf("%s\n", __FUNCTION__);
 	connector_.set_evloop(this);
 	bool ret = connector_.connect(conn_, host, atoi(port.c_str()));
@@ -61,13 +61,13 @@ bool MuteServer::connect(const std::string& host, const std::string& port) {
 	return ret;
 }
 
-int MuteServer::send(outmessage* msg) {
+int SimpleClient::send(outmessage* msg) {
 	printf("%s\n", __FUNCTION__);
 	return conn_->sendbuf(msg->cbuffer(), msg->size());
 }
 
-void MuteServer::handle_connect(tcpconn* conn) {
-	printf("MuteServer::%s\n", __FUNCTION__);
+void SimpleClient::handle_connect(tcpconn* conn) {
+	printf("SimpleClient::%s\n", __FUNCTION__);
 	outmessage msg;
 	msg.begin(cmd_peer_login);
 	msg.write_int((int)getpid());
@@ -75,17 +75,17 @@ void MuteServer::handle_connect(tcpconn* conn) {
 	conn_->sendmsg(&msg);
 }
 
-void MuteServer::handle_disconnect(tcpconn* conn) {
-	printf("MuteServer::%s\n", __FUNCTION__);
+void SimpleClient::handle_disconnect(tcpconn* conn) {
+	printf("SimpleClient::%s\n", __FUNCTION__);
 }
 
-int MuteServer::handle_timeout(tcpconn*) {
-	printf("MuteServer::%s\n", __FUNCTION__);
+int SimpleClient::handle_timeout(tcpconn*) {
+	printf("SimpleClient::%s\n", __FUNCTION__);
 	return 0;
 }
 
-int MuteServer::handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid) {
-	printf("MuteServer::%s\n", __FUNCTION__);
+int SimpleClient::handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid) {
+	printf("SimpleClient::%s\n", __FUNCTION__);
 	const short cmd = msg->command();
 	switch (cmd) {
 		case cmd_peer_login: {

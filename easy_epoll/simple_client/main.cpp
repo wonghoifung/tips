@@ -1,4 +1,4 @@
-#include "MuteServer.h"
+#include "SimpleClient.h"
 #include "log.h"
 #include "timer.h"
 #include <sys/resource.h>
@@ -37,7 +37,7 @@ int main() {
 	toggle_hex_level();
 	init_timer();
 
-	MuteServer ms;
+	SimpleClient ms;
 	if (!ms.init_event()) {
 		printf("cannot init event\n");
 		exit(0);

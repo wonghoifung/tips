@@ -1,17 +1,17 @@
-#ifndef MUTESERVER_HEADER
-#define MUTESERVER_HEADER
+#ifndef SIMPLECLIENT_HEADER
+#define SIMPLECLIENT_HEADER
 
 #include "stream_server.h"
 #include "stream_client.h"
 #include "timer.h"
 
-class MuteServer : public stream_server
+class SimpleClient : public stream_server
 {
-	MuteServer(const MuteServer&);
-	MuteServer& operator=(const MuteServer&);
+	SimpleClient(const SimpleClient&);
+	SimpleClient& operator=(const SimpleClient&);
 public:
-	MuteServer();
-	~MuteServer();
+	SimpleClient();
+	~SimpleClient();
 	bool init();
 	bool connect(const std::string& host, const std::string& port);
  	int send(outmessage* msg);
