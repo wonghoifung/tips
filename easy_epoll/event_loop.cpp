@@ -56,6 +56,27 @@ bool event_loop::init_server(int listen_port)
 	return true;	
 }
 
+bool event_loop::init_client(const std::string& host, int port)
+{
+    int sock_fd = socket_create();
+    if (sock_fd < 0) return false;
+    int ret = socket_nonblock_connect(sock_fd, host.c_str(), port);
+    if (ret == -1) return false;
+    tcpconn* c = create_tcpconn();
+    c->setfd(sock_fd);     
+    c->evloop(this);
+    addsock(c);
+    printf("ret: %d\n", ret);
+    if (ret == -2) {
+        c->setconnecting();
+        towrite(c);
+    } 
+    else if (ret == 0) {
+        c->handle_connect();
+    }
+    return true;
+}
+
 bool event_loop::run()
 {
 	int loop_times = 0;
@@ -92,7 +113,8 @@ bool event_loop::run()
             uint32_t index = (uint32_t)(epevarr_[i].data.u64 >> 32);
             tcpconn* s = fdconns_[fd];
             if( s == 0 || s->getfdidx() != index )
-            {                      
+            {         
+                printf("invalid?\n");             
                 continue;       // epoll returned invalid fd 
             }
             if( epevarr_[i].events & ( EPOLLHUP | EPOLLERR ))
@@ -102,23 +124,33 @@ bool event_loop::run()
             }
             else if(epevarr_[i].events & EPOLLIN )
             {               
-                if( s->handle_read() == -1 )
-                {
-                    handle_close(s);
-                    continue;
+                if (s->isconnecting()) {
+                    printf("..........ok\n");
+                    s->handle_connect(); 
+                } else {
+                    if( s->handle_read() == -1 )
+                    {
+                        handle_close(s);
+                        continue;
+                    }
+                    if( s->writable() )
+                        towrite(s);
                 }
-                if( s->writable() )
-                    towrite(s);
             }
             else if( epevarr_[i].events & EPOLLOUT )
             {
-                if( s->handle_write() == -1 )
-                {
-                    handle_close(s);
-                    continue;
+                if (s->isconnecting()) {
+                    printf("..........ok\n");
+                    s->handle_connect(); 
+                } else {
+                    if( s->handle_write() == -1 )
+                    {
+                        handle_close(s);
+                        continue;
+                    }
+                    if( !s->writable() )
+                        toread(s);
                 }
-                if( !s->writable() )
-                    toread(s);
             }
         }
     }

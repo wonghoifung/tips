@@ -1,6 +1,5 @@
 #include "tcpconn.h"
 #include "log.h"
-#include "sockapi.h"
 #include "event_loop.h"
 #include "message.h"
 #include <stdio.h>

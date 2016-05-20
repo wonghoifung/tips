@@ -23,6 +23,7 @@ tcpconn* stream_server::create_tcpconn()
 
 void stream_server::handle_connect(tcpconn* conn)
 {
+    printf("stream_server::%s\n", __FUNCTION__);
     int id = conn->connid();
     if(connmap_.find(id) == connmap_.end())
     {
@@ -37,6 +38,7 @@ void stream_server::handle_connect(tcpconn* conn)
 
 void stream_server::handle_disconnect(tcpconn* conn)
 {
+    printf("stream_server::%s\n", __FUNCTION__);
     int id = conn->connid();
     std::map<int, tcpconn*>::iterator iter = connmap_.find(id);
     if(iter != connmap_.end())
@@ -52,6 +54,7 @@ void stream_server::handle_disconnect(tcpconn* conn)
 
 int stream_server::handle_timeout(tcpconn* conn)
 {
+    printf("stream_server::%s\n", __FUNCTION__);
     log_debug("connect 30s and no packet,disconnect \n");
     disconnect(conn);
 	return 0;

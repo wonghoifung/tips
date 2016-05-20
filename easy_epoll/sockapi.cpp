@@ -147,10 +147,12 @@ int socket_nonblock_connect(int fd, const char* ip, int port)
 		{
 			if(0 > connect(fd, (struct sockaddr*)&remote, sizeof(remote)))
 			{	
+				printf("connect errno: %d\n", errno);
 				if(errno != EINPROGRESS)
 				{	
 					return -1;
 				}  
+				return -2;
 			}
 			sessions.push_back(fd);
 			maxnums++;

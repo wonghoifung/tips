@@ -2,8 +2,8 @@
 #define SIMPLECLIENT_HEADER
 
 #include "event_loop.h"
-#include "stream_client.h"
 #include "timer.h"
+#include "sockapi.h"
 
 class SimpleClient : public event_handler
 {
@@ -20,8 +20,12 @@ public:
     virtual void handle_disconnect(tcpconn* conn);
 	virtual int handle_timeout(tcpconn*);
 	virtual int handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid);
+
+	bool set_evloop(event_loop* pServer);
+	bool connect(tcpconn* conn, const std::string& strAddr, int port);
+	bool connect(tcpconn* conn, const address& addr);
+	bool register_to_evloop(tcpconn* conn);
 private:
-	stream_client connector_;
 	tcpconn* conn_;
 };
 

@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "loopbuf.h"
 #include "message_parser.h"
+#include "sockapi.h"
 #include <stdint.h>
 #include <map>
 #include <string>
@@ -41,6 +42,9 @@ public:
 
 	event_loop* evloop() { return evloop_; }
 	void evloop(event_loop* p) { evloop_ = p; }
+
+	const bool isconnecting() const { return status_ == CONNECTING; }
+	void setconnecting() { status_ = CONNECTING; }
 
 	int handle_connect();
 	int handle_read();

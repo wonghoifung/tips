@@ -36,6 +36,7 @@ static bool initTimer() {
 SimpleClient::SimpleClient() {
 	initTimer();
 	sc = this;
+	//conn_ = create_tcpconn();
 	conn_ = new tcpconn(1);
 	conn_->setneeddel(false);// TODO
 }
@@ -48,7 +49,7 @@ SimpleClient::~SimpleClient() {
 }
 
 tcpconn* SimpleClient::create_tcpconn(void) {
-	return new tcpconn(1);
+	return conn_;
 }
 
 bool SimpleClient::init() {
@@ -56,9 +57,8 @@ bool SimpleClient::init() {
 }
 
 bool SimpleClient::connect(const std::string& host, const std::string& port) {
-	printf("%s\n", __FUNCTION__);
-	connector_.set_evloop(this);
-	bool ret = connector_.connect(conn_, host, atoi(port.c_str()));
+	printf("SimpleClient::%s\n", __FUNCTION__);
+	bool ret = connect(conn_, host, atoi(port.c_str()));
 	if (!ret) {
 		printf("connect error\n");
 	}
@@ -66,7 +66,7 @@ bool SimpleClient::connect(const std::string& host, const std::string& port) {
 }
 
 int SimpleClient::send(outmessage* msg) {
-	printf("%s\n", __FUNCTION__);
+	printf("SimpleClient::%s\n", __FUNCTION__);
 	return conn_->sendbuf(msg->cbuffer(), msg->size());
 }
 
@@ -105,4 +105,45 @@ int SimpleClient::handle_message(inmessage* msg, tcpconn* conn, unsigned long ss
 		}
 	}
 	return 0;
+}
+
+bool SimpleClient::set_evloop(event_loop* pServer) {
+
+}
+
+bool SimpleClient::connect(tcpconn* conn, const std::string& strAddr, int port) {
+	// int sock_fd = socket_create();
+	// if( conn == NULL || sock_fd < 0)
+	// {	
+	// 	return false;
+	// }
+	// if(socket_block_connect(sock_fd, strAddr.c_str(), port) == 0)
+	// {	
+ //        socket_buffer(sock_fd,16*1024);
+ //        if(socket_nonblock(sock_fd) < 0)
+ //        {
+ //            printf("SetNonblock faild \n");
+ //            socket_close(sock_fd);
+ //            return false;
+ //        }
+ //        if(socket_keepalive(sock_fd) < 0)
+ //        {
+ //            printf("socket_keepalive faild \n");
+ //            socket_close(sock_fd);
+ //            return false;
+ //        }
+ //        conn->setfd(sock_fd);
+	// 	return register_to_evloop(conn);			
+	// }
+	// socket_close(sock_fd);	
+	// return false;
+	return init_client(strAddr, port);
+}
+
+bool SimpleClient::connect(tcpconn* conn, const address& addr) {
+	return connect(conn,addr.host,addr.port);
+}
+
+bool SimpleClient::register_to_evloop(tcpconn* conn) {
+	return manage(conn);
 }

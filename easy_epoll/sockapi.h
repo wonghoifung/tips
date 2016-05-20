@@ -42,7 +42,8 @@ enum STATUS
 {
     CONNECT=0, 
     REQUEST, 
-    CLOSE
+    CLOSE,
+    CONNECTING
 };
 
 int socket_listen(int fd , int port);

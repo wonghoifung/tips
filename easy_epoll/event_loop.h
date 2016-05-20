@@ -27,6 +27,7 @@ public:
     static void handle_signal(int signum);
 
 	bool init_server(int listen_port);	
+	bool init_client(const std::string& host, int port);
 	bool init_event();
 	bool run();
     
