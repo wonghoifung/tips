@@ -1,4 +1,3 @@
-#include "SimpleClient.h"
 #include "MuteServer.h"
 #include "log.h"
 #include "timer.h"
@@ -44,8 +43,7 @@ int main() {
 		exit(0);
 	}
 	
-	SimpleClient* sc = new SimpleClient(&ms);
-	sc->connect("127.0.0.1", "6464");
+	ms.connect("127.0.0.1", "6464");
 
 	ms.run();
 

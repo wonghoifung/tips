@@ -31,13 +31,13 @@ bool stream_client::connect(tcpconn* conn, const std::string& strAddr, int port)
         socket_buffer(sock_fd,16*1024);
         if(socket_nonblock(sock_fd) < 0)
         {
-            log_error("SetNonblock faild \n");
+            printf("SetNonblock faild \n");
             socket_close(sock_fd);
             return false;
         }
         if(socket_keepalive(sock_fd) < 0)
         {
-            log_error("socket_keepalive faild \n");
+            printf("socket_keepalive faild \n");
             socket_close(sock_fd);
             return false;
         }
