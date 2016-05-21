@@ -124,18 +124,13 @@ bool event_loop::run()
             }
             else if(epevarr_[i].events & EPOLLIN )
             {               
-                if (s->isconnecting()) {
-                    printf("..........ok\n");
-                    s->handle_connect(); 
-                } else {
-                    if( s->handle_read() == -1 )
-                    {
-                        handle_close(s);
-                        continue;
-                    }
-                    if( s->writable() )
-                        towrite(s);
+                if( s->handle_read() == -1 )
+                {
+                    handle_close(s);
+                    continue;
                 }
+                if( s->writable() )
+                    towrite(s);
             }
             else if( epevarr_[i].events & EPOLLOUT )
             {
