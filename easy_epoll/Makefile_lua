@@ -16,10 +16,10 @@ CPPFLAGS += -I/usr/local/include
 LIBS = -lrt
 LINKFLAGS = -L/usr/local/lib 
 
-INCLUDEDIRS = ./ ./luasrc/
+INCLUDEDIRS = ./ ./luasrc/ ./lualib/
 INCLUDES = $(foreach tmp, $(INCLUDEDIRS), -I $(tmp))
 
-MYSOURCEDIRS = ./ ./luasrc/
+MYSOURCEDIRS = ./ ./luasrc/ ./lualib/
 
 SOURCEDIRS = $(MYSOURCEDIRS)
 
