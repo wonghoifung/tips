@@ -17,7 +17,7 @@ tcpconn::tcpconn(int cid)
 ,status_(-1)
 ,connid_(cid)
 ,remoteaddr_()
-,port_(0)
+// ,port_(0)
 ,ud_(NULL)
 ,parser_(NULL)
 {
@@ -149,7 +149,10 @@ void tcpconn::setremoteaddr(void) {
     if(getpeername(getfd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
     {
         remoteaddr_ = inet_ntoa(remote_addr.sin_addr);
-        port_ = ntohs(remote_addr.sin_port);
+        int port = ntohs(remote_addr.sin_port);
+        char bufport[32] = {0};
+        sprintf(bufport,":%d",port);
+        remoteaddr_ += bufport;
     }
 }
 int tcpconn::on_message(inmessage* msg) {
@@ -174,12 +177,12 @@ int tcpconn::on_close(void) {
 }
 int tcpconn::on_connect(void) {
     status_ = CONNECT;
+    setremoteaddr();
     event_handler *h = (event_handler*)this->evloop();
     if(h != NULL)
         h->handle_connect(this);
 
     tcptimer_.start(30);
-    setremoteaddr();
     return 0;
 }
 int tcpconn::on_timeout(int timerid) {

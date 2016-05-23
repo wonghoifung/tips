@@ -57,7 +57,7 @@ public:
 	//-------------------------
 	const int status(void) const { return status_; }
 	const int connid(void) const { return connid_; }
-	const std::string& remoteaddr(void) const { return remoteaddr_; }		
+	const std::string& remoteaddr(void) const { return remoteaddr_; }
 	void* getud() { return ud_; }	
 	void setud(void* ud) { ud_ = ud; }
 	int sendmsg(outmessage* msg);
@@ -84,7 +84,6 @@ private:
 	int status_;
 	int connid_;
 	std::string remoteaddr_;
-	int port_;
 	void* ud_;
     message_parser* parser_;
 };
