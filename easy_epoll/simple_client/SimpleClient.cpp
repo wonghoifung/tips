@@ -71,6 +71,9 @@ int SimpleClient::send(outmessage* msg) {
 }
 
 void SimpleClient::handle_connect(tcpconn* conn) {
+	socket_buffer(conn->getfd(),16*1024);
+	socket_keepalive(conn->getfd());
+
 	printf("SimpleClient::%s\n", __FUNCTION__);
 	outmessage msg;
 	msg.begin(cmd_peer_login);
