@@ -37,15 +37,15 @@ int main() {
 	toggle_hex_level();
 	init_timer();
 
-	SimpleClient ms;
-	if (!ms.init_event()) {
+	SimpleClient* ms = new SimpleClient();
+	if (!ms->init_event()) {
 		printf("cannot init event\n");
 		exit(0);
 	}
 	
-	ms.connect("127.0.0.1", "6464");
+	ms->connect("127.0.0.1", "6464");
 
-	ms.run();
+	ms->run();
 
 	return 0;
 }
