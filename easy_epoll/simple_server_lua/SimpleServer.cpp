@@ -61,6 +61,10 @@ bool SimpleServer::init() {
 	return true;
 }
 
+int SimpleServer::lua_on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID) {
+
+}
+
 int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
 	printf("SimpleServer::%s\n", __FUNCTION__);
 	const short cmd = pMessage->command();
@@ -80,6 +84,8 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 	switch (cmd) {
 		case cmd_echo:
 			return handleEcho(peer, pMessage);
+		default:
+			return lua_on_message(pMessage, conn, ssid);
 	}
 
 	return 0;

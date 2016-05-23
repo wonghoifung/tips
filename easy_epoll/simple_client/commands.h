@@ -8,6 +8,7 @@ enum
 	cmd_echo = 2,
 	cmd_broadcast = 3,
 	cmd_kick = 4,
+	cmd_upper = 5,
 };
 
 #endif
