@@ -16,3 +16,6 @@ local s = inm:read_cstring()
 print("cmd:"..cmd)
 print("i:"..i)
 print("s:"..s)
+
+log_debug("debug from lua script...........")
+log_error("error from lua script...........")
