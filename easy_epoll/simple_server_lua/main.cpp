@@ -9,8 +9,8 @@ int main() {
 		exit(1);
 	}
 
-	luaport<lua_inmessage>::register_class(L, "inmsg");
-	luaport<lua_outmessage>::register_class(L, "outmsg");
+	luaport<lua_inmessage>::register_class(lua_state(), "inmsg");
+	luaport<lua_outmessage>::register_class(lua_state(), "outmsg");
 
 	lua_dofile("./scripts/main.lua");
 	lua_fini();

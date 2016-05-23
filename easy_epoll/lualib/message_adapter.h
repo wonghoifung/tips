@@ -28,7 +28,7 @@ public:
         return 1;
     }
     int read_cstring(lua_State* L) {
-        lua_pushstring(L, inmessage::read_cstring().c_str());
+        lua_pushstring(L, inmessage::read_cstring());
         return 1;
     }
     int copy(lua_State* L) {
@@ -89,7 +89,7 @@ public:
         outmessage::begin(cmd);
         return 0;
     }
-    int end(lua_State* L) {
+    int complete(lua_State* L) {
         outmessage::end();
         return 0;
     }

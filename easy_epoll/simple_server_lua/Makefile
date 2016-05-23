@@ -12,6 +12,7 @@ endif
 
 CPPFLAGS += -Wall
 CPPFLAGS += -I..
+CPPFLAGS += -I../luasrc/
 CPPFLAGS += -I../lualib
 
 LIBS = -lrt -lee

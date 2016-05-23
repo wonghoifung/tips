@@ -68,6 +68,7 @@ public:
     }
 };
 
+lua_State* lua_state();
 bool lua_init();
 bool lua_fini();
 void lua_dofile(const char* fname);

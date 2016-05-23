@@ -21,6 +21,6 @@ mfunc_item<outmessage_adapter> outmessage_adapter::mfuncs[11] = {
     {"write_front_char", &outmessage_adapter::write_front_char},
     {"write_cstring", &outmessage_adapter::write_cstring},
     {"begin", &outmessage_adapter::begin},
-    {"end", &outmessage_adapter::end},
+    {"complete", &outmessage_adapter::complete},
     {NULL, NULL}
 };

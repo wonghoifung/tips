@@ -8,6 +8,11 @@ int dofile (lua_State *L, const char *name);
 
 static lua_State* L = NULL;
 
+lua_State* lua_state() {
+	assert(L);
+	return L;
+}
+
 bool lua_init() {
 	if (L) {
         return false;
