@@ -42,7 +42,7 @@ int stream_client::send(outmessage* msg) {
 
 void stream_client::handle_connect(tcpconn* conn) {
 	socket_buffer(conn->getfd(),16*1024);
-	socket_keepalive(conn->getfd());
+	socket_keepalive(conn->getfd()); // TODO
 
 	printf("stream_client::%s\n", __FUNCTION__);
 }

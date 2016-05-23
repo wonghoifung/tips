@@ -2,9 +2,6 @@
 #include <netinet/tcp.h>
 #include <netinet/ip.h>
 
-static std::vector<int> sessions;
-static int maxnums = 0;
-
 int socket_listen(int fd, int port)
 {
 	struct sockaddr_in addr;
@@ -154,8 +151,6 @@ int socket_nonblock_connect(int fd, const char* ip, int port)
 				}  
 				return -2;
 			}
-			sessions.push_back(fd);
-			maxnums++;
 			return 0;
 		}
 		else
@@ -170,91 +165,3 @@ int socket_nonblock_connect(int fd, const char* ip, int port)
 	return -1;
 }
 
-int socket_wait_connect(int seconds)
-{
-	if(maxnums <= 0)
-	{
-		log_debug("Notice: Finish\n");
-		maxnums = 0;
-		return 0;
-	}
-	
-	int maxfd = 0;
-	int error = 0;
-
-	socklen_t errlen = sizeof(error);
-	
-	fd_set readset;
-	fd_set writeset;	
-	
-	FD_ZERO(&readset);
-	FD_ZERO(&writeset);
-	
-	std::vector<int>::iterator iter = sessions.begin();
-	for(; iter != sessions.end(); ++iter)
-	{
-		FD_SET(*iter, &readset);
-		FD_SET(*iter, &writeset);
-		if(maxfd < *iter)
-		{
-			maxfd = *iter;
-		}
-	}
-	
-	struct timeval tval;
-	tval.tv_sec = seconds;
-	tval.tv_usec = 0;
-	
-	int n = 0;
-	if(0 == (n = select(maxfd + 1, &readset, &writeset, NULL, seconds ? &tval : NULL)))
-	{
-	
-		for(iter = sessions.begin(); iter != sessions.end(); ++iter)
-		{
-			socket_close(*iter);
-		}		
-		log_debug("Notice: Select Time Out!!!\n");
-		sessions.clear();
-		maxnums = 0;
-		return 0;
-	}
-	else if(n < 0)
-	{
-		log_debug("Error: Select Error!!!\n");
-		return -1;
-	}
-	
-	for(iter = sessions.begin(); iter != sessions.end();)
-	{
-		if(FD_ISSET(*iter, &readset) || FD_ISSET(*iter, &writeset))
-		{
-			if(getsockopt(*iter, SOL_SOCKET, SO_ERROR, (char*)&error, &errlen) < 0)
-			{
-				log_debug("Error: Can not Connect To Server Ad Fd %d\n", *iter);
-				iter = sessions.erase(iter);
-				--maxnums;
-				socket_close(*iter);
-			}
-			else
-			{
-				int rtfd = *iter;
-				iter = sessions.erase(iter);
-				--maxnums;
-				if(error != 0)
-				{
-					log_debug("Error: Connect To Server Ad Fd %d Faile %s\n", *iter, strerror(error));
-				}
-				else
-				{
-					log_debug("Notice: Connect To Server Ad Fd %d Success \n", *iter);
-					return rtfd;
-				}				
-			}
-			continue;
-		}
-		
-		++iter;
-	}
-
-	return 0;
-}

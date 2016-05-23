@@ -58,6 +58,5 @@ int socket_keepalive(int fd);
 int socket_create(void);
 void socket_buffer(int fd,int iSize);
 int socket_nonblock_connect(int fd,const char* ip, int port);
-int socket_wait_connect(int seconds);
 
 #endif
