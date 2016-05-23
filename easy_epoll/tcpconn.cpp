@@ -43,7 +43,7 @@ tcpconn::~tcpconn()
 
 int tcpconn::handle_connect()
 {
-    return on_connect();
+    return process_connect();
 }
 
 int tcpconn::handle_read()
@@ -67,7 +67,7 @@ int tcpconn::handle_read()
         {
             return -1;
         }
-        if(on_rawdata(recvbuf_, nRecv) != 0)
+        if(process_rawdata(recvbuf_, nRecv) != 0)
             return -1;
         
         if(nRecv < buff_size)
@@ -112,7 +112,7 @@ int tcpconn::handle_write()
 int tcpconn::handle_close()
 {
 	tcptimer_.stop();
-	on_close();
+	process_close();
 	return 0;
 }
 
@@ -155,11 +155,11 @@ void tcpconn::setremoteaddr(void) {
         remoteaddr_ += bufport;
     }
 }
-int tcpconn::on_message(inmessage* msg) {
+int tcpconn::process_message(inmessage* msg) {
     event_handler* h = (event_handler*)this->evloop();
-    return h->handle_message(msg, this, connid_);
+    return h->handle_message_event(msg, this, connid_);
 }
-int tcpconn::on_rawdata(char* buf, int nLen) {
+int tcpconn::process_rawdata(char* buf, int nLen) {
     status_ = REQUEST;
     tcptimer_.stop();   
 
@@ -168,25 +168,25 @@ int tcpconn::on_rawdata(char* buf, int nLen) {
 
     return parser_->parse(buf, nLen);
 }
-int tcpconn::on_close(void) {
+int tcpconn::process_close(void) {
     status_ = CLOSE;    
     event_handler *h = (event_handler*)this->evloop();
     if(h != NULL)
-        h->handle_disconnect(this);
+        h->handle_disconnect_event(this);
     return 0;
 }
-int tcpconn::on_connect(void) {
+int tcpconn::process_connect(void) {
     status_ = CONNECT;
     setremoteaddr();
     event_handler *h = (event_handler*)this->evloop();
     if(h != NULL)
-        h->handle_connect(this);
+        h->handle_connect_event(this);
 
     tcptimer_.start(30);
     return 0;
 }
 int tcpconn::on_timeout(int timerid) {
     event_handler *h = (event_handler*)this->evloop();
-    int nRet = h->handle_timeout(this);
+    int nRet = h->handle_timeout_event(this);
     return nRet;
 }

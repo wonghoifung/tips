@@ -14,9 +14,10 @@ public:
 	SimpleServer();
 	~SimpleServer();
 	bool init();
-	virtual int handle_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID);
-    virtual void handle_connect(tcpconn* pHandler);
-    virtual void handle_disconnect(tcpconn* pHandler);
+	virtual int on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID);
+    virtual void on_connect(tcpconn* pHandler);
+    virtual void on_disconnect(tcpconn* pHandler);
+    virtual int on_no_message(tcpconn*);
 	virtual int on_timeout(int timerid);
 protected:
 	Peer* getPeer(tcpconn* pHandler);

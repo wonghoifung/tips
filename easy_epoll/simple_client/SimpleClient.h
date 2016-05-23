@@ -12,9 +12,9 @@ class SimpleClient : public stream_client
 public:
 	SimpleClient();
 	~SimpleClient();
-	virtual void handle_connect(tcpconn* conn);
-    virtual void handle_disconnect(tcpconn* conn);
-	virtual int handle_timeout(tcpconn*);
-	virtual int handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid);
+	virtual void on_connect(tcpconn* conn);
+    virtual void on_disconnect(tcpconn* conn);
+	virtual int on_no_message(tcpconn*);
+	virtual int on_message(inmessage* msg, tcpconn* conn, unsigned long ssid);
 };
 #endif

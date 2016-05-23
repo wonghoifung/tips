@@ -21,7 +21,7 @@ tcpconn* stream_server::create_tcpconn()
 	return conn;
 }
 
-void stream_server::handle_connect(tcpconn* conn)
+void stream_server::handle_connect_event(tcpconn* conn)
 {
     printf("stream_server::%s\n", __FUNCTION__);
     int id = conn->connid();
@@ -34,9 +34,10 @@ void stream_server::handle_connect(tcpconn* conn)
         log_debug("stream_server::ProcessConnected Error %d\r\n", conn->connid());
         assert(false);
     }
+    on_connect(conn);
 }
 
-void stream_server::handle_disconnect(tcpconn* conn)
+void stream_server::handle_disconnect_event(tcpconn* conn)
 {
     printf("stream_server::%s\n", __FUNCTION__);
     int id = conn->connid();
@@ -50,14 +51,22 @@ void stream_server::handle_disconnect(tcpconn* conn)
         log_debug("stream_server::ProcessClose Error %d\r\n",conn->connid());
         assert(false);
     }
+    on_disconnect(conn);
 }
 
-int stream_server::handle_timeout(tcpconn* conn)
+int stream_server::handle_timeout_event(tcpconn* conn)
 {
     printf("stream_server::%s\n", __FUNCTION__);
     log_debug("connect 30s and no packet,disconnect \n");
     disconnect(conn);
+    on_no_message(conn);
 	return 0;
+}
+
+int stream_server::handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) 
+{
+    on_message(msg,conn,ssid);
+    return 0;
 }
 
 tcpconn* stream_server::findconn(int idx)

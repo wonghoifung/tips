@@ -61,7 +61,7 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::handle_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
+int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
 	printf("SimpleServer::%s\n", __FUNCTION__);
 	const short cmd = pMessage->command();
 
@@ -85,20 +85,22 @@ int SimpleServer::handle_message(inmessage* pMessage, tcpconn* conn, unsigned lo
 	return 0;
 }
 
-void SimpleServer::handle_connect(tcpconn* conn) {
-	stream_server::handle_connect(conn);
+void SimpleServer::on_connect(tcpconn* conn) {
 	printf("SimpleServer::%s\n", __FUNCTION__);
 	printf("%s connected\n", conn->remoteaddr().c_str());
 }
 
-void SimpleServer::handle_disconnect(tcpconn* conn) {
-	stream_server::handle_disconnect(conn);
+void SimpleServer::on_disconnect(tcpconn* conn) {
 	printf("SimpleServer::%s\n", __FUNCTION__);
 	printf("%s disconnected\n", conn->remoteaddr().c_str());
 	Peer* peer = getPeer(conn);
 	if (peer) {
 		removePeer(peer);
 	}
+}
+
+int SimpleServer::on_no_message(tcpconn*) {
+	return 0;
 }
 
 int SimpleServer::on_timeout(int timerid) {

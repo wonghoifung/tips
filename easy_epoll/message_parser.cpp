@@ -49,7 +49,7 @@ public:
 
 			if(state_ == state_done)
 			{
-				handler_->on_message(&inmsg_);
+				conn_->process_message(&inmsg_);
 				reset();
 			}
 		}

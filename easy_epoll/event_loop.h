@@ -64,10 +64,10 @@ public:
 	event_handler() {}
 	virtual ~event_handler() {}
 
-    virtual void handle_connect(tcpconn* conn) = 0;
-    virtual void handle_disconnect(tcpconn* conn) = 0;
-	virtual int handle_timeout(tcpconn*) = 0;
-	virtual int handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid) = 0;
+    virtual void handle_connect_event(tcpconn* conn) = 0;
+    virtual void handle_disconnect_event(tcpconn* conn) = 0;
+	virtual int handle_timeout_event(tcpconn*) = 0;
+	virtual int handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) = 0;
 };
 
 #endif

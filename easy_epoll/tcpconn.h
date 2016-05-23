@@ -62,10 +62,10 @@ public:
 	void setud(void* ud) { ud_ = ud; }
 	int sendmsg(outmessage* msg);
 	void setremoteaddr(void);
-	int on_message(inmessage*);
-	int on_rawdata(char* buf, int nLen);
-	int on_close(void);
-	int on_connect(void);
+	int process_message(inmessage*);
+	int process_rawdata(char* buf, int nLen);
+	int process_close(void);
+	int process_connect(void);
 	virtual int	on_timeout(int timerid); // TODO
 	
 private:

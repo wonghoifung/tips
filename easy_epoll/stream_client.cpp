@@ -40,25 +40,28 @@ int stream_client::send(outmessage* msg) {
 	return conn_->sendbuf(msg->cbuffer(), msg->size());
 }
 
-void stream_client::handle_connect(tcpconn* conn) {
+void stream_client::handle_connect_event(tcpconn* conn) {
 	socket_buffer(conn->getfd(),16*1024);
 	socket_keepalive(conn->getfd()); // TODO
 
 	printf("stream_client::%s\n", __FUNCTION__);
+	on_connect(conn);
 }
 
-void stream_client::handle_disconnect(tcpconn* conn) {
+void stream_client::handle_disconnect_event(tcpconn* conn) {
 	printf("stream_client::%s\n", __FUNCTION__);
+	on_disconnect(conn);
 }
 
-int stream_client::handle_timeout(tcpconn*) {
+int stream_client::handle_timeout_event(tcpconn* conn) {
 	printf("stream_client::%s\n", __FUNCTION__);
+	on_no_message(conn);
 	return 0;
 }
 
-int stream_client::handle_message(inmessage* msg, tcpconn* conn, unsigned long ssid) {
+int stream_client::handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) {
 	printf("stream_client::%s\n", __FUNCTION__);
-
+	on_message(msg,conn,ssid);
 	return 0;
 }
 
