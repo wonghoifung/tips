@@ -1,6 +1,8 @@
 #include "luaport.h"
 #include "log.h"
 #include "timer.h"
+#include "SimpleServerAdapter.h"
+#include "PeerAdapter.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/resource.h>
@@ -41,7 +43,8 @@ int main() {
 		printf("cannot init lua\n");
 		exit(1);
 	}
-
+	luaport<SimpleServerAdapter>::register_class(lua_state(), "SimpleServer");
+	// luaport<PeerAdapter>::register_class(L, "Peer");
 	lua_dofile("./scripts/main.lua");
 	lua_fini();
 	exit(0);
