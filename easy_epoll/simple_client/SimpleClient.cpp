@@ -8,6 +8,7 @@ static void startTimer() {
 	gtimer.start(5);
 }
 static bool timerInit = false;
+static int cc = 0;
 class tmp: public timer_handler {
 public:
 	int on_timeout(int tid) {
@@ -24,6 +25,15 @@ public:
 			msg.end();
 			if (sc) sc->send(&msg);
 		}
+
+		if (cc++ % 2 == 0) {
+			outmessage msg;
+			msg.begin(cmd_chat2all);
+			msg.write_cstring("zbbbbbbbbbbz");
+			msg.end();
+			if (sc) sc->send(&msg);
+		}
+
 		startTimer();
 		return 0;
 	}
@@ -82,6 +92,12 @@ int SimpleClient::on_message(inmessage* msg, tcpconn* conn, unsigned long ssid) 
 		case cmd_upper: {
 			std::string rsp = msg->read_cstring();
 			printf("upper: %s\n", rsp.c_str());
+			break;
+		}
+		case cmd_chat2all: {
+			int peerid = msg->read_int();
+			std::string content = msg->read_cstring();
+			printf("%d say: %s\n", peerid, content.c_str());
 			break;
 		}
 	}

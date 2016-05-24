@@ -3,6 +3,7 @@
 #include "timer.h"
 #include "SimpleServerAdapter.h"
 #include "PeerAdapter.h"
+#include "Peer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/resource.h>
@@ -32,6 +33,19 @@ inline void set_rlimit()
 	}
 }
 
+static int getpeerid_lua(lua_State* L) {
+	tcpconn* conn = (tcpconn*)lua_topointer(L, -1);
+
+	Peer* peer = NULL;
+	if (conn) {
+		void* ptr = conn->getud();
+		if (ptr) peer = reinterpret_cast<Peer*>(ptr);
+	} // TODO reuse
+
+	lua_pushinteger(L, peer->getPeerId());
+	return 1;
+}
+
 int main() {
 	set_rlimit();
 	init_log("simple_server_lua");
@@ -44,6 +58,7 @@ int main() {
 		exit(1);
 	}
 	luaport<SimpleServerAdapter>::register_class(lua_state(), "SimpleServer");
+	lua_register(lua_state(), "getpeerid", getpeerid_lua);
 	// luaport<PeerAdapter>::register_class(L, "Peer");
 	lua_dofile("./scripts/main.lua");
 	lua_fini();

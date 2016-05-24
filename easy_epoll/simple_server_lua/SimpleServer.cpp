@@ -102,6 +102,7 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 		case cmd_echo:
 			return handleEcho(peer, pMessage);
 		case cmd_upper:
+		case cmd_chat2all:
 			return lua_on_message(pMessage, conn);
 	}
 
@@ -155,6 +156,11 @@ Peer* SimpleServer::getPeer(tcpconn* conn) {
 
 int SimpleServer::removePeer(Peer* peer) {
 	// to notify all modules...
+
+    lua_getglobal(lua_state(), "peer_go");
+    lua_pushinteger(lua_state(), peer->getPeerId());
+    lua_call(lua_state(), 1, 0);
+
 	delPeer(peer);
 	return 0;
 }
@@ -225,6 +231,11 @@ int SimpleServer::handlePeerLogin(inmessage* message, tcpconn* conn) {
 	} else {
 		return -1;
 	}
+
+	lua_getglobal(lua_state(), "peer_come");
+    lua_pushinteger(lua_state(), peer->getPeerId());
+    lua_pushlightuserdata(lua_state(), conn);
+    lua_call(lua_state(), 2, 0);
 
 	outmessage msg;
 	msg.begin(cmd_peer_login);

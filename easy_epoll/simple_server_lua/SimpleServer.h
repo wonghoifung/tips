@@ -20,8 +20,8 @@ public:
     virtual void on_disconnect(tcpconn* pHandler);
     virtual int on_no_message(tcpconn*);
 	virtual int on_timeout(int timerid);
-protected:
 	Peer* getPeer(tcpconn* pHandler);
+protected:
 	int removePeer(Peer* peer);
 	void delPeer(Peer* peer);
 	Peer* checkRelogin(const uint32_t peerid, tcpconn* pHandler);
