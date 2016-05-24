@@ -16,6 +16,14 @@ public:
 		msg.write_cstring("hello world");
 		msg.end();
 		if (sc) sc->send(&msg);
+
+		{
+			outmessage msg;
+			msg.begin(cmd_upper);
+			msg.write_cstring("hello world");
+			msg.end();
+			if (sc) sc->send(&msg);
+		}
 		startTimer();
 		return 0;
 	}
@@ -68,7 +76,13 @@ int SimpleClient::on_message(inmessage* msg, tcpconn* conn, unsigned long ssid) 
 		}
 		case cmd_echo: {
 			std::string rsp = msg->read_cstring();
-			printf("recv: %s\n", rsp.c_str());
+			printf("echo: %s\n", rsp.c_str());
+			break;
+		}
+		case cmd_upper: {
+			std::string rsp = msg->read_cstring();
+			printf("upper: %s\n", rsp.c_str());
+			break;
 		}
 	}
 	return 0;

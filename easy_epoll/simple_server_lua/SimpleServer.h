@@ -14,8 +14,8 @@ public:
 	SimpleServer();
 	~SimpleServer();
 	bool init();
-	int lua_on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID);
-	virtual int on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID);
+	int lua_on_message(inmessage* pMessage, tcpconn* pHandler);
+	virtual int on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long ssid);
     virtual void on_connect(tcpconn* pHandler);
     virtual void on_disconnect(tcpconn* pHandler);
     virtual int on_no_message(tcpconn*);

@@ -1,6 +1,7 @@
 #include "SimpleServer.h"
 #include "commands.h"
 #include "message.h"
+#include "message_adapter.h"
 #include "Peer.h"
 #include <assert.h>
 #include <stdio.h>
@@ -61,8 +62,24 @@ bool SimpleServer::init() {
 	return true;
 }
 
-int SimpleServer::lua_on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID) {
+int SimpleServer::lua_on_message(inmessage* pMessage, tcpconn* pHandler) {
+	printf("SimpleServer::%s\n", __FUNCTION__);
 
+	// dispatch_message
+    lua_getglobal(lua_state(), "dispatch_message");
+
+    // use jemalloc
+    lua_inmessage* lim = new lua_inmessage(); // TODO where to delete
+    lim->inmessage::copy(pMessage->buffer(), pMessage->size());
+    *(lua_inmessage**)lua_newuserdata(lua_state(), sizeof(lua_inmessage*)) = lim;
+    luaL_getmetatable(lua_state(), "inmsg");
+    lua_setmetatable(lua_state(), -2);
+
+    lua_pushlightuserdata(lua_state(), (void*)pHandler);
+
+    lua_call(lua_state(), 2, 0);
+
+    return 0;
 }
 
 int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
@@ -84,8 +101,8 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 	switch (cmd) {
 		case cmd_echo:
 			return handleEcho(peer, pMessage);
-		default:
-			return lua_on_message(pMessage, conn, ssid);
+		case cmd_upper:
+			return lua_on_message(pMessage, conn);
 	}
 
 	return 0;
@@ -112,14 +129,14 @@ int SimpleServer::on_no_message(tcpconn*) {
 int SimpleServer::on_timeout(int timerid) {
 	switch (timerid) {
 		case HEARTBEAT_TIMER: {
-			printf("heartbeat timer, %d\n", (int)time(NULL));
+			// printf("heartbeat timer, %d\n", (int)time(NULL));
 			heartbeatTimer_.start(30);
 			break;
 		}
 
 		case UPDATE_TIMER: {
 			// update status or cache...
-			printf("update timer, %d\n", (int)time(NULL));
+			// printf("update timer, %d\n", (int)time(NULL));
 			updateTimer_.start(6);
 			break;
 		}
