@@ -9,6 +9,7 @@ enum
 	cmd_broadcast = 3,
 	cmd_kick = 4,
 	cmd_upper = 5,
+	cmd_chat2all = 6,
 };
 
 #endif
