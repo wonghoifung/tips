@@ -62,7 +62,6 @@ bool SimpleServer::init() {
 }
 
 int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
 	const short cmd = pMessage->command();
 
 	switch (cmd) {
@@ -86,12 +85,10 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 }
 
 void SimpleServer::on_connect(tcpconn* conn) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
 	printf("%s connected\n", conn->remoteaddr().c_str());
 }
 
 void SimpleServer::on_disconnect(tcpconn* conn) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
 	printf("%s disconnected\n", conn->remoteaddr().c_str());
 	Peer* peer = getPeer(conn);
 	if (peer) {
