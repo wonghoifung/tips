@@ -2,6 +2,7 @@
 #include "log.h"
 #include "timer.h"
 #include "SimpleServerAdapter.h"
+#include "lua_timer.h"
 #include "Peer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,6 +55,7 @@ int main() {
 	}
 	luaport<SimpleServerAdapter>::register_class(lua_state(), "SimpleServer");
 	lua_register(lua_state(), "getpeerid", getpeerid_lua);
+	register_lua_timer();
 	lua_dofile("./scripts/main.lua");
 	lua_fini();
 	exit(0);

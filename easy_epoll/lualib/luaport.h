@@ -2,6 +2,7 @@
 #define LUAPORT_HEADER
 
 #include <lua.hpp>
+// #include <stdio.h>
 
 template <typename T>
 struct mfunc_item
@@ -42,6 +43,7 @@ public:
     static int create_object(lua_State* L)
     {
         const char* cname = lua_tostring(L, lua_upvalueindex(1));
+        // printf("luaport::create_object %s\n", cname);
         T* obj = new T();
         T** ud=(T**)lua_newuserdata(L,sizeof(T*));
         *ud = obj;
@@ -53,6 +55,7 @@ public:
     static int destroy_object(lua_State* L)
     {
         const char* cname = lua_tostring(L, lua_upvalueindex(1));
+        // printf("luaport::destroy_object %s\n", cname);
         T** obj = (T**)luaL_checkudata(L, -1, cname);
         delete (*obj);
         return 0;
@@ -62,6 +65,7 @@ public:
     {
         int i = (int)lua_tonumber(L, lua_upvalueindex(1));
         const char* cname = lua_tostring(L, lua_upvalueindex(2));
+        // printf("luaport::proxy %s\n", cname);
         T* obj = *(T**)luaL_checkudata(L, 1, cname);
         return (obj->*(T::mfuncs[i].mfunc))(L);
         return 0;

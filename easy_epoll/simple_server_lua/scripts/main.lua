@@ -1,5 +1,15 @@
 -- coding:utf-8
 
+-- local function test()
+-- 	local tom = outmsg()
+-- 	tom:begin(1)
+-- 	tom:write_int(2)
+-- 	tom:write_cstring("test")
+-- 	tom:complete()
+-- end
+
+-- test()
+
 local p = "./scripts/"
 local oldp = package.path
 package.path = string.format("%s?.lua;%s",p,oldp)
@@ -30,6 +40,15 @@ end
 function peer_go(peerid)
 	pm.peer_go(peerid)
 end
+
+----------------------------------------->
+local testtimer = create_timer('on_testtimer_timerout')
+function on_testtimer_timerout(timer)
+	print('lua on_testtimer_timerout')
+	start_timer(3, testtimer)
+end
+start_timer(3, testtimer)
+----------------------------------------->
 
 init_callbacks()
 
