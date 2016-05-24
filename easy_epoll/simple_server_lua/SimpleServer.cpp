@@ -146,12 +146,7 @@ int SimpleServer::on_timeout(int timerid) {
 }
 
 Peer* SimpleServer::getPeer(tcpconn* conn) {
-	Peer* peer = NULL;
-	if (conn) {
-		void* ptr = conn->getud();
-		if (ptr) peer = reinterpret_cast<Peer*>(ptr);
-	}
-	return peer;
+	return ::getPeer(conn);
 }
 
 int SimpleServer::removePeer(Peer* peer) {

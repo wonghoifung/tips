@@ -23,4 +23,6 @@ private:
 	tcpconn* streamhandler_;
 };
 
+Peer* getPeer(tcpconn* conn);
+
 #endif
