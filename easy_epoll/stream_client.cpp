@@ -27,7 +27,6 @@ bool stream_client::init() {
 }
 
 bool stream_client::connect(const std::string& host, const std::string& port) {
-	printf("stream_client::%s\n", __FUNCTION__);
 	bool ret = connect(conn_, host, atoi(port.c_str()));
 	if (!ret) {
 		printf("connect error\n");
@@ -36,7 +35,6 @@ bool stream_client::connect(const std::string& host, const std::string& port) {
 }
 
 int stream_client::send(outmessage* msg) {
-	printf("stream_client::%s\n", __FUNCTION__);
 	return conn_->sendbuf(msg->cbuffer(), msg->size());
 }
 
@@ -44,23 +42,19 @@ void stream_client::handle_connect_event(tcpconn* conn) {
 	socket_buffer(conn->getfd(),16*1024);
 	socket_keepalive(conn->getfd()); // TODO
 
-	printf("stream_client::%s\n", __FUNCTION__);
 	on_connect(conn);
 }
 
 void stream_client::handle_disconnect_event(tcpconn* conn) {
-	printf("stream_client::%s\n", __FUNCTION__);
 	on_disconnect(conn);
 }
 
 int stream_client::handle_timeout_event(tcpconn* conn) {
-	printf("stream_client::%s\n", __FUNCTION__);
 	on_no_message(conn);
 	return 0;
 }
 
 int stream_client::handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) {
-	printf("stream_client::%s\n", __FUNCTION__);
 	on_message(msg,conn,ssid);
 	return 0;
 }

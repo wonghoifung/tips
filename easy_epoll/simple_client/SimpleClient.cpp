@@ -56,7 +56,6 @@ SimpleClient::~SimpleClient() {
 }
 
 void SimpleClient::on_connect(tcpconn* conn) {
-	printf("SimpleClient::%s\n", __FUNCTION__);
 	outmessage msg;
 	msg.begin(cmd_peer_login);
 	msg.write_int((int)getpid());
@@ -65,21 +64,18 @@ void SimpleClient::on_connect(tcpconn* conn) {
 }
 
 void SimpleClient::on_disconnect(tcpconn* conn) {
-	printf("SimpleClient::%s\n", __FUNCTION__);
 }
 
 int SimpleClient::on_no_message(tcpconn*) {
-	printf("SimpleClient::%s\n", __FUNCTION__);
 	return 0;
 }
 
 int SimpleClient::on_message(inmessage* msg, tcpconn* conn, unsigned long ssid) {
-	printf("SimpleClient::%s\n", __FUNCTION__);
 	const short cmd = msg->command();
 	switch (cmd) {
 		case cmd_peer_login: {
 			int retcode = msg->read_int();
-			printf("login ret: %d\n", retcode);
+			printf("login %s\n", retcode==0?"success":"failure");
 			if (retcode == -1) exit(0);
 			startTimer();
 			break;

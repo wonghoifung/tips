@@ -144,9 +144,9 @@ int socket_nonblock_connect(int fd, const char* ip, int port)
 		{
 			if(0 > connect(fd, (struct sockaddr*)&remote, sizeof(remote)))
 			{	
-				printf("connect errno: %d\n", errno);
 				if(errno != EINPROGRESS)
-				{	
+				{
+					printf("connect errno: %d\n", errno);	
 					return -1;
 				}  
 				return -2;

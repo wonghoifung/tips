@@ -63,8 +63,6 @@ bool SimpleServer::init() {
 }
 
 int SimpleServer::lua_on_message(inmessage* pMessage, tcpconn* pHandler) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
-
 	// dispatch_message
     lua_getglobal(lua_state(), "dispatch_message");
 
@@ -83,7 +81,6 @@ int SimpleServer::lua_on_message(inmessage* pMessage, tcpconn* pHandler) {
 }
 
 int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long ssid) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
 	const short cmd = pMessage->command();
 
 	switch (cmd) {
@@ -110,12 +107,10 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 }
 
 void SimpleServer::on_connect(tcpconn* conn) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
 	printf("%s connected\n", conn->remoteaddr().c_str());
 }
 
 void SimpleServer::on_disconnect(tcpconn* conn) {
-	printf("SimpleServer::%s\n", __FUNCTION__);
 	printf("%s disconnected\n", conn->remoteaddr().c_str());
 	Peer* peer = getPeer(conn);
 	if (peer) {
@@ -256,7 +251,6 @@ int SimpleServer::handleReqBroadcast(inmessage* message) {
 
 int SimpleServer::handleEcho(Peer* peer, inmessage* message) {
 	const std::string content = message->read_cstring();
-	printf("receive: %s\n", content.c_str());
 	outmessage msg;
 	msg.begin(cmd_echo);
 	msg.write_string(content);

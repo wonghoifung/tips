@@ -66,7 +66,7 @@ bool event_loop::init_client(const std::string& host, int port)
     c->setfd(sock_fd);     
     c->evloop(this);
     addsock(c);
-    printf("ret: %d\n", ret);
+
     if (ret == -2) {
         c->setconnecting();
         towrite(c);
@@ -135,7 +135,6 @@ bool event_loop::run()
             else if( epevarr_[i].events & EPOLLOUT )
             {
                 if (s->isconnecting()) {
-                    printf("..........ok\n");
                     s->handle_connect(); 
                 } else {
                     if( s->handle_write() == -1 )
