@@ -17,7 +17,7 @@ LIBS = -lrt -lee
 LINKFLAGS = -L/usr/local/lib 
 LINKFLAGS += -L..
 
-INCLUDEDIRS = ./  
+INCLUDEDIRS = ./ ../shared/
 INCLUDES = $(foreach tmp, $(INCLUDEDIRS), -I $(tmp))
 
 MYSOURCEDIRS = ./  
