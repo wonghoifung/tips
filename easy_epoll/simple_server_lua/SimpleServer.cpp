@@ -98,8 +98,7 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 	switch (cmd) {
 		case cmd_echo:
 			return handleEcho(peer, pMessage);
-		case cmd_upper:
-		case cmd_chat2all:
+		default:
 			return lua_on_message(pMessage, conn);
 	}
 
