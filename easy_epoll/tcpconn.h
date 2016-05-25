@@ -1,8 +1,6 @@
 #ifndef TCPCONN_HEADER
 #define TCPCONN_HEADER
 
-#define RECV_BUFFER 4096
-
 #include "timer.h"
 #include "loopbuf.h"
 #include "message_parser.h"
