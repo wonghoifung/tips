@@ -3,8 +3,7 @@
 #include <stdarg.h>
 #include <assert.h>
 
-stream_server::stream_server()
-:event_handler()
+stream_server::stream_server(): event_handler()
 {
 	maxid_ = 0;
 }
@@ -17,61 +16,53 @@ tcpconn* stream_server::create_tcpconn()
 {
 	tcpconn* conn = NULL;
     int uid = genconnid();
-	conn = new tcpconn(uid);
+	conn = new tcpconn(uid); // server: delete by event_loop
 	return conn;
 }
 
 void stream_server::handle_connect_event(tcpconn* conn)
 {
     int id = conn->connid();
-    if(connmap_.find(id) == connmap_.end())
-    {
+    if(connmap_.find(id) == connmap_.end()) {
         connmap_.insert(std::map<int, tcpconn*>::value_type(id,conn));
     }
-    else
-    {
-        log_debug("stream_server::ProcessConnected Error %d\r\n", conn->connid());
+    else {
+        log_debug("stream_server::handle_connect_event connid %d already existed", conn->connid());
         assert(false);
     }
-    on_connect(conn);
+    on_connect(conn); // subclass provide implementation
 }
 
 void stream_server::handle_disconnect_event(tcpconn* conn)
 {
     int id = conn->connid();
     std::map<int, tcpconn*>::iterator iter = connmap_.find(id);
-    if(iter != connmap_.end())
-    {
+    if(iter != connmap_.end()) {
         connmap_.erase(iter);
     }
-    else
-    {
-        log_debug("stream_server::ProcessClose Error %d\r\n",conn->connid());
+    else {
+        log_debug("stream_server::handle_disconnect_event connid %d not existed", conn->connid());
         assert(false);
     }
-    on_disconnect(conn);
+    on_disconnect(conn); // subclass provide implementation
 }
 
 int stream_server::handle_timeout_event(tcpconn* conn)
 {
-    log_debug("connect 30s and no packet,disconnect \n");
+    log_debug("connect 30s and no message, disconnect connid: %d", conn->connid());
     disconnect(conn);
-    on_no_message(conn);
-	return 0;
+    return on_no_message(conn); // subclass provide implementation
 }
 
 int stream_server::handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) 
 {
-    on_message(msg,conn,ssid);
-    return 0;
+    return on_message(msg, conn, ssid); // subclass provide implementation
 }
 
 tcpconn* stream_server::findconn(int idx)
 {
 	std::map<int, tcpconn*>::iterator iter = connmap_.find(idx);
-
-	if(iter != connmap_.end())
-	{
+	if(iter != connmap_.end()) {
 		return iter->second;
 	}
 	return NULL;
@@ -80,8 +71,7 @@ tcpconn* stream_server::findconn(int idx)
 int stream_server::genconnid()
 {
     ++maxid_;
-    while (connmap_.find(maxid_) != connmap_.end())
-    {
+    while (connmap_.find(maxid_) != connmap_.end()) {
         ++maxid_;
     }
 	return maxid_;

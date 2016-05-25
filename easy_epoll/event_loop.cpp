@@ -14,7 +14,7 @@
 
 bool event_loop::run_ = true;	
 
-event_loop::event_loop():fdconns_(NULL),fdcount_(0),fdidx_(0),epevarr_(NULL)
+event_loop::event_loop(): fdconns_(NULL), fdcount_(0), fdidx_(0), epevarr_(NULL)
 {
 
 }
@@ -247,18 +247,18 @@ bool event_loop::disconnect(tcpconn* conn)
  	return true;
 }
 
-bool event_loop::manage(tcpconn* conn) // TODO no use
-{
-    if(conn == NULL)
-        return false;
+// bool event_loop::manage(tcpconn* conn) // TODO no use
+// {
+//     if(conn == NULL)
+//         return false;
 
-    addsock(conn);
+//     addsock(conn);
 
-    conn->evloop(this);
-    conn->handle_connect();	
+//     conn->evloop(this);
+//     conn->handle_connect();	
 
-	return true;
-}
+// 	return true;
+// }
 
 void event_loop::addsock(tcpconn* s)
 {

@@ -33,7 +33,7 @@ public:
     
 	virtual tcpconn* create_tcpconn(void) = 0;
 	tcpconn* prepare_tcpconn(int sock_fd);
-	bool manage(tcpconn* conn);
+	// bool manage(tcpconn* conn);
 	bool disconnect(tcpconn* conn);
 
     void towrite(tcpconn* s);
@@ -47,7 +47,6 @@ protected:
 
     static bool run_; // set false when signal received, default true
     int listen_sockfd_; // server: init by init_server(), client: no use
-	//int maxfd_;
     tcpconn** fdconns_; // init by init_event()
     int fdcount_; // increase 1 by addsock(), decrease 1 by remsock()
     uint32_t fdidx_; // generate idx for every new connection, set to tcpconn in addsock()
