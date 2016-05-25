@@ -41,7 +41,7 @@ public:
 
 protected:
 	int handle_accept();
-    void addsock(tcpconn* s);
+    void addsock(tcpconn* s); // call when tcpconn is setup ok 
     void remsock(tcpconn* s);
     void handle_close(tcpconn* conn);
 

@@ -157,7 +157,7 @@ bool event_loop::init_event()
 	if (getrlimit(RLIMIT_NOFILE, &rl) == 0 && rl.rlim_cur != RLIM_INFINITY) {
 			nfiles = rl.rlim_cur - 1;
 	}
-    if( nfiles > MAX_DESCRIPTORS )
+    if ( nfiles > MAX_DESCRIPTORS )
         nfiles = MAX_DESCRIPTORS;
 
 	log_debug("epoll create files: %d", nfiles);
@@ -183,18 +183,18 @@ int event_loop::handle_accept()
 	int conn_fd;
 
     do {
-        if((conn_fd = socket_accept(listen_sockfd_)) == INVALID_SOCKET) break;
+        if ((conn_fd = socket_accept(listen_sockfd_)) == INVALID_SOCKET) break;
 
         socket_buffer(conn_fd, 16 * 1024);
 
-        if(socket_nonblock(conn_fd) < 0) {
+        if (socket_nonblock(conn_fd) < 0) {
             log_error("cannot set non block for fd: %d", conn_fd);
             socket_close(conn_fd);
             assert(false);
             continue;
         }
 
-        if(socket_keepalive(conn_fd) < 0) {
+        if (socket_keepalive(conn_fd) < 0) {
             log_error("cannot set keepalive for fd: %d", conn_fd);
             socket_close(conn_fd);
             assert(false);
@@ -202,7 +202,7 @@ int event_loop::handle_accept()
         }	
         
         tcpconn* c = prepare_tcpconn(conn_fd);
-        if(c) {
+        if (c) {
             log_error("cannot prepare tcpconn for fd: %d", conn_fd);
             socket_close(conn_fd);
             assert(false);
@@ -224,7 +224,7 @@ void event_loop::handle_close(tcpconn* conn)
 
     remsock(conn);
 
-    if(conn->getneeddel()) {
+    if (conn->getneeddel()) {
         delete conn;
         conn = NULL;
     }

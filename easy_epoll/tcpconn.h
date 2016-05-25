@@ -72,20 +72,46 @@ public:
 	virtual int	on_timeout(int timerid);
 	
 private:
-	int sockfd_;
+	// init 0, server: set by event_loop:prepare_tcpconn(), client: set by event_loop:init_client()
+	int sockfd_; 
+
+	// init 0, set by event_loop:addsock()
     uint32_t fdidx_;
+
+    // init false, server: set by event_loop:prepare_tcpconn(), client: set by stream_client::stream_client()
     bool needdel_;
+
+    // init false, set true when sendloopbuf_ has not enough space for sendbuf
     bool full_;
+
+    // use only one time, test situations that connect but no data received
 	timer tcptimer_;
+
+	// server: set by event_loop:prepare_tcpconn(), client: set by event_loop:init_client()
 	event_loop* evloop_;
-	char recvbuf_[RECV_BUFFER_SIZE];	
+
+	// for sys read
+	char recvbuf_[RECV_BUFFER_SIZE];
+
+	// for app send
 	loopbuf* sendloopbuf_;
+
+	// for sys send
 	char tmpsendbuf_[SEND_BUFFER_SIZE];
 
+	// only client may set to CONNECTING 
 	int status_;
+
+	// set when tcpconn is constructing
 	int connid_;
+
+	// set by handle_connect()
 	std::string remoteaddr_;
+
+	// set by app
 	void* ud_;
+
+	// init by process_rawdata()
     message_parser* parser_;
 };
 
