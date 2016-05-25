@@ -131,7 +131,7 @@ int tcpconn::sendbuf(const char* buf, int nLen)
 {
     if (nLen > (int)sendloopbuf_->freecount()) {
         log_error("tcpconn::sendbuf, sendloopbuf not enough, fd:%d, idx:%d, connid:%d", sockfd_, fdidx_, connid_);
-        full_ = true;
+        full_ = true; // no way to restore now
         return -1;
     }
     else {    
