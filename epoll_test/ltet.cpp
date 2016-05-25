@@ -155,8 +155,8 @@ int main( int argc, char* argv[] )
             break;
         }
     
-        //lt( events, ret, epollfd, listenfd );
-        et( events, ret, epollfd, listenfd );
+        lt( events, ret, epollfd, listenfd );
+        //et( events, ret, epollfd, listenfd );
     }
 
     close( listenfd );
