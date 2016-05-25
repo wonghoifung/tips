@@ -15,10 +15,10 @@ class event_loop;
 class inmessage;
 class outmessage;
 
-const int MAX_LOOP_BUFFER_LEN = 64*1024;
+const int MAX_LOOP_BUFFER_LEN = 64 * 1024;
 
-#define RECV_BUFFER_SIZE (1024*32)
-#define SEND_BUFFER_SIZE (1024*32)
+#define RECV_BUFFER_SIZE (1024 * 32)
+#define SEND_BUFFER_SIZE (1024 * 32)
 
 class tcpconn;
 
@@ -29,7 +29,7 @@ class tcpconn : public timer_handler
 
 public:
 	tcpconn(int cid);	
-	~tcpconn();	
+	virtual ~tcpconn();	
 
 	const int getfd() const { return sockfd_; }
 	void setfd(int fd) { sockfd_ = fd; }
@@ -45,28 +45,33 @@ public:
 
 	const bool isconnecting() const { return status_ == CONNECTING; }
 	void setconnecting() { status_ = CONNECTING; }
+	const int status() const { return status_; }
 
+	const int connid() const { return connid_; }
+
+	const std::string& remoteaddr() const { return remoteaddr_; }
+	void setremoteaddr();
+
+	void* getud() { return ud_; }	
+	void setud(void* ud) { ud_ = ud; }
+
+	// used by event_loop
 	int handle_connect();
 	int handle_read();
 	int handle_write();
 	int handle_close();
 
 	int sendbuf(const char* buf, int nLen);
-    bool writable();
-	
-	//-------------------------
-	const int status(void) const { return status_; }
-	const int connid(void) const { return connid_; }
-	const std::string& remoteaddr(void) const { return remoteaddr_; }
-	void* getud() { return ud_; }	
-	void setud(void* ud) { ud_ = ud; }
 	int sendmsg(outmessage* msg);
-	void setremoteaddr(void);
-	int process_message(inmessage*);
-	int process_rawdata(char* buf, int nLen);
-	int process_close(void);
-	int process_connect(void);
-	virtual int	on_timeout(int timerid); // TODO
+    bool writable();
+
+	int process_message(inmessage*); // used by message_parser
+	int process_rawdata(char* buf, int nLen); // used by handle_read()
+	// int process_close(void);
+	// int process_connect(void);
+
+	// from timer_handler
+	virtual int	on_timeout(int timerid);
 	
 private:
 	int sockfd_;
@@ -80,7 +85,6 @@ private:
 	loopbuf* sendloopbuf_;
 	char tmpsendbuf_[SEND_BUFFER_SIZE];
 
-	//-------------------------
 	int status_;
 	int connid_;
 	std::string remoteaddr_;

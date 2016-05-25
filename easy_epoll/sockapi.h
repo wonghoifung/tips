@@ -51,7 +51,7 @@ int socket_accept(int fd);
 int socket_send(int fd, const char* buf, size_t len);
 int socket_recv(int fd , void* buf , size_t len );
 void socket_close(int fd);
-int socket_block_connect(int fd, const char* ip , int port );
+// int socket_block_connect(int fd, const char* ip , int port );
 int socket_nonblock(int fd);
 int socket_reuse(int fd);
 int socket_keepalive(int fd);

@@ -15,7 +15,7 @@ int socket_listen(int fd, int port)
 		return -1;		
 	}
 
-	if(listen(fd, MAX_LISTEN_QUEUE) != 0) {
+	if (listen(fd, MAX_LISTEN_QUEUE) != 0) {
 		log_error("listen fd error: %s", strerror(errno));		
 		return -1;		
 	}   
@@ -28,7 +28,7 @@ int socket_accept(int fd)
 	struct sockaddr_in clientaddr;
 	socklen_t clilen = sizeof(clientaddr);
 	int connfd = accept(fd, (struct sockaddr*)&clientaddr, &clilen);
-	if( connfd < 0 ) {
+	if (connfd < 0) {
 		return -1;
 	}
 	else {
@@ -39,34 +39,32 @@ int socket_accept(int fd)
 
 int socket_send(int fd, const char* buf, size_t len)
 {
-	return send( fd, buf, len, 0);
+	return send(fd, buf, len, 0);
 }
 
 int socket_recv(int fd , void* buf , size_t len)
 {
-	return recv( fd, (char*)buf, len, 0);
+	return recv(fd, (char*)buf, len, 0);
 }
 
-void socket_close( int fd )
+void socket_close(int fd)
 {
 	close(fd);
 }
 
-int socket_block_connect(int fd, const char* ip , int port )
-{
-	struct sockaddr_in remote;
-	memset(&remote, 0,sizeof(remote));
-	remote.sin_family = AF_INET;
-	remote.sin_port = htons(port);
-	remote.sin_addr.s_addr = inet_addr(ip);
-
-	if(0 != connect(fd, (struct sockaddr*)&remote, sizeof(remote)))
-	{
-		log_error("Error: Connect Faile connect(): %s\n", strerror(errno));
-		return -1;
-	}
-	return 0;
-}
+// int socket_block_connect(int fd, const char* ip , int port)
+// {
+// 	struct sockaddr_in remote;
+// 	memset(&remote, 0,sizeof(remote));
+// 	remote.sin_family = AF_INET;
+// 	remote.sin_port = htons(port);
+// 	remote.sin_addr.s_addr = inet_addr(ip);
+// 	if(connect(fd, (struct sockaddr*)&remote, sizeof(remote)) != 0) {
+// 		log_error("block connect failure: %s", strerror(errno));
+// 		return -1;
+// 	}
+// 	return 0;
+// }
 
 int socket_nonblock(int fd)
 {

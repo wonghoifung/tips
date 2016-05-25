@@ -41,9 +41,31 @@ tcpconn::~tcpconn()
     }
 }
 
+void tcpconn::setremoteaddr() {
+    sockaddr_in remote_addr;
+    memset(&remote_addr, 0, sizeof(remote_addr));
+    int len = sizeof(remote_addr);
+    if(getpeername(getfd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
+    {
+        remoteaddr_ = inet_ntoa(remote_addr.sin_addr);
+        int port = ntohs(remote_addr.sin_port);
+        char bufport[32] = {0};
+        sprintf(bufport,":%d",port);
+        remoteaddr_ += bufport;
+    }
+}
+
 int tcpconn::handle_connect()
 {
-    return process_connect();
+    // return process_connect();
+    status_ = CONNECT;
+    setremoteaddr();
+    event_handler *h = (event_handler*)this->evloop();
+    if(h != NULL)
+        h->handle_connect_event(this);
+
+    tcptimer_.start(30);
+    return 0;
 }
 
 int tcpconn::handle_read()
@@ -112,8 +134,13 @@ int tcpconn::handle_write()
 int tcpconn::handle_close()
 {
 	tcptimer_.stop();
-	process_close();
-	return 0;
+	// process_close();
+    status_ = CLOSE;    
+    event_handler *h = (event_handler*)this->evloop();
+    if(h != NULL)
+        h->handle_disconnect_event(this);
+    return 0;
+	// return 0;
 }
 
 int tcpconn::sendbuf(const char *buf, int nLen)
@@ -134,31 +161,20 @@ int tcpconn::sendbuf(const char *buf, int nLen)
 	return 0;
 }
 
+int tcpconn::sendmsg(outmessage* msg) {
+    return sendbuf(msg->cbuffer(), msg->size());
+}
+
 bool tcpconn::writable()
 {
     return sendloopbuf_->datacount() > 0;
 }
-//-----------------------
-int tcpconn::sendmsg(outmessage* msg) {
-    return sendbuf(msg->cbuffer(), msg->size());
-}
-void tcpconn::setremoteaddr(void) {
-    sockaddr_in remote_addr;
-    memset(&remote_addr, 0, sizeof(remote_addr));
-    int len = sizeof(remote_addr);
-    if(getpeername(getfd(), reinterpret_cast<sockaddr *> (&remote_addr), (socklen_t*)&len) == 0)
-    {
-        remoteaddr_ = inet_ntoa(remote_addr.sin_addr);
-        int port = ntohs(remote_addr.sin_port);
-        char bufport[32] = {0};
-        sprintf(bufport,":%d",port);
-        remoteaddr_ += bufport;
-    }
-}
+
 int tcpconn::process_message(inmessage* msg) {
     event_handler* h = (event_handler*)this->evloop();
     return h->handle_message_event(msg, this, connid_);
 }
+
 int tcpconn::process_rawdata(char* buf, int nLen) {
     status_ = REQUEST;
     tcptimer_.stop();   
@@ -168,23 +184,25 @@ int tcpconn::process_rawdata(char* buf, int nLen) {
 
     return parser_->parse(buf, nLen);
 }
-int tcpconn::process_close(void) {
-    status_ = CLOSE;    
-    event_handler *h = (event_handler*)this->evloop();
-    if(h != NULL)
-        h->handle_disconnect_event(this);
-    return 0;
-}
-int tcpconn::process_connect(void) {
-    status_ = CONNECT;
-    setremoteaddr();
-    event_handler *h = (event_handler*)this->evloop();
-    if(h != NULL)
-        h->handle_connect_event(this);
 
-    tcptimer_.start(30);
-    return 0;
-}
+// int tcpconn::process_close() {
+//     status_ = CLOSE;    
+//     event_handler *h = (event_handler*)this->evloop();
+//     if(h != NULL)
+//         h->handle_disconnect_event(this);
+//     return 0;
+// }
+
+// int tcpconn::process_connect() {
+//     status_ = CONNECT;
+//     setremoteaddr();
+//     event_handler *h = (event_handler*)this->evloop();
+//     if(h != NULL)
+//         h->handle_connect_event(this);
+
+//     tcptimer_.start(30);
+//     return 0;
+// }
 int tcpconn::on_timeout(int timerid) {
     event_handler *h = (event_handler*)this->evloop();
     int nRet = h->handle_timeout_event(this);

@@ -37,7 +37,8 @@ void event_loop::handle_signal(int signum)
 
 bool event_loop::init_server(int listen_port)
 {
-	listen_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
+	// listen_sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
+    listen_sockfd_ = socket_create();
 	if (listen_sockfd_ == INVALID_SOCKET) return false;
 
     socket_reuse(listen_sockfd_);
