@@ -55,7 +55,7 @@ int socket_block_connect(int fd, const char* ip , int port );
 int socket_nonblock(int fd);
 int socket_reuse(int fd);
 int socket_keepalive(int fd);
-int socket_create(void);
+int socket_create();
 void socket_buffer(int fd,int iSize);
 int socket_nonblock_connect(int fd,const char* ip, int port);
 

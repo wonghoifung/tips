@@ -45,14 +45,14 @@ protected:
     void remsock(tcpconn* s);
     void handle_close(tcpconn* conn);
 
-    static bool run_;
-    int listen_sockfd_;
-	int maxfd_;
-    tcpconn** fdconns_;    
-    int fdcount_;
-    uint32_t fdidx_; 
-	int epollfd_;
-	struct epoll_event* epevarr_; 
+    static bool run_; // set false when signal received, default true
+    int listen_sockfd_; // server: init by init_server(), client: no use
+	//int maxfd_;
+    tcpconn** fdconns_; // init by init_event()
+    int fdcount_; // increase 1 by addsock(), decrease 1 by remsock()
+    uint32_t fdidx_; // generate idx for every new connection, set to tcpconn in addsock()
+	int epollfd_; // init by init_event()
+	struct epoll_event* epevarr_; // active events...init by init_event()
 };
 
 class event_handler : public event_loop

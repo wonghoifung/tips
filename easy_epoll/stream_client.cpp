@@ -71,6 +71,6 @@ bool stream_client::connect(tcpconn* conn, const address& addr) {
 	return connect(conn,addr.host,addr.port);
 }
 
-bool stream_client::register_to_evloop(tcpconn* conn) {
+bool stream_client::register_to_evloop(tcpconn* conn) { // no use TODO
 	return manage(conn);
 }
