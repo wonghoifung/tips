@@ -67,16 +67,13 @@ public:
 
 	int process_message(inmessage*); // used by message_parser
 	int process_rawdata(char* buf, int nLen); // used by handle_read()
-	// int process_close(void);
-	// int process_connect(void);
 
 	// from timer_handler
 	virtual int	on_timeout(int timerid);
 	
 private:
 	int sockfd_;
-    uint32_t fdidx_;             
-	uint32_t socktype_;
+    uint32_t fdidx_;
     bool needdel_;
     bool full_;
 	timer tcptimer_;

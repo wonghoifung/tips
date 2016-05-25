@@ -122,7 +122,7 @@ bool event_loop::run()
                 continue;
             }
             else if (epevarr_[i].events & EPOLLIN) { 
-                if (s->handle_read() == -1) {
+                if (s->handle_read() == -1) { // maybe overload, write loop buffer full...
                     handle_close(s);
                     continue;
                 }
