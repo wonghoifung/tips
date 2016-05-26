@@ -1,6 +1,6 @@
 #ifndef TIMER_HEADER
 #define TIMER_HEADER
-
+// TODO new timer design
 struct time_ev
 {
 	int time_id;
