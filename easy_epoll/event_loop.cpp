@@ -248,7 +248,7 @@ bool event_loop::disconnect(tcpconn* conn)
  	return true;
 }
 
-// bool event_loop::manage(tcpconn* conn) // TODO no use
+// bool event_loop::manage(tcpconn* conn)
 // {
 //     if(conn == NULL)
 //         return false;
