@@ -33,7 +33,6 @@ public:
     
 	virtual tcpconn* create_tcpconn(void) = 0;
 	tcpconn* prepare_tcpconn(int sock_fd);
-	// bool manage(tcpconn* conn);
 	bool disconnect(tcpconn* conn);
 
     void towrite(tcpconn* s);

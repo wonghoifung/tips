@@ -248,19 +248,6 @@ bool event_loop::disconnect(tcpconn* conn)
  	return true;
 }
 
-// bool event_loop::manage(tcpconn* conn)
-// {
-//     if(conn == NULL)
-//         return false;
-
-//     addsock(conn);
-
-//     conn->evloop(this);
-//     conn->handle_connect();	
-
-// 	return true;
-// }
-
 void event_loop::addsock(tcpconn* s)
 {
     fdcount_++;
