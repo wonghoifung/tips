@@ -41,7 +41,6 @@
 #include <errno.h>
 
 #include "ae.h"
-// #include "config.h"
 
 #if defined(__APPLE__) 
 // apple
