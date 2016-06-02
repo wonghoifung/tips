@@ -1,4 +1,4 @@
-TARGET = test_ae
+TARGET = test
 
 BUILD_DIR =
 
