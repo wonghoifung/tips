@@ -1,4 +1,4 @@
-TARGET = test_ae
+TARGET = client
 
 BUILD_DIR =
 
@@ -12,13 +12,13 @@ endif
 
 CFLAGS += -Wall
 CFLAGS += -I/usr/local/include
-CFLAGS += -I..
+CFLAGS += -I../..
 
 CPPFLAGS += -Wall
 CPPFLAGS += -I/usr/local/include
 
 LIBS = -lrt -lae
-LINKFLAGS = -L/usr/local/lib -L..
+LINKFLAGS = -L/usr/local/lib -L../..
 
 INCLUDEDIRS = ./ 
 INCLUDES = $(foreach tmp, $(INCLUDEDIRS), -I $(tmp))

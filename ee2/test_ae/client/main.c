@@ -4,6 +4,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ae.h"
 #include "anet.h"
 
@@ -32,7 +33,7 @@ void ClientClose(aeEventLoop *el, int fd, int err)
 	if( 0 == err )
 		printf("Client quit: %d\n", fd);
 	else if( -1 == err )
-		printf("quit abnormally\n");
+		fprintf(stderr, "Client Error: %s\n", strerror(errno));
 
 	aeDeleteFileEvent(el, fd, AE_READABLE);
 	close(fd);
@@ -40,6 +41,7 @@ void ClientClose(aeEventLoop *el, int fd, int err)
 
 void ReadFromClient(aeEventLoop *el, int fd, void *privdata, int mask)
 {
+	printf("%s\n", __FUNCTION__);
 	char buffer[MAX_LEN] = { 0 };
 	int res;
 	res = read(fd, buffer, MAX_LEN);
@@ -49,20 +51,22 @@ void ReadFromClient(aeEventLoop *el, int fd, void *privdata, int mask)
 	}
 	else
 	{
-		res = write(fd, buffer, MAX_LEN);
-		if( -1 == res )
-			ClientClose(el, fd, res);
+		printf("received: %s\n", buffer);
 	}
 }
 
-void AcceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask)
-{
-	int cfd, cport;
-	char ip_addr[128] = { 0 };
-	cfd = anetTcpAccept(g_err_string, fd, ip_addr, sizeof ip_addr, &cport);
-	printf("Connected from %s:%d\n", ip_addr, cport);
+void connect_handler(aeEventLoop* el, int fd, void* privdata, int mask) {
+	printf("%s\n", __FUNCTION__);
+	aeDeleteFileEvent(el, fd, AE_WRITABLE);
 
-	if( aeCreateFileEvent(el, cfd, AE_READABLE, ReadFromClient, NULL) == AE_ERR )
+	const char* buf = "helloworld";
+
+	if (-1 == write(fd, buf, strlen(buf))) {
+		fprintf(stderr, "cannot write\n");
+		close(fd);
+	}
+
+	if(aeCreateFileEvent(el, fd, AE_READABLE, ReadFromClient, NULL) == AE_ERR)
 	{
 		fprintf(stderr, "client connect fail: %d\n", fd);
 		close(fd);
@@ -102,12 +106,15 @@ int main()
 
 	g_event_loop = aeCreateEventLoop(1024*10);
 
-	int fd = anetTcpServer(g_err_string, PORT, NULL, 5);
-	if( ANET_ERR == fd )
-		fprintf(stderr, "Open port %d error: %s\n", PORT, g_err_string);
-
-	if( aeCreateFileEvent(g_event_loop, fd, AE_READABLE, AcceptTcpHandler, NULL) == AE_ERR )
-		fprintf(stderr, "Unrecoverable error creating server.ipfd file event.");
+	int fd = anetTcpNonBlockConnect(g_err_string, "127.0.0.1", 4444);
+	if (ANET_ERR == fd) {
+		fprintf(stderr, "connect failure: %s\n", g_err_string);
+		return -1;
+	}
+	if (aeCreateFileEvent(g_event_loop, fd, AE_WRITABLE, connect_handler, NULL) == AE_ERR) {
+		fprintf(stderr, "cannot create connect event\n");
+		return -1;
+	}
 
 	aeCreateTimeEvent(g_event_loop, 1, PrintTimer, NULL, NULL);
 
