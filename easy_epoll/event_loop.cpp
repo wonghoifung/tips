@@ -202,7 +202,7 @@ int event_loop::handle_accept()
         }	
         
         tcpconn* c = prepare_tcpconn(conn_fd);
-        if (c) {
+        if (c==NULL) {
             log_error("cannot prepare tcpconn for fd: %d", conn_fd);
             socket_close(conn_fd);
             assert(false);
