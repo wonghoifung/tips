@@ -17,7 +17,7 @@ CFLAGS += -I..
 CPPFLAGS += -Wall
 CPPFLAGS += -I/usr/local/include
 
-LIBS = -lae
+LIBS = -lee2
 LINKFLAGS = -L/usr/local/lib -L..
 
 INCLUDEDIRS = ./ 

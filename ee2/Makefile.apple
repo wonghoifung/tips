@@ -1,4 +1,4 @@
-TARGET = libae.dylib
+TARGET = libee2.dylib
 
 BUILD_DIR =
 
