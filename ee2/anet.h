@@ -77,4 +77,7 @@ int anetFormatAddr(char *fmt, size_t fmt_len, char *ip, int port);
 int anetFormatPeer(int fd, char *fmt, size_t fmt_len);
 int anetFormatSock(int fd, char *fmt, size_t fmt_len);
 
+// added by wonghoifung
+void anetSocketBuffer(int fd, int size);
+
 #endif

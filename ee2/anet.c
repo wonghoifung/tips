@@ -653,3 +653,10 @@ int anetFormatSock(int fd, char *fmt, size_t fmt_len) {
     anetSockName(fd,ip,sizeof(ip),&port);
     return anetFormatAddr(fmt, fmt_len, ip, port);
 }
+
+void anetSocketBuffer(int fd, int size) {
+    int opt = size;
+    socklen_t optlen = sizeof(opt);
+    setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &opt, optlen);
+    setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &opt, optlen);
+}
