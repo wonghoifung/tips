@@ -7,9 +7,6 @@
 #include "ae.h"
 #include "anet.h"
 
-#define PORT 4444
-#define MAX_LEN 1024
-
 char errstr[1024];
 
 aeEventLoop *evloop = NULL;
@@ -45,6 +42,7 @@ void close_handler(aeEventLoop *el, int fd, int err)
 	close(fd);
 }
 
+#define MAX_LEN 1024
 void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 {
 	char buffer[MAX_LEN] = { 0 };
@@ -107,11 +105,11 @@ int main()
 
 	set_signalhandler();
 
-	evloop = aeCreateEventLoop(1024*10);
+	evloop = aeCreateEventLoop(100000);
 
-	int fd = anetTcpServer(errstr, PORT, NULL, 5);
+	int fd = anetTcpServer(errstr, 8888, NULL, 5);
 	if (ANET_ERR == fd)
-		fprintf(stderr, "listen port %d error: %s\n", PORT, errstr);
+		fprintf(stderr, "listen port %d error: %s\n", 8888, errstr);
 
 	if (aeCreateFileEvent(evloop, fd, AE_READABLE, accept_handler, NULL) == AE_ERR)
 		fprintf(stderr, "cannot create file event for fd: %d\n", fd);

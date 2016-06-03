@@ -8,9 +8,6 @@
 #include "ae.h"
 #include "anet.h"
 
-#define PORT 4444
-#define MAX_LEN 1024
-
 char errstr[1024];
 
 aeEventLoop *evloop = NULL;
@@ -46,6 +43,7 @@ void close_handler(aeEventLoop *el, int fd, int err)
 	close(fd);
 }
 
+#define MAX_LEN 1024
 void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 {
 	printf("%s\n", __FUNCTION__);
@@ -113,7 +111,7 @@ int main()
 
 	evloop = aeCreateEventLoop(1024*10);
 
-	int fd = anetTcpNonBlockConnect(errstr, "127.0.0.1", 4444);
+	int fd = anetTcpNonBlockConnect(errstr, "127.0.0.1", 8888);
 	if (ANET_ERR == fd) {
 		fprintf(stderr, "connect failure: %s\n", errstr);
 		return -1;
