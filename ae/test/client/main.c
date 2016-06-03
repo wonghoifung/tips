@@ -11,11 +11,23 @@
 #define PORT 4444
 #define MAX_LEN 1024
 
-char g_err_string[1024];
+char errstr[1024];
 
-aeEventLoop *g_event_loop = NULL;
+aeEventLoop *evloop = NULL;
 
-int PrintTimer(struct aeEventLoop *eventLoop, long long id, void *clientData)
+static void signal_handler(int sig) {
+	(void)sig;
+    aeStop(evloop);
+}
+
+void set_signalhandler(void) {
+	signal(SIGHUP, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
+}
+
+int timeout_handler(struct aeEventLoop *eventLoop, long long id, void *clientData)
 {
 	static int i = 0;
 	printf("Test Output: %d\n", i++);
@@ -23,12 +35,7 @@ int PrintTimer(struct aeEventLoop *eventLoop, long long id, void *clientData)
 	return 10000;
 }
 
-void StopServer()
-{
-	aeStop(g_event_loop);
-}
-
-void ClientClose(aeEventLoop *el, int fd, int err)
+void close_handler(aeEventLoop *el, int fd, int err)
 {
 	if( 0 == err )
 		printf("Client quit: %d\n", fd);
@@ -39,7 +46,7 @@ void ClientClose(aeEventLoop *el, int fd, int err)
 	close(fd);
 }
 
-void ReadFromClient(aeEventLoop *el, int fd, void *privdata, int mask)
+void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 {
 	printf("%s\n", __FUNCTION__);
 	char buffer[MAX_LEN] = { 0 };
@@ -47,7 +54,7 @@ void ReadFromClient(aeEventLoop *el, int fd, void *privdata, int mask)
 	res = read(fd, buffer, MAX_LEN);
 	if( res <= 0 )
 	{
-		ClientClose(el, fd, res);
+		close_handler(el, fd, res);
 	}
 	else
 	{
@@ -66,7 +73,7 @@ void connect_handler(aeEventLoop* el, int fd, void* privdata, int mask) {
 		close(fd);
 	}
 
-	if(aeCreateFileEvent(el, fd, AE_READABLE, ReadFromClient, NULL) == AE_ERR)
+	if(aeCreateFileEvent(el, fd, AE_READABLE, read_handler, NULL) == AE_ERR)
 	{
 		fprintf(stderr, "client connect fail: %d\n", fd);
 		close(fd);
@@ -102,25 +109,25 @@ int main()
 {
 	set_rlimit();
 
-	signal(SIGINT, StopServer);
+	set_signalhandler();
 
-	g_event_loop = aeCreateEventLoop(1024*10);
+	evloop = aeCreateEventLoop(1024*10);
 
-	int fd = anetTcpNonBlockConnect(g_err_string, "127.0.0.1", 4444);
+	int fd = anetTcpNonBlockConnect(errstr, "127.0.0.1", 4444);
 	if (ANET_ERR == fd) {
-		fprintf(stderr, "connect failure: %s\n", g_err_string);
+		fprintf(stderr, "connect failure: %s\n", errstr);
 		return -1;
 	}
-	if (aeCreateFileEvent(g_event_loop, fd, AE_WRITABLE, connect_handler, NULL) == AE_ERR) {
+	if (aeCreateFileEvent(evloop, fd, AE_WRITABLE, connect_handler, NULL) == AE_ERR) {
 		fprintf(stderr, "cannot create connect event\n");
 		return -1;
 	}
 
-	aeCreateTimeEvent(g_event_loop, 1, PrintTimer, NULL, NULL);
+	aeCreateTimeEvent(evloop, 1, timeout_handler, NULL, NULL);
 
-	aeMain(g_event_loop);
+	aeMain(evloop);
 
-	aeDeleteEventLoop(g_event_loop);
+	aeDeleteEventLoop(evloop);
 
 	return 0;
 }

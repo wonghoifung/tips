@@ -10,13 +10,13 @@
 #define PORT 4444
 #define MAX_LEN 1024
 
-char g_err_string[1024];
+char errstr[1024];
 
-aeEventLoop *g_event_loop = NULL;
+aeEventLoop *evloop = NULL;
 
 static void signal_handler(int sig) {
 	(void)sig;
-    aeStop(g_event_loop);
+    aeStop(evloop);
 }
 
 void set_signalhandler(void) {
@@ -66,7 +66,7 @@ void accept_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 {
 	int cfd, cport;
 	char ip_addr[128] = { 0 };
-	cfd = anetTcpAccept(g_err_string, fd, ip_addr, sizeof ip_addr, &cport);
+	cfd = anetTcpAccept(errstr, fd, ip_addr, sizeof ip_addr, &cport);
 	printf("Connected from %s:%d\n", ip_addr, cport);
 
 	if( aeCreateFileEvent(el, cfd, AE_READABLE, read_handler, NULL) == AE_ERR )
@@ -107,20 +107,20 @@ int main()
 
 	set_signalhandler();
 
-	g_event_loop = aeCreateEventLoop(1024*10);
+	evloop = aeCreateEventLoop(1024*10);
 
-	int fd = anetTcpServer(g_err_string, PORT, NULL, 5);
+	int fd = anetTcpServer(errstr, PORT, NULL, 5);
 	if( ANET_ERR == fd )
-		fprintf(stderr, "Open port %d error: %s\n", PORT, g_err_string);
+		fprintf(stderr, "Open port %d error: %s\n", PORT, errstr);
 
-	if( aeCreateFileEvent(g_event_loop, fd, AE_READABLE, accept_handler, NULL) == AE_ERR )
+	if( aeCreateFileEvent(evloop, fd, AE_READABLE, accept_handler, NULL) == AE_ERR )
 		fprintf(stderr, "Unrecoverable error creating server.ipfd file event.");
 
-	aeCreateTimeEvent(g_event_loop, 1, timeout_handler, NULL, NULL);
+	aeCreateTimeEvent(evloop, 1, timeout_handler, NULL, NULL);
 
-	aeMain(g_event_loop);
+	aeMain(evloop);
 
-	aeDeleteEventLoop(g_event_loop);
+	aeDeleteEventLoop(evloop);
 
 	return 0;
 }
