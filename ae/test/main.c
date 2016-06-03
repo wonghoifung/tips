@@ -9,7 +9,7 @@
 
 char errstr[1024];
 
-aeEventLoop *evloop = NULL;
+aeEventLoop* evloop = NULL;
 
 static void signal_handler(int sig) {
 	(void)sig;
@@ -23,7 +23,7 @@ void set_signalhandler(void) {
     signal(SIGINT, signal_handler);
 }
 
-int timeout_handler(struct aeEventLoop *eventLoop, long long id, void *clientData)
+int timeout_handler(struct aeEventLoop* eventLoop, long long id, void* clientData)
 {
 	static int i = 0;
 	printf("timeout: %d\n", i++);
@@ -31,7 +31,7 @@ int timeout_handler(struct aeEventLoop *eventLoop, long long id, void *clientDat
 	return 10000;
 }
 
-void close_handler(aeEventLoop *el, int fd, int err)
+void close_handler(aeEventLoop* el, int fd, int err)
 {
 	if (0 == err)
 		printf("client quit: %d\n", fd);
@@ -43,7 +43,7 @@ void close_handler(aeEventLoop *el, int fd, int err)
 }
 
 #define MAX_LEN 1024
-void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
+void read_handler(aeEventLoop* el, int fd, void* privdata, int mask)
 {
 	char buffer[MAX_LEN] = { 0 };
 	int res;
@@ -60,7 +60,7 @@ void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 	}
 }
 
-void accept_handler(aeEventLoop *el, int fd, void *privdata, int mask)
+void accept_handler(aeEventLoop* el, int fd, void* privdata, int mask)
 {
 	int cfd, cport;
 	char ip_addr[128] = { 0 };
