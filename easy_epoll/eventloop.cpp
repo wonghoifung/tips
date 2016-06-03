@@ -1,6 +1,8 @@
 #include "eventloop.h"
 #include "log.h"
 #include <sys/resource.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 eventloop::eventloop(): epollfd(-1), firedevents(NULL), stop(0)
 {
@@ -23,8 +25,8 @@ bool eventloop::init(int maxfdcnt)
 	if (filenum > maxfdcnt) filenum = maxfdcnt;
 	log_debug("epoll create hint filenum: %d", filenum);
 
-	epollfd_ = epoll_create(filenum); // it's just a hint
-	if (-1 == epollfd_) {
+	epollfd = epoll_create(filenum); // it's just a hint
+	if (-1 == epollfd) {
 		log_error("cannot create epoll fd");
 		return false;
 	}
