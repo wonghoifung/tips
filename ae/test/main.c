@@ -14,17 +14,24 @@ char g_err_string[1024];
 
 aeEventLoop *g_event_loop = NULL;
 
+static void sigShutdownHandler(int sig) {
+	(void)sig;
+    aeStop(g_event_loop);
+}
+
+void setupSignalHandlers(void) {
+	signal(SIGHUP, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGTERM, sigShutdownHandler);
+    signal(SIGINT, sigShutdownHandler);
+}
+
 int PrintTimer(struct aeEventLoop *eventLoop, long long id, void *clientData)
 {
 	static int i = 0;
 	printf("Test Output: %d\n", i++);
 	// run after 10 seconds
 	return 10000;
-}
-
-void StopServer()
-{
-	aeStop(g_event_loop);
 }
 
 void ClientClose(aeEventLoop *el, int fd, int err)
@@ -98,7 +105,7 @@ int main()
 {
 	set_rlimit();
 
-	signal(SIGINT, StopServer);
+	setupSignalHandlers();
 
 	g_event_loop = aeCreateEventLoop(1024*10);
 
