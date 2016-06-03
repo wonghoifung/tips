@@ -46,3 +46,21 @@ void eventloop::run()
 
 	}
 }
+
+void eventloop::toread(int fd, uint32_t idx)
+{
+    struct epoll_event ev = { 0 };
+    ev.data.u64 = (uint64_t)(uint32_t)fd | ((uint64_t)idx << 32);
+    ev.events = EPOLLIN ;
+    epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &ev);
+}
+
+void eventloop::towrite(int fd, uint32_t idx)
+{
+    struct epoll_event ev = { 0 };
+    ev.data.u64 = (uint64_t)(uint32_t)fd | ((uint64_t)idx << 32);
+    ev.events = EPOLLOUT;
+    epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &ev);
+}
+
+
