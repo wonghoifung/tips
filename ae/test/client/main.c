@@ -30,17 +30,17 @@ void set_signalhandler(void) {
 int timeout_handler(struct aeEventLoop *eventLoop, long long id, void *clientData)
 {
 	static int i = 0;
-	printf("Test Output: %d\n", i++);
+	printf("timeout: %d\n", i++);
 	// run after 10 seconds
 	return 10000;
 }
 
 void close_handler(aeEventLoop *el, int fd, int err)
 {
-	if( 0 == err )
-		printf("Client quit: %d\n", fd);
-	else if( -1 == err )
-		fprintf(stderr, "Client Error: %s\n", strerror(errno));
+	if (0 == err)
+		printf("client quit: %d\n", fd);
+	else if (-1 == err)
+		fprintf(stderr, "client error: %s\n", strerror(errno));
 
 	aeDeleteFileEvent(el, fd, AE_READABLE);
 	close(fd);
@@ -52,7 +52,7 @@ void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 	char buffer[MAX_LEN] = { 0 };
 	int res;
 	res = read(fd, buffer, MAX_LEN);
-	if( res <= 0 )
+	if (res <= 0)
 	{
 		close_handler(el, fd, res);
 	}
@@ -73,9 +73,9 @@ void connect_handler(aeEventLoop* el, int fd, void* privdata, int mask) {
 		close(fd);
 	}
 
-	if(aeCreateFileEvent(el, fd, AE_READABLE, read_handler, NULL) == AE_ERR)
+	if (aeCreateFileEvent(el, fd, AE_READABLE, read_handler, NULL) == AE_ERR)
 	{
-		fprintf(stderr, "client connect fail: %d\n", fd);
+		fprintf(stderr, "client connect failed: %d\n", fd);
 		close(fd);
 	}
 }
