@@ -14,19 +14,19 @@ char g_err_string[1024];
 
 aeEventLoop *g_event_loop = NULL;
 
-static void sigShutdownHandler(int sig) {
+static void signal_handler(int sig) {
 	(void)sig;
     aeStop(g_event_loop);
 }
 
-void setupSignalHandlers(void) {
+void set_signalhandler(void) {
 	signal(SIGHUP, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
-    signal(SIGTERM, sigShutdownHandler);
-    signal(SIGINT, sigShutdownHandler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
 }
 
-int PrintTimer(struct aeEventLoop *eventLoop, long long id, void *clientData)
+int timeout_handler(struct aeEventLoop *eventLoop, long long id, void *clientData)
 {
 	static int i = 0;
 	printf("Test Output: %d\n", i++);
@@ -34,7 +34,7 @@ int PrintTimer(struct aeEventLoop *eventLoop, long long id, void *clientData)
 	return 10000;
 }
 
-void ClientClose(aeEventLoop *el, int fd, int err)
+void close_handler(aeEventLoop *el, int fd, int err)
 {
 	if( 0 == err )
 		printf("Client quit: %d\n", fd);
@@ -45,31 +45,31 @@ void ClientClose(aeEventLoop *el, int fd, int err)
 	close(fd);
 }
 
-void ReadFromClient(aeEventLoop *el, int fd, void *privdata, int mask)
+void read_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 {
 	char buffer[MAX_LEN] = { 0 };
 	int res;
 	res = read(fd, buffer, MAX_LEN);
 	if( res <= 0 )
 	{
-		ClientClose(el, fd, res);
+		close_handler(el, fd, res);
 	}
 	else
 	{
 		res = write(fd, buffer, MAX_LEN);
 		if( -1 == res )
-			ClientClose(el, fd, res);
+			close_handler(el, fd, res);
 	}
 }
 
-void AcceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask)
+void accept_handler(aeEventLoop *el, int fd, void *privdata, int mask)
 {
 	int cfd, cport;
 	char ip_addr[128] = { 0 };
 	cfd = anetTcpAccept(g_err_string, fd, ip_addr, sizeof ip_addr, &cport);
 	printf("Connected from %s:%d\n", ip_addr, cport);
 
-	if( aeCreateFileEvent(el, cfd, AE_READABLE, ReadFromClient, NULL) == AE_ERR )
+	if( aeCreateFileEvent(el, cfd, AE_READABLE, read_handler, NULL) == AE_ERR )
 	{
 		fprintf(stderr, "client connect fail: %d\n", fd);
 		close(fd);
@@ -105,7 +105,7 @@ int main()
 {
 	set_rlimit();
 
-	setupSignalHandlers();
+	set_signalhandler();
 
 	g_event_loop = aeCreateEventLoop(1024*10);
 
@@ -113,10 +113,10 @@ int main()
 	if( ANET_ERR == fd )
 		fprintf(stderr, "Open port %d error: %s\n", PORT, g_err_string);
 
-	if( aeCreateFileEvent(g_event_loop, fd, AE_READABLE, AcceptTcpHandler, NULL) == AE_ERR )
+	if( aeCreateFileEvent(g_event_loop, fd, AE_READABLE, accept_handler, NULL) == AE_ERR )
 		fprintf(stderr, "Unrecoverable error creating server.ipfd file event.");
 
-	aeCreateTimeEvent(g_event_loop, 1, PrintTimer, NULL, NULL);
+	aeCreateTimeEvent(g_event_loop, 1, timeout_handler, NULL, NULL);
 
 	aeMain(g_event_loop);
 
