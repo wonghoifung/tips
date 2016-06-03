@@ -1,4 +1,4 @@
-TARGET = libee2.so
+TARGET = libae.so
 
 BUILD_DIR =
 
