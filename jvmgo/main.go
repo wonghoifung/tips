@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 import "strings"
-import "jvmgo/classpath"
+import "classpath"
 
 func main() {
 	cmd := parseCmd()
