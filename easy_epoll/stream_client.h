@@ -4,8 +4,6 @@
 #include "eventloop.h"
 #include "sockapi.h"
 
-// TODO a client that can use server's eventloop
-
 class outmessage;
 
 class stream_client : public event_handler
@@ -17,7 +15,6 @@ public:
 	stream_client(eventloop* evloop);
 	virtual ~stream_client();
 
-	// from event_loop
 	tcpconn* create_tcpconn();
 
 	bool connect(const std::string& host, const std::string& port);
@@ -37,7 +34,7 @@ public:
 	virtual int on_message(inmessage* msg, tcpconn* conn, unsigned long ssid) = 0;
 
 protected:
-	eventloop* evloop_;
+	eventloop* evloop_; // pass in from outside, stream_client dont care its lifetime
 	tcpconn* conn_;
 };
 

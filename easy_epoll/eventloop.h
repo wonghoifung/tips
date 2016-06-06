@@ -33,9 +33,10 @@ public:
 	int fdcount;
 	uint32_t fdidx;
 	tcpconn** fdconns;
-	int listenfd;
+	int listenfd; // pass in from outside, eventloop dont care its lifetime
 };
 
+// interface used by tcpconn, put it here just for convenience
 class event_handler
 {
 	event_handler(const event_handler&);

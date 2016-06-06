@@ -18,8 +18,6 @@ const int MAX_LOOP_BUFFER_LEN = 64 * 1024;
 #define RECV_BUFFER_SIZE (1024 * 32)
 #define SEND_BUFFER_SIZE (1024 * 32)
 
-class tcpconn;
-
 class tcpconn : public timer_handler
 {
 	tcpconn(const tcpconn&);
@@ -74,13 +72,13 @@ public:
 	virtual int	on_timeout(int timerid);
 	
 private:
-	// init 0, server: set by eventloop:prepare_tcpconn(), client: set by eventloop:init_client()
+	// init 0, server: set by stream_server::handle_accept, client: set by stream_client::connect
 	int sockfd_; 
 
-	// init 0, set by eventloop:addsock()
+	// init 0, set by eventloop:addfd
     uint32_t fdidx_;
 
-    // init false, server: set by eventloop:prepare_tcpconn(), client: set by stream_client::stream_client()
+    // init false, server: set by stream_server::handle_accept, client: set by stream_client::stream_client
     bool needdel_;
 
     // init false, set true when sendloopbuf_ has not enough space for sendbuf
@@ -89,10 +87,11 @@ private:
     // use only one time, test situations that connect but no data received
 	timer tcptimer_;
 
-	// server: set by eventloop:prepare_tcpconn(), client: set by eventloop:init_client()
-	eventloop* evloop_;
+	// server: set by stream_server::handle_accept, client: set by stream_client::connect
+	eventloop* evloop_;  // pass in from outside, tcpconn dont care its lifetime
 
-	event_handler* evhandler_;
+	// server: set by stream_server::handle_accept, client: set by stream_client::connect
+	event_handler* evhandler_; // pass in from outside, tcpconn dont care its lifetime
 
 	// for sys read
 	char recvbuf_[RECV_BUFFER_SIZE];
@@ -109,13 +108,13 @@ private:
 	// set when tcpconn is constructing
 	int connid_;
 
-	// set by handle_connect()
+	// set by handle_connect
 	std::string remoteaddr_;
 
 	// set by app
 	void* ud_;
 
-	// init by process_rawdata()
+	// init by process_rawdata
     message_parser* parser_;
 };
 

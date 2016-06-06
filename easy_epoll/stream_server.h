@@ -18,7 +18,6 @@ public:
 	bool init(int listenport);
 	int handle_accept();
 
-	// from tcpconn
 	tcpconn* create_tcpconn();
 
 	// from event_handler
@@ -41,7 +40,7 @@ public:
 	eventloop* evloop() { return evloop_; }
 	
 private:
-	eventloop* evloop_;
+	eventloop* evloop_; // pass in from outside, stream_client dont care its lifetime
 	int listenfd_;
     int maxid_;
     std::map<int, tcpconn*> connmap_;

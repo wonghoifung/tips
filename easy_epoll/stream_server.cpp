@@ -18,6 +18,7 @@ stream_server::~stream_server()
         socket_close(listenfd_); 
         listenfd_ = -1; 
     }
+    evloop_ = NULL;
 }
 
 bool stream_server::init(int listenport)
@@ -34,8 +35,6 @@ bool stream_server::init(int listenport)
     if (ret < 0) return false;
 
     evloop_->addlistenfd(this);
-
-    // TODO handle signal
 
     log_debug("server start, listen port: %d", listenport);
     return true;
@@ -88,7 +87,7 @@ tcpconn* stream_server::create_tcpconn()
 {
 	tcpconn* conn = NULL;
     int uid = genconnid();
-	conn = new tcpconn(uid); // server: delete by event_loop
+	conn = new tcpconn(uid); // delete by event_loop
 	return conn;
 }
 
