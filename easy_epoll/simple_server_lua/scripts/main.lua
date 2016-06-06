@@ -1,15 +1,6 @@
 -- coding:utf-8
 
--- local function test()
--- 	local tom = outmsg()
--- 	tom:begin(1)
--- 	tom:write_int(2)
--- 	tom:write_cstring("test")
--- 	tom:complete()
--- end
-
--- test()
-
+-----------------------------------------> script path
 local p = "./scripts/"
 local oldp = package.path
 package.path = string.format("%s?.lua;%s",p,oldp)
@@ -41,22 +32,23 @@ function peer_go(peerid)
 	pm.peer_go(peerid)
 end
 
+-----------------------------------------> init
 if not skeleton_init("SimpleServerLua", 7, 100000) then
 	print("lua cannot init skeleton")
 	return
 end
 
------------------------------------------>
+init_callbacks()
+
+-----------------------------------------> test timer
 local testtimer = create_timer('on_testtimer_timerout')
 function on_testtimer_timerout(timer)
 	print('lua on_testtimer_timerout')
 	start_timer(3, testtimer)
 end
 start_timer(3, testtimer)
------------------------------------------>
 
-init_callbacks()
-
+-----------------------------------------> test server
 local server = SimpleServer()
 
 if not server:init(6464) then
@@ -64,6 +56,7 @@ if not server:init(6464) then
 	return
 end
 
+-----------------------------------------> run
 skeleton_run()
 
 
