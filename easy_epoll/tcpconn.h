@@ -5,11 +5,11 @@
 #include "loopbuf.h"
 #include "message_parser.h"
 #include "sockapi.h"
+#include "eventloop.h"
 #include <stdint.h>
 #include <map>
 #include <string>
 
-class event_loop;
 class inmessage;
 class outmessage;
 
@@ -38,8 +38,11 @@ public:
     const bool getneeddel() const { return needdel_; }
     void setneeddel(bool d) { needdel_ = d; }
 
-	event_loop* evloop() { return evloop_; }
-	void evloop(event_loop* p) { evloop_ = p; }
+	eventloop* evloop() { return evloop_; }
+	void evloop(eventloop* p) { evloop_ = p; }
+
+	event_handler* evhandler() { return evhandler_; }
+	void evhandler(event_handler* p) { evhandler_ = p; }
 
 	const bool isconnecting() const { return status_ == CONNECTING; }
 	void setconnecting() { status_ = CONNECTING; }
@@ -53,7 +56,8 @@ public:
 	void* getud() { return ud_; }	
 	void setud(void* ud) { ud_ = ud; }
 
-	// used by event_loop
+	// used by eventloop
+	int handle_accept();
 	int handle_connect();
 	int handle_read();
 	int handle_write();
@@ -70,13 +74,13 @@ public:
 	virtual int	on_timeout(int timerid);
 	
 private:
-	// init 0, server: set by event_loop:prepare_tcpconn(), client: set by event_loop:init_client()
+	// init 0, server: set by eventloop:prepare_tcpconn(), client: set by eventloop:init_client()
 	int sockfd_; 
 
-	// init 0, set by event_loop:addsock()
+	// init 0, set by eventloop:addsock()
     uint32_t fdidx_;
 
-    // init false, server: set by event_loop:prepare_tcpconn(), client: set by stream_client::stream_client()
+    // init false, server: set by eventloop:prepare_tcpconn(), client: set by stream_client::stream_client()
     bool needdel_;
 
     // init false, set true when sendloopbuf_ has not enough space for sendbuf
@@ -85,8 +89,10 @@ private:
     // use only one time, test situations that connect but no data received
 	timer tcptimer_;
 
-	// server: set by event_loop:prepare_tcpconn(), client: set by event_loop:init_client()
-	event_loop* evloop_;
+	// server: set by eventloop:prepare_tcpconn(), client: set by eventloop:init_client()
+	eventloop* evloop_;
+
+	event_handler* evhandler_;
 
 	// for sys read
 	char recvbuf_[RECV_BUFFER_SIZE];

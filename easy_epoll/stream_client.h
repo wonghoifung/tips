@@ -1,10 +1,12 @@
 #ifndef STREAMCLIENT_HEADER
 #define STREAMCLIENT_HEADER
 
-#include "event_loop.h"
+#include "eventloop.h"
 #include "sockapi.h"
 
 // TODO a client that can use server's eventloop
+
+class outmessage;
 
 class stream_client : public event_handler
 {
@@ -12,13 +14,13 @@ class stream_client : public event_handler
 	stream_client& operator=(const stream_client&);
 
 public:
-	stream_client();
+	stream_client(eventloop* evloop);
 	virtual ~stream_client();
 
 	// from event_loop
 	virtual tcpconn* create_tcpconn(); 
+	bool init(const std::string& host, int port);
 
-	// bool init();
 	bool connect(const std::string& host, const std::string& port);
 	bool connect(tcpconn* conn, const std::string& strAddr, int port);
 	bool connect(tcpconn* conn, const address& addr);
@@ -36,9 +38,8 @@ public:
 	virtual int on_no_message(tcpconn* conn) = 0;
 	virtual int on_message(inmessage* msg, tcpconn* conn, unsigned long ssid) = 0;
 
-	// bool set_evloop(event_loop* pServer);
-	// bool register_to_evloop(tcpconn* conn); // TODO
 protected:
+	eventloop* evloop_;
 	tcpconn* conn_;
 };
 

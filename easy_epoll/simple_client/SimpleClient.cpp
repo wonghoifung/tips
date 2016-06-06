@@ -46,7 +46,7 @@ static bool initTimer() {
 	return true;
 }
 
-SimpleClient::SimpleClient() {
+SimpleClient::SimpleClient(eventloop* evloop): stream_client(evloop) {
 	initTimer();
 	sc = this;
 }

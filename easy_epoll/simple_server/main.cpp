@@ -37,17 +37,22 @@ int main(int argc, char** argv) {
 	toggle_hex_level();
 	init_timer();
 
-	SimpleServer* ss = new SimpleServer();
-	if (!ss->init_server(6464)) {
-		log_error("cannot start server socket");
+	eventloop evloop;
+	if (!evloop.init(10000)) {
+		log_error("cannot init eventloop");
 		return 0;
 	}
-	if (!ss->init()) {
+
+	SimpleServer* ss = new SimpleServer(&evloop);
+	if (!ss->init(6464)) {
 		log_error("init failed");
 		return 0;
 	}
-	ss->run();
+
+	evloop.run();
+
 	delete ss;
 	ss=NULL;
+
 	return 0;
 }

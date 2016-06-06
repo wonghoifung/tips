@@ -1,4 +1,5 @@
 #include "SimpleClient.h"
+#include "eventloop.h"
 #include "log.h"
 #include "timer.h"
 #include <sys/resource.h>
@@ -37,15 +38,17 @@ int main() {
 	toggle_hex_level();
 	init_timer();
 
-	SimpleClient* ms = new SimpleClient();
-	if (!ms->init_event()) {
-		printf("cannot init event\n");
+	eventloop evloop;
+	if (!evloop.init(1024)) {
+		printf("cannot init eventloop\n");
 		exit(0);
 	}
+
+	SimpleClient* ms = new SimpleClient(&evloop);
 	
 	ms->connect("127.0.0.1", "6464");
 
-	ms->run();
+	evloop.run();
 
 	return 0;
 }

@@ -1,7 +1,7 @@
 #ifndef STREAM_SERVER_HEADER
 #define STREAM_SERVER_HEADER
 
-#include "event_loop.h"
+#include "eventloop.h"
 #include "tcpconn.h"
 #include "timer.h"
 #include <map>
@@ -12,11 +12,14 @@ class stream_server : public event_handler
 	stream_server& operator=(const stream_server&);
 	
 public:
-	stream_server();
+	stream_server(eventloop* evloop);
 	virtual ~stream_server();
 
-	// from event_loop
-	virtual tcpconn* create_tcpconn();
+	bool init(int listenport);
+	int handle_accept();
+
+	// from tcpconn
+	tcpconn* create_tcpconn();
 
 	// from event_handler
     virtual void handle_connect_event(tcpconn* conn);
@@ -33,7 +36,13 @@ public:
 	tcpconn* findconn(int idx);
 	int genconnid();
 
+	const int listenfd() const { return listenfd_; }
+
+	eventloop* evloop() { return evloop_; }
+	
 private:
+	eventloop* evloop_;
+	int listenfd_;
     int maxid_;
     std::map<int, tcpconn*> connmap_;
 };

@@ -1,7 +1,9 @@
 #include "tcpconn.h"
 #include "log.h"
-#include "event_loop.h"
+#include "eventloop.h"
 #include "message.h"
+#include "stream_server.h"
+#include "stream_client.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -16,6 +18,7 @@ tcpconn::tcpconn(int cid)
     ,needdel_(false)
     ,full_(false)
     ,evloop_(NULL)
+    ,evhandler_(NULL)
     ,sendloopbuf_(new loopbuf(MAX_LOOP_BUFFER_LEN))
     ,status_(-1)
     ,connid_(cid)
@@ -56,8 +59,7 @@ int tcpconn::handle_connect()
 {
     status_ = CONNECT;
     setremoteaddr();
-    event_handler* h = (event_handler*)this->evloop();
-    if (h) h->handle_connect_event(this);
+    if (evhandler_) evhandler_->handle_connect_event(this);
 
     tcptimer_.start(30);
     return 0;
@@ -121,9 +123,8 @@ int tcpconn::handle_close()
 {
 	tcptimer_.stop();
 
-    status_ = CLOSE;    
-    event_handler* h = (event_handler*)this->evloop();
-    if (h) h->handle_disconnect_event(this);
+    status_ = CLOSE;
+    if (evhandler_) evhandler_->handle_disconnect_event(this);
     return 0;
 }
 
@@ -156,8 +157,7 @@ bool tcpconn::writable()
 }
 
 int tcpconn::process_message(inmessage* msg) {
-    event_handler* h = (event_handler*)this->evloop();
-    return h->handle_message_event(msg, this, connid_);
+    return evhandler_->handle_message_event(msg, this, connid_);
 }
 
 int tcpconn::process_rawdata(char* buf, int nLen) {
@@ -168,6 +168,5 @@ int tcpconn::process_rawdata(char* buf, int nLen) {
 }
 
 int tcpconn::on_timeout(int timerid) {
-    event_handler* h = (event_handler*)this->evloop();
-    return h->handle_timeout_event(this);
+    return evhandler_->handle_timeout_event(this);
 }

@@ -4,22 +4,51 @@
 #include <sys/epoll.h>
 #include <stdint.h>
 
-struct eventloop
-{
-	int epollfd;
-	struct epoll_event* firedevents;
-	int stop;
+class tcpconn;
+class stream_server;
+class inmessage;
 
+class eventloop
+{
+	eventloop(const eventloop&);
+	eventloop& operator=(const eventloop&);
+
+public:
 	eventloop();
 	~eventloop();
 	bool init(int maxfdcnt);
 	void run();
-	void toread(int fd, uint32_t idx);
-	void towrite(int fd, uint32_t idx);
+	void toread(tcpconn* tc);
+	void towrite(tcpconn* tc);
+	void addlistenfd(stream_server* server);
+	void dellistenfd(stream_server* server);
+	void addfd(tcpconn* tc);
+	void delfd(tcpconn* tc);
+	void close_conn(tcpconn* conn);
 
-private:
-	eventloop(const eventloop&);
-	eventloop& operator=(const eventloop&);
+	int stop;
+	int epollfd;
+	struct epoll_event* firedevents;
+	int maxfdcount;
+	int fdcount;
+	uint32_t fdidx;
+	tcpconn** fdconns;
+	int listenfd;
+};
+
+class event_handler
+{
+	event_handler(const event_handler&);
+	event_handler& operator=(const event_handler&);
+	
+public:
+	event_handler() {}
+	virtual ~event_handler() {}
+
+    virtual void handle_connect_event(tcpconn* conn) = 0;
+    virtual void handle_disconnect_event(tcpconn* conn) = 0;
+	virtual int handle_timeout_event(tcpconn*) = 0;
+	virtual int handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) = 0;
 };
 
 #endif

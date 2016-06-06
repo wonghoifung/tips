@@ -10,7 +10,7 @@ class SimpleClient : public stream_client
 	SimpleClient(const SimpleClient&);
 	SimpleClient& operator=(const SimpleClient&);
 public:
-	SimpleClient();
+	SimpleClient(eventloop* evloop);
 	~SimpleClient();
 	virtual void on_connect(tcpconn* conn);
     virtual void on_disconnect(tcpconn* conn);

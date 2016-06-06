@@ -11,9 +11,9 @@ class SimpleServer : public stream_server, public timer_handler
 	SimpleServer(const SimpleServer&);
 	SimpleServer& operator=(const SimpleServer&);
 public:
-	SimpleServer();
+	SimpleServer(eventloop* evloop);
 	~SimpleServer();
-	bool init();
+	bool init(int port);
 	virtual int on_message(inmessage* pMessage, tcpconn* pHandler, unsigned long dwSessionID);
     virtual void on_connect(tcpconn* pHandler);
     virtual void on_disconnect(tcpconn* pHandler);

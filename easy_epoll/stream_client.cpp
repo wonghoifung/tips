@@ -6,25 +6,47 @@
 #include <unistd.h>
 #include <stdio.h>
 
-stream_client::stream_client() {
+stream_client::stream_client(eventloop* evloop): evloop_(evloop) {
 	conn_ = new tcpconn(1);
 	conn_->setneeddel(false);
 }
 
 stream_client::~stream_client() {
 	if (conn_) {
+		evloop_->delfd(conn_); // TODO need ?
 		delete conn_;
 		conn_ = NULL;
 	}
+	evloop_ = NULL;
 }
 
 tcpconn* stream_client::create_tcpconn() {
 	return conn_;
 }
 
-// bool stream_client::init() {
-// 	return true;
-// }
+bool stream_client::init(const std::string& host, int port)
+{
+    int sock_fd = socket_create();
+    if (sock_fd < 0) return false;
+
+    int ret = socket_nonblock_connect(sock_fd, host.c_str(), port);
+    if (ret == -1) return false;
+
+    tcpconn* c = create_tcpconn(); // subclass provide implementation
+    c->setfd(sock_fd);     
+    c->evloop(evloop_);
+    c->evhandler(this);
+    evloop_->addfd(c);
+
+    if (ret == -2) { // connecting...
+        c->setconnecting();
+        evloop_->towrite(c);
+    } 
+    else if (ret == 0) { // connected!
+        c->handle_connect();
+    }
+    return true;
+}
 
 bool stream_client::connect(const std::string& host, const std::string& port) {
 	bool ret = connect(conn_, host, atoi(port.c_str()));
@@ -35,7 +57,7 @@ bool stream_client::connect(const std::string& host, const std::string& port) {
 }
 
 bool stream_client::connect(tcpconn* conn, const std::string& strAddr, int port) {
-	return init_client(strAddr, port);
+	return init(strAddr, port);
 }
 
 bool stream_client::connect(tcpconn* conn, const address& addr) {
@@ -64,11 +86,3 @@ int stream_client::handle_timeout_event(tcpconn* conn) {
 int stream_client::handle_message_event(inmessage* msg, tcpconn* conn, unsigned long ssid) {
 	return on_message(msg,conn,ssid);
 }
-
-// bool stream_client::set_evloop(event_loop* pServer) {
-// 	return true;
-// }
-
-// bool stream_client::register_to_evloop(tcpconn* conn) { // no use TODO
-// 	return manage(conn);
-// }
