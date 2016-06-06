@@ -41,6 +41,11 @@ function peer_go(peerid)
 	pm.peer_go(peerid)
 end
 
+if not skeleton_init("SimpleServerLua", 7, 100000) then
+	print("lua cannot init skeleton")
+	return
+end
+
 ----------------------------------------->
 local testtimer = create_timer('on_testtimer_timerout')
 function on_testtimer_timerout(timer)
@@ -54,16 +59,11 @@ init_callbacks()
 
 local server = SimpleServer()
 
-if not server:init_server(6464) then
+if not server:init(6464) then
 	print("cannot init server")
 	return
 end
 
-if not server:init() then
-	print("cannot init")
-	return
-end
-
-server:run()
+skeleton_run()
 
 

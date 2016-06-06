@@ -45,7 +45,7 @@ static void broadcast(outmessage* msg) {
 
 const std::string sys_key("1234567890");
 
-SimpleServer::SimpleServer():svid_(0) {
+SimpleServer::SimpleServer(eventloop* evloop): stream_server(evloop), svid_(0) {
 	heartbeatTimer_.set_handler(this, HEARTBEAT_TIMER);
 	updateTimer_.set_handler(this, UPDATE_TIMER);
 }
@@ -54,8 +54,9 @@ SimpleServer::~SimpleServer() {
 
 }
 
-bool SimpleServer::init() {
+bool SimpleServer::init(int port) {
 	// svid_...
+	if (!stream_server::init(port)) return false;
 
 	heartbeatTimer_.start(30);
 	updateTimer_.start(6);
@@ -181,7 +182,7 @@ Peer* SimpleServer::checkRelogin(const uint32_t peerid, tcpconn* conn) {
 		removePeer(peer);
 
 		if (oldhandler) {
-			disconnect(oldhandler);
+			evloop()->close_conn(oldhandler);
 		}
 
 		return NULL;
