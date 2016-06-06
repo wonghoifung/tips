@@ -13,7 +13,7 @@ stream_client::stream_client(eventloop* evloop): evloop_(evloop) {
 
 stream_client::~stream_client() {
 	if (conn_) {
-		evloop_->delfd(conn_); // TODO need ?
+		//evloop_->delfd(conn_); 
 		delete conn_;
 		conn_ = NULL;
 	}
@@ -24,9 +24,16 @@ tcpconn* stream_client::create_tcpconn() {
 	return conn_;
 }
 
-bool stream_client::init(const std::string& host, int port)
-{
-    int sock_fd = socket_create();
+bool stream_client::connect(const std::string& host, const std::string& port) {
+	bool ret = connect(host, atoi(port.c_str()));
+	if (!ret) {
+		log_error("connect error");
+	}
+	return ret;
+}
+
+bool stream_client::connect(const std::string& host, int port) {
+	int sock_fd = socket_create();
     if (sock_fd < 0) return false;
 
     int ret = socket_nonblock_connect(sock_fd, host.c_str(), port);
@@ -46,22 +53,6 @@ bool stream_client::init(const std::string& host, int port)
         c->handle_connect();
     }
     return true;
-}
-
-bool stream_client::connect(const std::string& host, const std::string& port) {
-	bool ret = connect(conn_, host, atoi(port.c_str()));
-	if (!ret) {
-		log_error("connect error");
-	}
-	return ret;
-}
-
-bool stream_client::connect(tcpconn* conn, const std::string& strAddr, int port) {
-	return init(strAddr, port);
-}
-
-bool stream_client::connect(tcpconn* conn, const address& addr) {
-	return connect(conn, addr.host, addr.port);
 }
 
 int stream_client::send(outmessage* msg) {

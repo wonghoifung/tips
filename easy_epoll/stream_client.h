@@ -18,12 +18,10 @@ public:
 	virtual ~stream_client();
 
 	// from event_loop
-	virtual tcpconn* create_tcpconn(); 
-	bool init(const std::string& host, int port);
+	tcpconn* create_tcpconn();
 
 	bool connect(const std::string& host, const std::string& port);
-	bool connect(tcpconn* conn, const std::string& strAddr, int port);
-	bool connect(tcpconn* conn, const address& addr);
+	bool connect(const std::string& host, int port);
  	int send(outmessage* msg);
 
  	// from event_handler
