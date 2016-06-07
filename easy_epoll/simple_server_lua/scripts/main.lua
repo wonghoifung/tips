@@ -2,8 +2,9 @@
 
 -----------------------------------------> script path
 local p = "./scripts/"
+local p2 = "../shared/"
 local oldp = package.path
-package.path = string.format("%s?.lua;%s",p,oldp)
+package.path = string.format("%s?.lua;%s?.lua;%s",p,p2,oldp)
 
 local cmd_callbacks = {}
 
