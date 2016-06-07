@@ -10,6 +10,9 @@ enum
 	cmd_kick = 4,
 	cmd_upper = 5,
 	cmd_chat2all = 6,
+
+	tblmsg_test1 = 7,
+	tblmsg_test2 = 8,
 };
 
 #endif

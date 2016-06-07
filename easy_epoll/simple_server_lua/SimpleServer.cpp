@@ -3,6 +3,7 @@
 #include "message.h"
 #include "message_adapter.h"
 #include "Peer.h"
+#include "lua_tblmsg.h"
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
@@ -99,6 +100,10 @@ int SimpleServer::on_message(inmessage* pMessage, tcpconn* conn, unsigned long s
 	switch (cmd) {
 		case cmd_echo:
 			return handleEcho(peer, pMessage);
+		case tblmsg_test1:
+		case tblmsg_test2:
+			call_lua_dispatch_tblmsg(pMessage, conn);
+			break;
 		default:
 			return lua_on_message(pMessage, conn);
 	}

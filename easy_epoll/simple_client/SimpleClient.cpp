@@ -34,6 +34,30 @@ public:
 			if (sc) sc->send(&msg);
 		}
 
+		{
+			outmessage msg;
+			msg.begin(tblmsg_test1);
+			msg.write_int(cc);
+			msg.write_cstring("test1");
+			msg.write_cstring("test11");
+			msg.write_cstring("test111");
+			msg.write_int(cc+1);
+			msg.end();
+			if (sc) sc->send(&msg);
+		}
+
+		{
+			outmessage msg;
+			msg.begin(tblmsg_test2);
+			msg.write_cstring("test2");
+			msg.write_int(cc);
+			msg.write_int(cc+1);
+			msg.write_int(cc+2);
+			msg.write_cstring("test22");
+			msg.end();
+			if (sc) sc->send(&msg);
+		}
+
 		startTimer();
 		return 0;
 	}
@@ -94,6 +118,26 @@ int SimpleClient::on_message(inmessage* msg, tcpconn* conn, unsigned long ssid) 
 			int peerid = msg->read_int();
 			std::string content = msg->read_cstring();
 			printf("%d say: %s\n", peerid, content.c_str());
+			break;
+		}
+		case tblmsg_test1: {
+			// 1,2,2,2,1
+			int i1 = msg->read_int();
+			std::string s1 = msg->read_cstring();
+			std::string s2 = msg->read_cstring();
+			std::string s3 = msg->read_cstring();
+			int i2 = msg->read_int();
+			printf("tblmsg_test1: %d|%s|%s|%s|%d\n", i1, s1.c_str(), s2.c_str(), s3.c_str(), i2);
+			break;
+		}
+		case tblmsg_test2: {
+			// 2,1,1,1,2
+			std::string s1 = msg->read_cstring();
+			int i1 = msg->read_int();
+			int i2 = msg->read_int();
+			int i3 = msg->read_int();
+			std::string s2 = msg->read_cstring();
+			printf("tblmsg_test2: %s|%d|%d|%d|%s\n", s1.c_str(), i1, i2, i3, s2.c_str()); 
 			break;
 		}
 	}

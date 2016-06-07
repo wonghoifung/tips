@@ -1,5 +1,8 @@
 #include "luaport.h"
 #include "message_adapter.h"
+#include "lua_skeleton.h"
+#include "lua_timer.h"
+#include "lua_tblmsg.h"
 #include "log.h"
 #include "tcpconn.h"
 #include <assert.h>
@@ -63,6 +66,10 @@ bool lua_init() {
 
     luaport<lua_inmessage>::register_class(L, "inmsg");
 	luaport<lua_outmessage>::register_class(L, "outmsg");
+
+    register_lua_skeleton();
+    register_lua_timer();
+    register_lua_tblmsg();
 
     return true;
 }
