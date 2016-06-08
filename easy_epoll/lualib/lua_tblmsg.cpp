@@ -124,6 +124,9 @@ void call_lua_dispatch_tblmsg(inmessage* msg, tcpconn* conn)
 			lua_pushstring(L, msg->read_cstring());
 			lua_settable(L, -3);
 			break;
+		default:
+			printf("error tblmsg field type: %d\n", it->second[i]);
+			assert(0);
 		}
 	}
 
