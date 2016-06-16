@@ -1,0 +1,37 @@
+1. skynet_main.c main()->skynet_start()
+
+2. skynet_start.c skynet_start()->bootstrap() // config 'snlua bootstrap' ->skynet_context_new()
+
+3. skynet_server.c skynet_context_new() // module already inited
+
+4. service_snlua.c snlua_init()->skynet_send() // send message to itself, then skynet_start.c start() thread run...
+
+		   init_cb()->luaL_loadfile()->lua_pcall() loader.lua 'bootstrap.lua' // worker
+
+5. bootstrap.lua skynet.start(start_func)->c.callback(skynet.dispatch_message)->skynet.timeout()
+
+		   =>skynet.init_service(start_func)->skynet.pcall(start_func)->xpcall() // worker
+
+		   lua-skynet.c lcallback()->skynet_callback(_cb) 
+
+		   skynet.launch('snlua','launcher') // worker
+
+6. manager.lua c.command('LAUNCH'...)
+
+7. lua-skynet.c lcommand()->skynet_command()
+
+8. skynet_server.c skynet_command()->cmd_launch()->skynet_context_new()
+
+9. like 3 launcher.lua is loaded...
+
+10. bootstrap.lua skynet.newservice('main')
+
+11. skynet.lua skynet.call(".launcher", "lua" , "LAUNCH", "snlua", name, ...)->c.send()
+
+12. lua-skynet.c lsend()->skynet_sendname()
+
+13. skynet_server.c skynet_send()->skynet_context_push()
+
+14. launcher.lua command.LAUNCH()->launch_service()->skynet.launch() // worker
+
+15. like 6
