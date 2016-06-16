@@ -1,62 +1,45 @@
 1. [skynet_main.c]main() -> [skynet_start.c]skynet_start()
 
-2. [skynet_start.c]skynet_start() -> [skynet_start.c]bootstrap() // config
-'snlua bootstrap' for skynet_context_new()
+2. [skynet_start.c]skynet_start() -> [skynet_start.c]bootstrap() // config 'snlua bootstrap' for skynet_context_new()
 
-3. [skynet_start.c]bootstrap() -> [skynet_server.c]skynet_context_new('snlua',
-'bootstrap') // snlua.so already loaded
+3. [skynet_start.c]bootstrap() -> [skynet_server.c]skynet_context_new('snlua', 'bootstrap') // snlua.so already loaded
 
 4. [skynet_server.c]skynet_context_new('snlua', 'bootstrap') -> 
 
-   [service_snlua.c]snlua_init() -> [skynet_server.c]skynet_send() // send
-message to snlua itself, then [skynet_start.c]start() get threads run
+   [service_snlua.c]snlua_init() -> [skynet_server.c]skynet_send() // send message to snlua itself, then [skynet_start.c]start() get threads run
 
-   [service_snlua.c]init_cb() -> luaL_loadfile(), lua_pcall() -> loader.lua
-'bootstrap.lua' // worker(internal message 1)
+   [service_snlua.c]init_cb() -> luaL_loadfile(), lua_pcall() -> loader.lua 'bootstrap.lua' // worker(internal message 1)
 
-5. {bootstrap.lua}[skynet.lua]skynet.start(start_func) -> // worker(internal
-message 1)
+5. {bootstrap.lua}[skynet.lua]skynet.start(start_func) -> // worker(internal message 1)
 
-   {skynet.lua}c.callback([skynet.lua]skynet.dispatch_message) ->
-[lua-skynet.c]lcallback() ->
-[skynet_server.c]skynet_callback([lua-skynet.c]_cb) // worker(internal message
-1)
+   {skynet.lua}c.callback([skynet.lua]skynet.dispatch_message) -> [lua-skynet.c]lcallback() -> 
+   [skynet_server.c]skynet_callback([lua-skynet.c]_cb) // worker(internal message 1)
 
-   {skynet.lua}skynet.timeout() -> c.inicommand('TIMEOUT') -> //
-worker(internal message 1) 
+   {skynet.lua}skynet.timeout() -> c.inicommand('TIMEOUT') -> // worker(internal message 1) 
 
-   [lua-skynet.c]lintcommand() -> [skynet_server.c]skynet_command() ->
-[skynet_server.c]cmd_timeout() -> [skynet_timer.c]skynet_timeout() //
-worker(internal message 1) done
+   [lua-skynet.c]lintcommand() -> [skynet_server.c]skynet_command() -> 
+   [skynet_server.c]cmd_timeout() -> [skynet_timer.c]skynet_timeout() // worker(internal message 1) done
 
-   {skynet.lua}skynet.init_service(start_func) -> skynet.pcall(start_func) ->
-xpcall() // worker(timer message)
+   {skynet.lua}skynet.init_service(start_func) -> skynet.pcall(start_func) -> xpcall() // worker(timer message)
 
-   -> {bootstrap.lua}[manager.lua]skynet.launch('snlua','launcher') //
-worker(timer message)
+   -> {bootstrap.lua}[manager.lua]skynet.launch('snlua','launcher') // worker(timer message)
 
 6. {manager.lua}c.command('LAUNCH'...) // worker(timer message)
 
-7. [lua-skynet.c]lcommand() -> [skynet_server.c]skynet_command() //
-worker(timer message)
+7. [lua-skynet.c]lcommand() -> [skynet_server.c]skynet_command() // worker(timer message)
 
-8. [skynet_server.c]skynet_command() -> [skynet_server.c]cmd_launch() ->
-[skynet_server.c]skynet_context_new() // worker(timer message)
+8. [skynet_server.c]skynet_command() -> [skynet_server.c]cmd_launch() -> [skynet_server.c]skynet_context_new() // worker(timer message)
 
 9. like 3, launcher.lua is loaded...
 
 10. {bootstrap.lua}skynet.newservice('main') // worker(timer message)
 
-11. {skynet.lua}skynet.call(".launcher", "lua" , "LAUNCH", "snlua", name, ...)
--> {skynet.lua}c.send() // worker(timer message)
+11. {skynet.lua}skynet.call(".launcher", "lua" , "LAUNCH", "snlua", name, ...) -> {skynet.lua}c.send() // worker(timer message)
 
-12. [lua-skynet.c]lsend() -> [skynet_server.c]skynet_sendname() //
-worker(timer message)
+12. [lua-skynet.c]lsend() -> [skynet_server.c]skynet_sendname() // worker(timer message)
 
-13. [skynet_server.c]skynet_send() -> [skynet_server.c]skynet_context_push()
-// worker(timer message) done
+13. [skynet_server.c]skynet_send() -> [skynet_server.c]skynet_context_push() // worker(timer message) done
 
-14. {launcher.lua}command.LAUNCH() -> [luancher.lua]launch_service() ->
-{launch.lua}skynet.launch() // worker(internal message 2), start main
+14. {launcher.lua}command.LAUNCH() -> [luancher.lua]launch_service() -> {launch.lua}skynet.launch() // worker(internal message 2), start main
 
 15. like 6
