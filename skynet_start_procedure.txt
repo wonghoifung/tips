@@ -12,7 +12,7 @@
 message to snlua itself, then [skynet_start.c]start() get threads run
 
    [service_snlua.c]init_cb() -> luaL_loadfile(), lua_pcall() -> loader.lua
-'bootstrap.lua' // worker(internal message)
+'bootstrap.lua' // worker(internal message 1)
 
 5. {bootstrap.lua}[skynet.lua]skynet.start(start_func) -> 
 
@@ -31,25 +31,28 @@ xpcall() // worker(timer message)
    -> {bootstrap.lua}[manager.lua]skynet.launch('snlua','launcher') //
 worker(timer message)
 
-6. {manager.lua}c.command('LAUNCH'...)
+6. {manager.lua}c.command('LAUNCH'...) // worker(timer message)
 
-7. [lua-skynet.c]lcommand() -> [skynet_server.c]skynet_command()
+7. [lua-skynet.c]lcommand() -> [skynet_server.c]skynet_command() //
+worker(timer message)
 
 8. [skynet_server.c]skynet_command() -> [skynet_server.c]cmd_launch() ->
-[skynet_server.c]skynet_context_new()
+[skynet_server.c]skynet_context_new() // worker(timer message)
 
 9. like 3, launcher.lua is loaded...
 
 10. {bootstrap.lua}skynet.newservice('main') // worker(timer message)
 
 11. {skynet.lua}skynet.call(".launcher", "lua" , "LAUNCH", "snlua", name, ...)
--> {skynet.lua}c.send()
+-> {skynet.lua}c.send() // worker(timer message)
 
-12. [lua-skynet.c]lsend() -> [skynet_server.c]skynet_sendname()
+12. [lua-skynet.c]lsend() -> [skynet_server.c]skynet_sendname() //
+worker(timer message)
 
 13. [skynet_server.c]skynet_send() -> [skynet_server.c]skynet_context_push()
+// worker(timer message)
 
 14. {launcher.lua}command.LAUNCH() -> [luancher.lua]launch_service() ->
-{launch.lua}skynet.launch() // worker(message)
+{launch.lua}skynet.launch() // worker(internal message 2), start main
 
 15. like 6
