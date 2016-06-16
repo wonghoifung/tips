@@ -14,16 +14,20 @@ message to snlua itself, then [skynet_start.c]start() get threads run
    [service_snlua.c]init_cb() -> luaL_loadfile(), lua_pcall() -> loader.lua
 'bootstrap.lua' // worker(internal message 1)
 
-5. {bootstrap.lua}[skynet.lua]skynet.start(start_func) -> 
+5. {bootstrap.lua}[skynet.lua]skynet.start(start_func) -> // worker(internal
+message 1)
 
    {skynet.lua}c.callback([skynet.lua]skynet.dispatch_message) ->
 [lua-skynet.c]lcallback() ->
-[skynet_server.c]skynet_callback([lua-skynet.c]_cb) 
+[skynet_server.c]skynet_callback([lua-skynet.c]_cb) // worker(internal message
+1)
 
-   {skynet.lua}skynet.timeout() -> c.inicommand('TIMEOUT') ->
+   {skynet.lua}skynet.timeout() -> c.inicommand('TIMEOUT') -> //
+worker(internal message 1) 
 
    [lua-skynet.c]lintcommand() -> [skynet_server.c]skynet_command() ->
-[skynet_server.c]cmd_timeout() -> [skynet_timer.c]skynet_timeout()
+[skynet_server.c]cmd_timeout() -> [skynet_timer.c]skynet_timeout() //
+worker(internal message 1) done
 
    {skynet.lua}skynet.init_service(start_func) -> skynet.pcall(start_func) ->
 xpcall() // worker(timer message)
@@ -50,7 +54,7 @@ worker(timer message)
 worker(timer message)
 
 13. [skynet_server.c]skynet_send() -> [skynet_server.c]skynet_context_push()
-// worker(timer message)
+// worker(timer message) done
 
 14. {launcher.lua}command.LAUNCH() -> [luancher.lua]launch_service() ->
 {launch.lua}skynet.launch() // worker(internal message 2), start main
