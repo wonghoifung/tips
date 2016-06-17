@@ -13,12 +13,14 @@
 5. {bootstrap.lua}[skynet.lua]skynet.start(start_func) -> // worker(internal message 1)
 
    {skynet.lua}c.callback([skynet.lua]skynet.dispatch_message) -> [lua-skynet.c]lcallback() -> 
+
    [skynet_server.c]skynet_callback([lua-skynet.c]_cb) // worker(internal message 1)
 
    {skynet.lua}skynet.timeout() -> c.inicommand('TIMEOUT') -> // worker(internal message 1) 
 
    [lua-skynet.c]lintcommand() -> [skynet_server.c]skynet_command() -> 
-   [skynet_server.c]cmd_timeout() -> [skynet_timer.c]skynet_timeout() // worker(internal message 1) done
+   
+   [skynet_server.c]cmd_timeout() -> [skynet_timer.c]skynet_timeout() // worker(internal message 1) done, interval 0 send message
 
    {skynet.lua}skynet.init_service(start_func) -> skynet.pcall(start_func) -> xpcall() // worker(timer message)
 
@@ -43,3 +45,58 @@
 14. {launcher.lua}command.LAUNCH() -> [luancher.lua]launch_service() -> {launch.lua}skynet.launch() // worker(internal message 2), start main
 
 15. like 6
+
+-------------------------------------------------
+
+skynet.newservice(sname) 
+>> skynet.call(".launcher", "lua" , "LAUNCH", "snlua", sname, ...)
+>> c.send('.launcher', 'lua'id, nil, p.pack(...))
+>> lsend()
+>> skynet_sendname() / skynet_send()
+
+// recv msg, launcher service start processing...
+>> command.LAUNCH()
+>> launch_service()
+>> skynet.launch()
+>> c.command('LAUNCH'...)
+>> lcommand()
+>> skynet_command() // dispatch cmd
+>> cmd_launch()
+>> skynet_context_new()
+>> snlua_create() // a new lua vm start
+   snlua_init() // setup callback and skynet_command("REG")
+>> skynet_send() // send to itself
+>> launch_cb() // clear callback 
+>> init_cb()
+>> loader.lua 'sname' // run the 'sname'.lua file
+
+-------------------------------------------------
+
+skynet.start(f)
+>> c.callback(skynet.dispatch_message) // setup new callback
+   skynet.timeout(0, skynet.init_service(f)) 
+>> c.intcommand("TIMEOUT")
+>> lintcommand()
+>> skynet_command() // dispatch cmd
+>> cmd_timeout()
+>> skynet_timeout()
+>> interval 0, send message to lua file itself, skynet_context_push()
+
+// resv msg, lua file itself dispatch_message
+>> skynet.dispatch_message()
+>> raw_dispatch_message()
+
+-------------------------------------------------
+
+c.callback(skynet.dispatch_message)
+>> lcallback()
+>> skynet_callback(_cb)
+
+-------------------------------------------------
+
+skynet.exit()
+>> skynet.send(".launcher","lua","REMOVE",skynet.self(), false)
+   // ... coroutine ??
+   c.command("EXIT") >> handle_exit(), KILL self
+   coroutine_yield "QUIT" 
+>> lyield()
