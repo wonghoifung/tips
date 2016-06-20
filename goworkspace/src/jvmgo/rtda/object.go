@@ -1,5 +1,5 @@
 package rtda
 
-type object struct {
+type Object struct {
 
 }
