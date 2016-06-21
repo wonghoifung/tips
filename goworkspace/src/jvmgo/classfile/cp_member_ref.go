@@ -8,7 +8,7 @@ type ConstantMemberrefInfo struct {
 
 func (self *ConstantMemberrefInfo) readInfo(reader *ClassReader) {
 	self.classIndex = reader.readUint16()
-	self.nameAndTypeIndex = read.readUint16()
+	self.nameAndTypeIndex = reader.readUint16()
 }
 
 func (self *ConstantMemberrefInfo) ClassName() string {
