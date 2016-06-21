@@ -1,0 +1,6 @@
+put this folder in the skynet root folder, then run those commands
+
+cd myserver
+./build_my_luaclib.sh
+cd ..
+./skynet myserver/config
