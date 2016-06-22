@@ -34,7 +34,7 @@ func (self LocalVars) SetLong(index uint, val int64) {
 	self[index + 1].num = int32(val >> 32)
 }
 
-func (self LocalVars) GetLong(index uint) {
+func (self LocalVars) GetLong(index uint) int64 {
 	low := uint32(self[index].num)
 	high := uint32(self[index+1].num)
 	return int64(high) << 32 | int64(low)
