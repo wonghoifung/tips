@@ -1,0 +1,31 @@
+./configure --prefix=/home/albert/or_tcp/run --with-stream --with-stream_ssl_module --add-module=/home/albert/or_tcp/stream-lua-nginx-module-0.0.1
+
+nginx.conf:
+stream {
+    server {
+        listen 6464;
+        content_by_lua_file /home/albert/or_tcp/run/src/main.lua;
+    }
+}
+
+main.lua:
+ngx.say("welcome to stream server")
+
+local sock = assert(ngx.req.socket(true))
+--sock:settimeout(5000) -- five seconds timeout, set the timeout for subsequent socket operations
+
+local remoteipport = ngx.var.remote_addr..":"..ngx.var.remote_port
+ngx.log(ngx.ERR, remoteipport.." connected")
+
+local data, err, partial = sock:receive()
+while data do
+	local bytes, serr = sock:send(data..'\n')
+	if not bytes then
+		ngx.log(ngx.ERR, remoteipport.." send error: ", serr)
+		return
+	end
+	data, err, partial = sock:receive()
+end
+
+ngx.log(ngx.ERR, "failed to read data: ", err)
+
