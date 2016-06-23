@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <arpa/inet.h>
-
 #define QUEUESIZE 1024
 #define HASHSIZE 4096
 #define SMALLSTRING 2048
@@ -23,66 +21,17 @@
 #define TYPE_CLOSE 5
 #define TYPE_WARNING 6
 
-/* header: | flag_2 | cmd_2 | version_1 | subversion_1 | bodylen_2 | checkcode_1 | */
-#define HEADBUF_SIZE 9
-
-#define HEADPOS_CMD 2
-#define HEADPOS_VERSION 4
-#define HEADPOS_SUBVERSION 5
-#define HEADPOS_BODYLEN 6
-#define HEADPOS_CHECKCODE 8
-
-enum { c_default_version = 1, c_default_subversion = 1 };
-
-static inline void mynetpack_read_header(const char* pack, char* outbuf, int len, int pos) {
-	if (pos > 0 || pos + len < HEADBUF_SIZE) {
-		memcpy(outbuf, pack + pos, len);
-	}
-}
-static inline void mynetpack_write_header(char* pack, const char* inbuf, int len, int pos) {
-	if (pos > 0 || pos + len < HEADBUF_SIZE) {
-		memcpy(pack + pos, inbuf, len);
-	}
-}	
-static inline uint16_t mynetpack_command(const char* pack) {
-	uint16_t cmd;
-	mynetpack_read_header(pack, (char*)&cmd, sizeof(uint16_t), HEADPOS_CMD);
-	return ntohs(cmd);
-}
-static inline uint8_t mynetpack_version(const char* pack) {
-	uint8_t ver;
-	mynetpack_read_header(pack, (char*)&ver, sizeof(uint8_t), HEADPOS_VERSION);
-	return ver;
-}
-static inline uint8_t mynetpack_subversion(const char* pack) {
-	uint8_t subver;
-	mynetpack_read_header(pack, (char*)&subver, sizeof(uint8_t), HEADPOS_SUBVERSION);
-	return subver;
-}
-static inline uint16_t mynetpack_bodylen(const char* pack) {
-	uint16_t bodylen;
-	mynetpack_read_header(pack, (char*)&bodylen, sizeof(uint16_t), HEADPOS_BODYLEN);
-	return ntohs(bodylen);
-}
-static inline uint8_t mynetpack_checkcode(const char* pack) {
-	uint8_t cc;
-	mynetpack_read_header(pack, (char*)&cc, sizeof(uint8_t), HEADPOS_CHECKCODE);
-	return cc;
-}
-
 struct netpack {
 	int id;
 	int size;
 	void * buffer;
-	char headbuf[HEADBUF_SIZE];
 };
 
 struct uncomplete {
 	struct netpack pack;
 	struct uncomplete * next;
 	int read;
-	// int header;
-	int headread;
+	int header;
 };
 
 struct queue {
@@ -193,7 +142,7 @@ expand_queue(lua_State *L, struct queue *q) {
 }
 
 static void
-push_data(lua_State *L, int fd, void *buffer, int size, int clone, void* headbuf) {
+push_data(lua_State *L, int fd, void *buffer, int size, int clone) {
 	if (clone) {
 		void * tmp = skynet_malloc(size);
 		memcpy(tmp, buffer, size);
@@ -206,7 +155,6 @@ push_data(lua_State *L, int fd, void *buffer, int size, int clone, void* headbuf
 	np->id = fd;
 	np->buffer = buffer;
 	np->size = size;
-	memcpy(np->headbuf, headbuf, HEADBUF_SIZE);
 	if (q->head == q->tail) {
 		expand_queue(L, q);
 	}
@@ -227,22 +175,21 @@ save_uncomplete(lua_State *L, int fd) {
 
 static inline int
 read_size(uint8_t * buffer) {
-	int bodylen = mynetpack_bodylen((const char*)buffer);
-	return bodylen;
+	int r = (int)buffer[0] << 8 | (int)buffer[1];
+	return r;
 }
 
 static void
 push_more(lua_State *L, int fd, uint8_t *buffer, int size) {
-	if (size < HEADBUF_SIZE) {
-		struct uncomplete* uc = save_uncomplete(L, fd);
+	if (size == 1) {
+		struct uncomplete * uc = save_uncomplete(L, fd);
 		uc->read = -1;
-		memcpy(uc->pack.headbuf, buffer, size);
-		uc->headread = size;
+		uc->header = *buffer;
 		return;
 	}
 	int pack_size = read_size(buffer);
-	buffer += HEADBUF_SIZE;
-	size -= HEADBUF_SIZE;
+	buffer += 2;
+	size -= 2;
 
 	if (size < pack_size) {
 		struct uncomplete * uc = save_uncomplete(L, fd);
@@ -250,13 +197,9 @@ push_more(lua_State *L, int fd, uint8_t *buffer, int size) {
 		uc->pack.size = pack_size;
 		uc->pack.buffer = skynet_malloc(pack_size);
 		memcpy(uc->pack.buffer, buffer, size);
-
-		memcpy(uc->pack.headbuf, buffer - HEADBUF_SIZE, HEADBUF_SIZE);
-		uc->headread = HEADBUF_SIZE;
-
 		return;
 	}
-	push_data(L, fd, buffer, pack_size, 1, buffer - HEADBUF_SIZE);
+	push_data(L, fd, buffer, pack_size, 1);
 
 	buffer += pack_size;
 	size -= pack_size;
@@ -282,24 +225,12 @@ filter_data_(lua_State *L, int fd, uint8_t * buffer, int size) {
 	if (uc) {
 		// fill uncomplete
 		if (uc->read < 0) {
-			assert(uc->read == -1);
-
-			if (uc->headread + size < HEADBUF_SIZE) {
-				memcpy(uc->pack.headbuf + uc->headread, buffer, size);
-				uc->headread += size;
-				return 1;
-			}
-
-			int headleft = HEADBUF_SIZE - uc->headread;
-			memcpy(uc->pack.headbuf + uc->headread, buffer, headleft);
-			uc->headread += headleft;
-			assert(uc->headread == HEADBUF_SIZE);
-
-			size -= headleft;
-			buffer += headleft;
-
 			// read size
-			int pack_size = mynetpack_bodylen(uc->pack.headbuf);
+			assert(uc->read == -1);
+			int pack_size = *buffer;
+			pack_size |= uc->header << 8 ;
+			++buffer;
+			--size;
 			uc->pack.size = pack_size;
 			uc->pack.buffer = skynet_malloc(pack_size);
 			uc->read = 0;
@@ -319,35 +250,27 @@ filter_data_(lua_State *L, int fd, uint8_t * buffer, int size) {
 		if (size == 0) {
 			lua_pushvalue(L, lua_upvalueindex(TYPE_DATA));
 			lua_pushinteger(L, fd);
-			
-			void* result = skynet_malloc(uc->pack.size + HEADBUF_SIZE);
-			memcpy(result, uc->pack.headbuf, HEADBUF_SIZE);
-			memcpy(result, uc->pack.buffer, uc->pack.size);
-			
-			lua_pushlightuserdata(L, result);
-			lua_pushinteger(L, uc->pack.size + HEADBUF_SIZE);
-
-			skynet_free(uc->pack.buffer);
+			lua_pushlightuserdata(L, uc->pack.buffer);
+			lua_pushinteger(L, uc->pack.size);
 			skynet_free(uc);
 			return 5;
 		}
 		// more data
-		push_data(L, fd, uc->pack.buffer, uc->pack.size, 0, uc->pack.headbuf);
+		push_data(L, fd, uc->pack.buffer, uc->pack.size, 0);
 		skynet_free(uc);
 		push_more(L, fd, buffer, size);
 		lua_pushvalue(L, lua_upvalueindex(TYPE_MORE));
 		return 2;
 	} else {
-		if (size < HEADBUF_SIZE) {
-			struct uncomplete* uc = save_uncomplete(L, fd);
+		if (size == 1) {
+			struct uncomplete * uc = save_uncomplete(L, fd);
 			uc->read = -1;
-			memcpy(uc->pack.headbuf, buffer, size);
-			uc->headread = size;
+			uc->header = *buffer;
 			return 1;
 		}
 		int pack_size = read_size(buffer);
-		buffer += HEADBUF_SIZE;
-		size -= HEADBUF_SIZE;
+		buffer+=2;
+		size-=2;
 
 		if (size < pack_size) {
 			struct uncomplete * uc = save_uncomplete(L, fd);
@@ -355,24 +278,20 @@ filter_data_(lua_State *L, int fd, uint8_t * buffer, int size) {
 			uc->pack.size = pack_size;
 			uc->pack.buffer = skynet_malloc(pack_size);
 			memcpy(uc->pack.buffer, buffer, size);
-
-			memcpy(uc->pack.headbuf, buffer - HEADBUF_SIZE, HEADBUF_SIZE);
-			uc->headread = HEADBUF_SIZE;
-
 			return 1;
 		}
 		if (size == pack_size) {
 			// just one package
 			lua_pushvalue(L, lua_upvalueindex(TYPE_DATA));
 			lua_pushinteger(L, fd);
-			void * result = skynet_malloc(HEADBUF_SIZE + pack_size);
-			memcpy(result, buffer - HEADBUF_SIZE, HEADBUF_SIZE + size);
+			void * result = skynet_malloc(pack_size);
+			memcpy(result, buffer, size);
 			lua_pushlightuserdata(L, result);
-			lua_pushinteger(L, HEADBUF_SIZE + size);
+			lua_pushinteger(L, size);
 			return 5;
 		}
 		// more data
-		push_data(L, fd, buffer, pack_size, 1, buffer - HEADBUF_SIZE); 
+		push_data(L, fd, buffer, pack_size, 1);
 		buffer += pack_size;
 		size -= pack_size;
 		push_more(L, fd, buffer, size);
@@ -427,7 +346,12 @@ lfilter(lua_State *L) {
 	case SKYNET_SOCKET_TYPE_DATA:
 		// ignore listen id (message->id)
 		assert(size == -1);	// never padding string
-		return filter_data(L, message->id, (uint8_t *)buffer, message->ud);
+		// return filter_data(L, message->id, (uint8_t *)buffer, message->ud);
+		lua_pushvalue(L, lua_upvalueindex(TYPE_DATA));
+		lua_pushinteger(L, message->id);
+		lua_pushlightuserdata(L, buffer);
+		lua_pushinteger(L, message->ud);
+		return 5;
 	case SKYNET_SOCKET_TYPE_CONNECT:
 		// ignore listen fd connect
 		return 1;
@@ -504,25 +428,8 @@ tolstring(lua_State *L, size_t *sz, int index) {
 
 static inline void
 write_size(uint8_t * buffer, int len) {
-	buffer[0] = 'G';
-	buffer[1] = 'P';
-	
-	uint16_t bodylen = htons(len);
-	mynetpack_write_header((char*)buffer, (char*)&bodylen, sizeof(uint16_t), HEADPOS_BODYLEN);
-
-	uint8_t ver = c_default_version;
-	uint8_t sver = c_default_subversion;
-	uint8_t cc = 0;
-	mynetpack_write_header((char*)buffer, (char*)&ver, sizeof(uint8_t), HEADPOS_VERSION);
-	mynetpack_write_header((char*)buffer, (char*)&sver, sizeof(uint8_t), HEADPOS_SUBVERSION);
-	mynetpack_write_header((char*)buffer, (char*)&cc, sizeof(uint8_t), HEADPOS_CHECKCODE);
-}
-
-static int
-lsetcmd(lua_State *L) {
-	// TODO
-
-	return 0;
+	buffer[0] = (len >> 8) & 0xff;
+	buffer[1] = len & 0xff;
 }
 
 static int
@@ -533,12 +440,12 @@ lpack(lua_State *L) {
 		return luaL_error(L, "Invalid size (too long) of data : %d", (int)len);
 	}
 
-	uint8_t * buffer = skynet_malloc(len + HEADBUF_SIZE);
+	uint8_t * buffer = skynet_malloc(len + 2);
 	write_size(buffer, len);
-	memcpy(buffer + HEADBUF_SIZE, ptr, len);
+	memcpy(buffer+2, ptr, len);
 
 	lua_pushlightuserdata(L, buffer);
-	lua_pushinteger(L, len + HEADBUF_SIZE);
+	lua_pushinteger(L, len + 2);
 
 	return 2;
 }
@@ -562,7 +469,6 @@ luaopen_netpack(lua_State *L) {
 	luaL_Reg l[] = {
 		{ "pop", lpop },
 		{ "pack", lpack },
-		{ "setcmd", lsetcmd },
 		{ "clear", lclear },
 		{ "tostring", ltostring },
 		{ NULL, NULL },
