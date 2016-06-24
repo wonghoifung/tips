@@ -32,7 +32,8 @@ init_callbacks()
 load_tblmsg_formats(c.tblmsg_format) -- test1 test2 request format is same with response
 
 local client = simpleclient_create()
-simpleclient_connect(client, "127.0.0.1", "6464")
+simpleclient_connect(client, "127.0.0.1", "8989")
+--simpleclient_connect(client, "127.0.0.1", "6464")
 
 -----------------------------------------> run loop
 skeleton_run()

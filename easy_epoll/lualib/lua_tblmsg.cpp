@@ -5,6 +5,7 @@
 #include "log.h"
 #include <vector>
 #include <map>
+#include <assert.h>
 
 typedef std::map<int, std::vector<int> > mapintvector;
 
