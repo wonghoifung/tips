@@ -1,5 +1,10 @@
 local skynet = require "skynet"
+
+local p = "./myserver/"
+local oldp = package.path
+package.path = string.format("%s?.lua;%s",p,oldp)
 local c = require "commands"
+
 local netpack = require "netpack"
 
 local max_client = 64

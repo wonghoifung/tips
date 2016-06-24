@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <arpa/inet.h>
 
@@ -74,6 +75,7 @@ struct netpack {
 	int id;
 	int size;
 	void * buffer;
+	void * pack;
 	char headbuf[HEADBUF_SIZE];
 };
 
@@ -120,6 +122,7 @@ lclear(lua_State *L) {
 	for (i=q->head;i<q->tail;i++) {
 		struct netpack *np = &q->queue[i % q->cap];
 		skynet_free(np->buffer);
+		skynet_free(np->pack);
 	}
 	q->head = q->tail = 0;
 
@@ -477,9 +480,14 @@ lpop(lua_State *L) {
 	if (++q->head >= q->cap) {
 		q->head = 0;
 	}
+
+	np->pack = skynet_malloc(np->size + HEADBUF_SIZE);
+	memcpy(np->pack, np->headbuf, HEADBUF_SIZE);
+	memcpy(np->pack + HEADBUF_SIZE, np->buffer, np->size);
+
 	lua_pushinteger(L, np->id);
-	lua_pushlightuserdata(L, np->buffer);
-	lua_pushinteger(L, np->size);
+	lua_pushlightuserdata(L, np->pack);
+	lua_pushinteger(L, np->size + HEADBUF_SIZE);
 
 	return 3;
 }
@@ -520,8 +528,10 @@ write_size(uint8_t * buffer, int len) {
 
 static int
 lsetcmd(lua_State *L) {
-	// TODO
-
+	uint8_t* buffer = lua_touserdata(L, 1);
+	uint16_t cmd = lua_tointeger(L, 2);
+	cmd = htons(cmd);
+	mynetpack_write_header((char*)buffer, (char*)&cmd, sizeof(uint16_t), HEADPOS_CMD);
 	return 0;
 }
 
@@ -556,6 +566,207 @@ ltostring(lua_State *L) {
 	return 1;
 }
 
+#define MAX_CMD_COUNT 1000
+#define MAX_FIELD_COUNT 10
+static int8_t tblmsg_formats[MAX_CMD_COUNT][MAX_FIELD_COUNT];
+static void 
+init_tblmsg_formats() {
+	int i;
+	for (i=0; i<MAX_CMD_COUNT; ++i) {
+		tblmsg_formats[i][0] = -1; // mark non-existed message
+	}
+}
+#include <stdio.h>
+static void
+print_tblmsg_formats() {
+	int i,j;
+	for (i=0; i<MAX_CMD_COUNT; ++i) {
+		if (tblmsg_formats[i][0] == -1) continue;
+		printf("cmd %d: [", i);
+		for (j=0; j<MAX_FIELD_COUNT; ++j) {
+			if (tblmsg_formats[i][j] == 0) break;
+			printf("%d ", tblmsg_formats[i][j]);
+		}
+		printf("\b]\n");
+	}
+}
+/*
+_M.tblmsg_format = {}
+_M.tblmsg_format[_M.tblmsg_test1] = { 1, 2, 2, 2, 1 } -- 1 for int; 2 for str
+*/
+static int 
+lloadtblmsgformats(lua_State* L) {
+	init_tblmsg_formats();
+
+	lua_pushnil(L); // for next to start, -1:nil -2:table
+	while (lua_next(L, -2)) {
+		// -1:value -2:key -3:table
+		int cmd = lua_tointeger(L, -2);
+
+		// -1 is the sub table
+		size_t len = lua_rawlen(L, -1);
+		size_t i;
+		for (i = 0; i < len; ++i) {
+			lua_pushnumber(L, i+1);
+			lua_gettable(L,-2);
+			tblmsg_formats[cmd][i] = lua_tointeger(L,-1);
+			lua_pop(L, 1);
+		}
+		tblmsg_formats[cmd][i] = 0; // mark field end
+
+		// pop the value(sub table)
+		lua_pop(L, 1);
+	}
+	// no need to pop key, lua_next pop it for us, -1:table
+
+	print_tblmsg_formats();
+	return 0;
+}
+static bool 
+read_b(char* outbuf, int len, const char* buffer_, int size_, int* readptr_) {
+    if ((len + *readptr_) > size_) { return false; }
+    memcpy(outbuf, buffer_ + *readptr_, len);
+    *readptr_ += len;
+    return true;
+}
+static char* 
+read_bytes_b(int len, const char* buffer_, int size_, int* readptr_) {
+	if ((len + *readptr_) > size_) return NULL;
+	char* p = (char*)&buffer_[*readptr_];
+	*readptr_ += len;
+	return p;
+}
+static int 
+read_int32(const char* buffer_, int size_, int* readptr_) {
+	int32_t val = -1;
+	read_b((char*)&val, sizeof(int32_t), buffer_, size_, readptr_);
+	return ntohl(val);
+}
+static char* 
+read_string(const char* buffer_, int size_, int* readptr_) {
+	int32_t len = read_int32(buffer_, size_, readptr_);
+	if (len <= 0) return NULL;
+	return read_bytes_b(len, buffer_, size_, readptr_);
+}
+static int
+ltotable(lua_State* L) { // cmd, tbl = totable(msg,size)
+	int readptr_ = HEADBUF_SIZE;
+	int i;
+	// uint16_t cmd = lua_tointeger(L, 1);
+	char* buffer = (char*)lua_tostring(L, 1);
+	// char* buffer = lua_touserdata(L, 1);
+	int size = lua_tointeger(L, 2);
+	// assert(mynetpack_command(buffer) == cmd);
+	uint16_t cmd = mynetpack_command(buffer);
+	// assert(tblmsg_formats[cmd][0] != -1);
+	if (tblmsg_formats[cmd][0] == -1) {
+		lua_pushinteger(L, cmd);
+		return 1;
+	}
+	assert(buffer[0] == 'G');
+	assert(buffer[1] == 'P');
+	assert(mynetpack_version(buffer) == c_default_version);
+	assert(mynetpack_subversion(buffer) == c_default_subversion);
+	assert(mynetpack_checkcode(buffer) == 0);
+	assert(mynetpack_bodylen(buffer) + HEADBUF_SIZE == size);
+
+	lua_pushinteger(L, cmd);
+
+	lua_newtable(L); // new table on top
+	for (i = 0; tblmsg_formats[cmd][i] != 0; ++i) {
+		// 1 for int; 2 for str
+		switch (tblmsg_formats[cmd][i]) {
+		case 1:
+			lua_pushnumber(L, i + 1);
+			lua_pushinteger(L, read_int32(buffer, size, &readptr_));
+			lua_settable(L, -3);
+			break;
+		case 2:
+			lua_pushnumber(L, i + 1);
+			lua_pushstring(L, read_string(buffer, size, &readptr_));
+			lua_settable(L, -3);
+			break;
+		default:
+			printf("error tblmsg field type: %d\n", tblmsg_formats[cmd][i]);
+			assert(0);
+		}
+	}
+
+	return 2;
+}
+static bool 
+write_b(const char* inbuf, int len, char* buffer_, int* size_, int blen) {
+    if((*size_ < 0) || ((len + *size_) > blen))
+    { return false; }
+    memcpy(buffer_+*size_, inbuf, len);
+    *size_ += len;
+    return true;
+}
+static bool 
+write_zero_b(char* buffer_, int* size_, int blen) {
+    if((*size_ + 1) > blen)
+    { return false; }
+    memset(buffer_+*size_, '\0', sizeof(char));
+    ++*size_;
+    return true;
+}
+static bool 
+write_int32(int32_t val, char* buffer_, int* size_, int blen) {
+	val = htonl(val);
+	return write_b((char*)&val, sizeof(int32_t), buffer_, size_, blen);
+}
+static bool
+write_string(const char* str, char* buffer_, int* size_, int blen) {
+	int len = (int)strlen(str);
+	write_int32(len + 1, buffer_, size_, blen);
+	return write_b(str, len, buffer_, size_, blen) &&
+			write_zero_b(buffer_, size_, blen);
+}
+static int 
+ltopack(lua_State* L) { // pack, size = topack(cmd, tblmsg)
+	const int maxlen = 10240;
+	int size_ = HEADBUF_SIZE;
+	char* pack = skynet_malloc(maxlen);
+	memset(pack, 0, maxlen);
+
+	int cmd = lua_tointeger(L, -2);
+	cmd = htons(cmd);
+	mynetpack_write_header((char*)pack, (char*)&cmd, sizeof(uint16_t), HEADPOS_CMD);
+
+	size_t len = lua_rawlen(L, -1);
+	size_t i;
+	for (i = 0; i < len; ++i)
+	{
+		lua_pushnumber(L, i + 1);
+		lua_gettable(L, -2);
+		if (lua_isinteger(L, -1)) {
+			write_int32((int)lua_tointeger(L, -1), pack, &size_, maxlen);
+		} else if (lua_isstring(L, -1)) {
+			// write_string(lua_tostring(L, -1), pack, &size_, maxlen);
+			char* str = (char*)lua_tostring(L, -1);
+			printf("[lua-mynetpack.c] [ltopack] str: %s(%d)\n", str, (int)strlen(str));
+			write_string(str, pack, &size_, maxlen);
+		} else {
+			printf("err: dont support %s\n", lua_typename(L, lua_type(L, -1)));
+			lua_pop(L, 1);
+			return 0;
+		}
+		lua_pop(L, 1);
+	}
+
+	write_size((uint8_t*)pack, size_ - HEADBUF_SIZE);
+
+	lua_pushlightuserdata(L, pack);
+	lua_pushinteger(L, size_);
+	return 2;
+}
+// static int 
+// ldeletepack(lua_State* L) {
+// 	char* pack = lua_touserdata(L, 1);
+// 	skynet_free(pack);
+// 	return 0;
+// }
+
 int
 luaopen_netpack(lua_State *L) {
 	luaL_checkversion(L);
@@ -565,6 +776,10 @@ luaopen_netpack(lua_State *L) {
 		{ "setcmd", lsetcmd },
 		{ "clear", lclear },
 		{ "tostring", ltostring },
+		{ "loadtblmsgformats", lloadtblmsgformats },
+		{ "totable", ltotable }, 
+		{ "topack", ltopack },
+		// { "deletepack", ldeletepack },
 		{ NULL, NULL },
 	};
 	luaL_newlib(L,l);
