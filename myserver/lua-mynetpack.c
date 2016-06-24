@@ -526,14 +526,14 @@ write_size(uint8_t * buffer, int len) {
 	mynetpack_write_header((char*)buffer, (char*)&cc, sizeof(uint8_t), HEADPOS_CHECKCODE);
 }
 
-static int
-lsetcmd(lua_State *L) {
-	uint8_t* buffer = lua_touserdata(L, 1);
-	uint16_t cmd = lua_tointeger(L, 2);
-	cmd = htons(cmd);
-	mynetpack_write_header((char*)buffer, (char*)&cmd, sizeof(uint16_t), HEADPOS_CMD);
-	return 0;
-}
+// static int
+// lsetcmd(lua_State *L) {
+// 	uint8_t* buffer = lua_touserdata(L, 1);
+// 	uint16_t cmd = lua_tointeger(L, 2);
+// 	cmd = htons(cmd);
+// 	mynetpack_write_header((char*)buffer, (char*)&cmd, sizeof(uint16_t), HEADPOS_CMD);
+// 	return 0;
+// }
 
 static int
 lpack(lua_State *L) {
@@ -773,7 +773,7 @@ luaopen_netpack(lua_State *L) {
 	luaL_Reg l[] = {
 		{ "pop", lpop },
 		{ "pack", lpack },
-		{ "setcmd", lsetcmd },
+		// { "setcmd", lsetcmd },
 		{ "clear", lclear },
 		{ "tostring", ltostring },
 		{ "loadtblmsgformats", lloadtblmsgformats },
