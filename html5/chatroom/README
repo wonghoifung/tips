@@ -1,0 +1,25 @@
+1. configure openresty
+
+	add to nginx.conf:
+	---------------------
+	http {
+		...
+		lua_package_path "/home/albert/or_tcp/run/lualib/?.lua;;";
+	    include server_conf/*;
+	    ...
+	}
+
+	add server_conf/chatroom.conf:
+	---------------------
+	server {
+	    listen 8008;
+	    set $APP_PATH '/home/albert/or_tcp/run/src/chatroom';
+	    location = /sredis {
+	        content_by_lua_file '$APP_PATH/chatroom_server.lua';
+	    }
+	    location ~ /ws/(.*) {
+	        alias '$APP_PATH/$1';
+	    }
+	}
+
+2. put chatroom_client.html chatroom_server.lua into /home/albert/or_tcp/run/src/chatroom
