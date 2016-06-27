@@ -24,7 +24,6 @@
 			                marginRight: 10,
 			                events: {
 			                    load: function () {
-
 			                        // set up the updating of the chart each second
 			                        var series = this.series[0];
 			                        setInterval(function () {
@@ -66,7 +65,7 @@
 			                enabled: false
 			            },
 			            series: [{
-			                name: 'Random data',
+			                name: 'Online Count',
 			                data: (function () {
 			                    // generate an array of random data
 			                    var data = [],
@@ -76,7 +75,8 @@
 			                    for (i = -19; i <= 0; i += 1) {
 			                        data.push({
 			                            x: time + i * 1000,
-			                            y: Math.random()
+			                            // y: Math.random()
+			                            y: 0
 			                        });
 			                    }
 			                    return data;
