@@ -27,32 +27,32 @@
 using namespace std;
 
 class Solution {
-	/*
- * 	int kadane(const vector<int>& arr, int& start, int& end) {
- * 			if (arr.empty()) return 0;
- * 					vector<int> dp(arr.size(), 0);
- * 							vector<int> sidx(arr.size(), 0);
- * 									dp[0] = arr[0];
- * 											sidx[0] = 0;
- * 													auto m = dp[0];
- * 															for (auto i = 1; i < arr.size(); ++i) {
- * 																		if (arr[i] + dp[i - 1] > arr[i]) {
- * 																						dp[i] = arr[i] + dp[i - 1];
- * 																										sidx[i] = sidx[i - 1];
- * 																													}
- * 																																else {
- * 																																				dp[i] = arr[i];
- * 																																								sidx[i] = i;
- * 																																											}
- * 																																														if (dp[i] > m) {
- * 																																																		m = dp[i];
- * 																																																						start = sidx[i];
- * 																																																										end = i;
- * 																																																													}
- * 																																																															}
- * 																																																																	return m;
- * 																																																																		}
- * 																																																																			*/
+/*
+	int kadane(const vector<int>& arr, int& start, int& end) {
+		if (arr.empty()) return 0;
+		vector<int> dp(arr.size(), 0);
+		vector<int> sidx(arr.size(), 0);
+		dp[0] = arr[0];
+		sidx[0] = 0;
+		auto m = dp[0];
+		for (auto i = 1; i < arr.size(); ++i) {
+			if (arr[i] + dp[i - 1] > arr[i]) {
+				dp[i] = arr[i] + dp[i - 1];
+				sidx[i] = sidx[i - 1];
+			}
+			else {
+				dp[i] = arr[i];
+				sidx[i] = i;
+			}
+			if (dp[i] > m) {
+				m = dp[i];
+				start = sidx[i];
+				end = i;
+			}
+		}
+		return m;
+	}
+*/
 	int maxSubArrayNoBiggerThanK(const vector<int>& arr, int& start, int& end, int k) {
 		if (arr.empty()) return 0;
 		int gm = INT_MIN;
@@ -75,7 +75,7 @@ class Solution {
 		}
 		return gm;
 	}
-public:
+	public:
 	int maxSumSubmatrix(vector<vector<int>>& matrix, int k) { 
 		if (matrix.empty()) return 0;
 		if (matrix[0].empty()) return 0;
