@@ -4,6 +4,7 @@
 
 static int counter(lua_State* L) {
 	// printf("%s(%d): %d\n", __FUNCTION__, __LINE__, lua_gettop(L));
+	printf("up1:%f, up2:%f\n", lua_tonumber(L, lua_upvalueindex(1)), lua_tonumber(L, lua_upvalueindex(2)));
 	double val = lua_tonumber(L, lua_upvalueindex(1));
 	// printf("%s(%d): %d\n", __FUNCTION__, __LINE__, lua_gettop(L));
 	lua_pushnumber(L, ++val);
@@ -18,8 +19,9 @@ static int counter(lua_State* L) {
 static int newCounter(lua_State* L) {
 	// printf("%s(%d): %d\n", __FUNCTION__, __LINE__, lua_gettop(L));
 	lua_pushnumber(L, 0);
+	lua_pushnumber(L, 10);
 	// printf("%s(%d): %d\n", __FUNCTION__, __LINE__, lua_gettop(L));
-	lua_pushcclosure(L, &counter, 1);
+	lua_pushcclosure(L, &counter, 2);
 	// printf("%s(%d): %d\n", __FUNCTION__, __LINE__, lua_gettop(L));
 	return 1;
 }
