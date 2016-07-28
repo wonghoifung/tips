@@ -4,6 +4,10 @@
 
 static int l_hello(lua_State* l)
 {
+	// printf("%s(%d): %d\n", __FUNCTION__, __LINE__, lua_gettop(l));
+	// int forward = lua_toboolean(l, 2);
+	// printf("forward:%d\n", forward);
+	
     printf("Hello, world!\n");
     return 0;
 }
