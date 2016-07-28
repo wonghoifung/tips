@@ -5,15 +5,15 @@ PREFIX_BIN =
 CC=gcc
 
 ifeq (0,${debug}) 
-	CFLAGS = -DNDEBUG -g2 -O2 -std=gnu99
+	CFLAGS = -DNDEBUG -g2 -O2 -std=gnu99 
 else
-	CFLAGS = -ggdb -O2 -std=gnu99
+	CFLAGS = -ggdb -O2 -std=gnu99 -DDEBUG_LOG
 endif 
 
 CFLAGS += -Wall
 CFLAGS += -I/home/albert/lua-5.3.2/src/
 
-LIBS = -ldl -lm -llua
+LIBS = -lrt -ldl -lm -llua
 #LINKFLAGS = -L/usr/local/lib 
 LINKFLAGS += -L/home/albert/lua-5.3.2/src/ 
 
@@ -29,7 +29,7 @@ C_OBJS = $(patsubst %.c, %.o, $(C_SOURCES))
 
 LUA_CLIB_PATH ?= testlib
 
-LUA_CLIB = counter luahello
+LUA_CLIB = counter luahello profile
 
 all:compile \
 	$(foreach v, $(LUA_CLIB), $(LUA_CLIB_PATH)/$(v).so) 
@@ -41,6 +41,9 @@ $(LUA_CLIB_PATH)/counter.so : testlib/counter.c | $(LUA_CLIB_PATH)
 	$(CC) $(CFLAGS) $(LINKFLAGS) $(LIBS) $(SHARED) $^ -o $@
 
 $(LUA_CLIB_PATH)/luahello.so : testlib/luahello.c | $(LUA_CLIB_PATH)
+	$(CC) $(CFLAGS) $(LINKFLAGS) $(LIBS) $(SHARED) $^ -o $@
+
+$(LUA_CLIB_PATH)/profile.so : testlib/profile.c | $(LUA_CLIB_PATH)
 	$(CC) $(CFLAGS) $(LINKFLAGS) $(LIBS) $(SHARED) $^ -o $@
 
 .c.o:

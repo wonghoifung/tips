@@ -52,3 +52,35 @@ local ttt2={}
 setDefault2(ttt2, 456)
 print(ttt2[1])
 print(ttt2[33])
+
+-- coroutine profile
+local profile = require "testlib.profile"
+local coroutine_resume=profile.resume
+local coroutine_yield=profile.yield
+function producer(  )
+	return coroutine.create(function ( salt )
+		profile.start()
+		local t = {1,2,3}
+		for i=1,#t do
+			-- salt=coroutine.yield(t[i]+salt)
+			salt=coroutine_yield(t[i]+salt)
+		end
+		profile.stop()
+	end)
+end
+function consumer( prod )
+	local salt=10
+	while true do
+		-- local running,product=coroutine.resume(prod,salt)
+		local running,product=coroutine_resume(prod,salt)
+		salt=salt*salt
+		if running then
+			print(product or "end")
+		else
+			break
+		end
+	end
+end
+profile.start()
+consumer(producer()) -- 11 102 10003 end
+profile.stop()
