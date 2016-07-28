@@ -84,3 +84,19 @@ end
 profile.start()
 consumer(producer()) -- 11 102 10003 end
 profile.stop()
+
+local queue={}
+print('queue size:',#queue)
+table.insert(queue,11)
+table.insert(queue,22)
+table.insert(queue,33)
+print('queue size:',#queue)
+while true do
+	local key,val = next(queue)
+	if val == nil then
+		break
+	end
+	queue[key]=nil
+	print('queue:',key,val)
+end
+print('queue size:',#queue)
