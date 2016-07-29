@@ -121,3 +121,16 @@ if 1 then print('true') else print('false') end
 if 0 then print('true') else print('false') end
 if nil then print('true') else print('false') end
 if false then print('true') else print('false') end
+
+local ws = {}
+ws['a'] = true
+ws['b'] = true
+ws['c'] = false
+ws['d'] = nil
+ws['e'] = true
+local s = next(ws)
+while s do
+	print('###',s,ws[s])
+	ws[s] = nil
+	s = next(ws)
+end
