@@ -100,3 +100,24 @@ while true do
 	print('queue:',key,val)
 end
 print('queue size:',#queue)
+
+-- error('TESTERROR')
+-- print('after error')
+
+local co = coroutine.create(function () print('coco',coroutine.running()) end)
+coroutine.resume(co)
+print(debug.traceback(co,'==='),coroutine.running())
+-- error(debug.traceback(co,'~~~'))
+-- print('after error')
+
+function response()
+	return 'response'
+end
+pack = response
+print(pack)
+
+-- only false and nil is condition FALSE
+if 1 then print('true') else print('false') end
+if 0 then print('true') else print('false') end
+if nil then print('true') else print('false') end
+if false then print('true') else print('false') end
