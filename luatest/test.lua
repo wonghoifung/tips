@@ -134,3 +134,16 @@ while s do
 	ws[s] = nil
 	s = next(ws)
 end
+
+-- print(nil+100) -- error
+
+local p = {}
+p.dispatch = function ()
+	print('I am dispatch callback')
+end
+function disp(p)
+	return p and p.dispatch
+end
+local pd = disp(p)
+print(pd)
+pd()
