@@ -147,3 +147,18 @@ end
 local pd = disp(p)
 print(pd)
 pd()
+
+local init_func = {}
+table.insert(init_func, 1)
+table.insert(init_func, 2)
+table.insert(init_func, 3)
+init_func['a']=1
+init_func['b']=2
+init_func['c']=3
+for k,v in ipairs(init_func) do
+	print(k,v)
+end
+print('---')
+for k,v in pairs(init_func) do
+	print(k,v)
+end
