@@ -19,3 +19,8 @@ end
 for e in pop,q do
 	print(e)
 end
+
+function pp(name)
+	print('hello,',name)
+end
+pp "wong" -- also a call
