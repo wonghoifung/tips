@@ -24,3 +24,7 @@ function pp(name)
 	print('hello,',name)
 end
 pp "wong" -- also a call
+
+print [[abc
+cde
+xyz]]
