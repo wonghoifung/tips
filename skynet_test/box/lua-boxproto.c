@@ -459,6 +459,7 @@ read_body(struct parseinfo* p, const char* data, const size_t length, size_t* pn
 	return 1; // done
 }
 
+#include <stdio.h>
 /* chain, error = boxproto.parse(table, id, str) */
 static int
 lparse(lua_State* L) {
@@ -467,6 +468,7 @@ lparse(lua_State* L) {
 	size_t length = 0;
 	const char* data = luaL_checklstring(L, 3, &length);
 	struct parseinfo* p = find_parseinfo(t, id);
+	printf("c: id %d\n", id);
 	assert(p);
 
 	int msgcnt = 0;
@@ -697,7 +699,7 @@ lbmend(lua_State* L) {
 	return 0;
 }
 
-/* boxproto.writeu16(msg, i) */
+/* boxproto.bmwriteu16(msg, i) */
 static int
 lbmwriteu16(lua_State* L) {
 	struct boxmsg* msg = lua_touserdata(L, 1);
@@ -706,7 +708,7 @@ lbmwriteu16(lua_State* L) {
 	return 0;
 }
 
-/* boxproto.writei16(msg, i) */
+/* boxproto.bmwritei16(msg, i) */
 static int
 lbmwritei16(lua_State* L) {
 	struct boxmsg* msg = lua_touserdata(L, 1);
@@ -715,7 +717,7 @@ lbmwritei16(lua_State* L) {
 	return 0;
 }
 
-/* boxproto.writeu32(msg, i) */
+/* boxproto.bmwriteu32(msg, i) */
 static int
 lbmwriteu32(lua_State* L) {
 	struct boxmsg* msg = lua_touserdata(L, 1);
@@ -724,7 +726,7 @@ lbmwriteu32(lua_State* L) {
 	return 0;
 }
 
-/* boxproto.writei32(msg, i) */
+/* boxproto.bmwritei32(msg, i) */
 static int
 lbmwritei32(lua_State* L) {
 	struct boxmsg* msg = lua_touserdata(L, 1);
@@ -733,7 +735,7 @@ lbmwritei32(lua_State* L) {
 	return 0;
 }
 
-/* boxproto.writecstring(msg, cstr) */
+/* boxproto.bmwritecstring(msg, cstr) */
 static int
 lbmwritecstring(lua_State* L) {
 	struct boxmsg* msg = lua_touserdata(L, 1);
@@ -742,7 +744,7 @@ lbmwritecstring(lua_State* L) {
 	return 0;
 }
 
-/* boxproto.writebinary(msg, bin) */
+/* boxproto.bmwritebinary(msg, bin) */
 static int
 lbmwritebinary(lua_State* L) {
 	struct boxmsg* msg = lua_touserdata(L, 1);
@@ -782,6 +784,14 @@ lbmsetsid(lua_State* L) {
 	return 0;
 }
 
+/* lstr = boxproto.bmtolstring(msg) */
+static int
+lbmtolstring(lua_State* L) {
+	struct boxmsg* msg = lua_touserdata(L, 1);
+	lua_pushlstring(L, msg->buf, msg->size);
+	return 1;
+}
+
 int
 luaopen_boxproto(lua_State* L) {
 	luaL_checkversion(L);
@@ -810,11 +820,12 @@ luaopen_boxproto(lua_State* L) {
 		{ "bmwritei16", lbmwritei16 },
 		{ "bmwriteu32", lbmwriteu32},
 		{ "bmwritei32", lbmwritei32 },
-		{ "bmwritecstirng", lbmwritecstring },
+		{ "bmwritecstring", lbmwritecstring },
 		{ "bmwritebinary", lbmwritebinary },
 		{ "bmsetversion", lbmsetversion },
 		{ "bmsetflag", lbmsetflag },
 		{ "bmsetsid", lbmsetsid },
+		{ "bmtolstring", lbmtolstring },
 		{ NULL, NULL },
 	};
 	luaL_newlib(L,l);
