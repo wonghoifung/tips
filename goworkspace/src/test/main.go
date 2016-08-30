@@ -38,7 +38,7 @@ func main() {
 
     <- done
 
-    fmt.Printf("len(data): %d\n", len(data)) // 4
+    fmt.Printf("len(data): %d\n", len(data)) // 3
     for i:=0; i<len(data); i++ {
     	c := data[i]
     	close(c)
