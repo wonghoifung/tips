@@ -1,1 +1,0 @@
-cc -g -O2 -Wall -I../3rd/lua -I../skynet-src -fPIC --shared lua-boxproto.c -o ../luaclib/boxproto.so 
