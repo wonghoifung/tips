@@ -6,7 +6,11 @@
      why: limitation for global
      check: cat /proc/sys/fs/file-nr
 
+   sysctl -p /etc/sysctl.conf
+
 2. vim /etc/profile
      add: ulimit -n 1020000
      why: limitation for each process     
      check: ulimit -n 
+
+   source /etc/profile
