@@ -2,14 +2,14 @@
      add: net.ipv4.tcp_max_tw_buckets = 200000
      why: for concurrent test clients 
 
-     add: fs.file-max = 1020000
+     add: fs.file-max = 13121218
      why: limitation for global
      check: cat /proc/sys/fs/file-nr
 
    sysctl -p /etc/sysctl.conf
 
 2. vim /etc/profile
-     add: ulimit -n 1020000
+     add: ulimit -n 1048000
      why: limitation for each process     
      check: ulimit -n 
 
