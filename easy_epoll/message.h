@@ -193,6 +193,42 @@ public:
 	    return endianop(val);
 	}
 
+	int8_t read_int8() {
+	    int8_t val(0);
+	    message::read_b((char*)&val, sizeof(int8_t));
+	    return endianop(val);
+	}
+
+	uint8_t read_uint8() {
+	    uint8_t val(0);
+	    message::read_b((char*)&val, sizeof(uint8_t));
+	    return endianop(val);
+	}
+
+	int16_t read_int16() {
+	    int16_t val(0);
+	    message::read_b((char*)&val, sizeof(int16_t));
+	    return endianop(val);
+	}
+
+	uint16_t read_uint16() {
+	    uint16_t val(0);
+	    message::read_b((char*)&val, sizeof(uint16_t));
+	    return endianop(val);
+	}
+
+	int32_t read_int32() {
+	    int32_t val(0);
+	    message::read_b((char*)&val, sizeof(int32_t));
+	    return endianop(val);
+	}
+
+	uint32_t read_uint32() {
+	    uint32_t val(0);
+	    message::read_b((char*)&val, sizeof(uint32_t));
+	    return endianop(val);
+	}
+
     int64_t read_int64() {
 	    int64_t val(0);
 	    message::read_b((char*)&val, sizeof(int64_t));
@@ -291,6 +327,36 @@ public:
     bool write_uint(unsigned int val) {
 	  val = endianop(val);
 	  return message::write_b((char*)&val, sizeof(unsigned int));
+	}
+
+	bool write_int8(int8_t val) {
+	    val = endianop(val);
+	    return message::write_b((char*)&val, sizeof(int8_t));
+	}
+
+	bool write_uint8(uint8_t val) {
+	    val = endianop(val);
+	    return message::write_b((char*)&val, sizeof(uint8_t));
+	}
+
+	bool write_int16(int16_t val) {
+	    val = endianop(val);
+	    return message::write_b((char*)&val, sizeof(int16_t));
+	}
+
+	bool write_uint16(uint16_t val) {
+	    val = endianop(val);
+	    return message::write_b((char*)&val, sizeof(uint16_t));
+	}
+
+	bool write_int32(int32_t val) {
+	    val = endianop(val);
+	    return message::write_b((char*)&val, sizeof(int32_t));
+	}
+
+	bool write_uint32(uint32_t val) {
+	    val = endianop(val);
+	    return message::write_b((char*)&val, sizeof(uint32_t));
 	}
 
     bool write_int64(int64_t val) {
