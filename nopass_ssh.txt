@@ -1,0 +1,13 @@
+1. on host to login others hosts without password:
+  
+  ssh-keygen -t rsa  // enter till the end
+  
+  // copy the id_rsa.pub to others hosts ~/.ssh dir, like xftp or scp id_rsa.pubroot@other_host:~/.ssh/
+  
+2. on host that to be logined by others:
+
+  cat id_rsa.pub >> ~/.ssh/authorized_keys
+  
+  chmod 600 authorized_keys
+  
+  chmod 700 -R .ssh
