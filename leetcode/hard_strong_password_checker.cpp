@@ -20,7 +20,7 @@ It must NOT contain three repeating characters in a row("...aaa..." is weak, but
 
 class Solution {
 public:
-	int strongPasswordChecker(string s) // TODO
+	int strongPasswordChecker(string s) // TODO https://leetcode.com/problems/strong-password-checker/
 	{
 		
 	}
