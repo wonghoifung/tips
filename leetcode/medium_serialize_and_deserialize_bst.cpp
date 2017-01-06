@@ -22,21 +22,21 @@ struct TreeNode {
 
 class Codec {
 public:
-	void serialize(TreeNode* root, ostringstream& out)
+	void preorderSeri(TreeNode* root, ostringstream& out)
 	{
 		if ( !root ) return;
 		out << root->val << ",";
-		serialize(root->left, out);
-		serialize(root->right, out);
+		preorderSeri(root->left, out);
+		preorderSeri(root->right, out);
 	}
 
 	string serialize(TreeNode* root) {
 		ostringstream ss;
-		serialize(root, ss);
+		preorderSeri(root, ss);
 		return ss.str();
 	}
 
-	TreeNode* deserialize(const string& s, int lower, int upper, int& pos )
+	TreeNode* preorderDeseri(const string& s, int lower, int upper, int& pos )
 	{
 		if ( pos == s.size() ) return nullptr;
 		int cur_pos = pos;
@@ -48,18 +48,20 @@ public:
 		}
 		++cur_pos; // ,
 
-		if ( number < lower || number > upper ) return nullptr; // not in this subtree
+		if (number < lower || number > upper) {
+			return nullptr; // not in this subtree
+		}
 
 		TreeNode* root = new TreeNode( number );
 		pos = cur_pos;
-		root->left =  deserialize( s, lower, root->val, pos );
-		root->right = deserialize( s, root->val, upper, pos );
+		root->left = preorderDeseri(s, lower, root->val, pos);
+		root->right = preorderDeseri(s, root->val, upper, pos);
 		return root;
 	}
 
 	TreeNode* deserialize(string data) {
 		int pos = 0;
-		return deserialize( data, INT_MIN, INT_MAX, pos );
+		return preorderDeseri(data, INT_MIN, INT_MAX, pos);
 
 	}
 };
@@ -120,6 +122,8 @@ public:
 #endif
 
 int main() {
+	TreeNode* tn = Codec().deserialize("5,4,2,1,3,6,");
+	cout << Codec().serialize(tn) << endl;
 
 	cin.get();
 	return EXIT_SUCCESS;
