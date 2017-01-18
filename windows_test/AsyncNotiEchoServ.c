@@ -2,6 +2,8 @@
 #include <string.h>
 #include <winsock2.h>
 
+#pragma comment(lib, "ws2_32.lib")
+
 #define BUF_SIZE 100
 
 void CompressSockets(SOCKET hSockArr[], int idx, int total);
@@ -67,7 +69,7 @@ int main(int argc, char* argv[]) {
 			}
 			else {
 				sigEventIdx = i;
-				WSAEnumNetworkEvents(hSockArr[sigEventIdx], hEventArr[sigEventIdx], &&netEvents);
+				WSAEnumNetworkEvents(hSockArr[sigEventIdx], hEventArr[sigEventIdx], &netEvents);
 
 				if (netEvents.lNetworkEvents & FD_ACCEPT) {
 					if (netEvents.iErrorCode[FD_ACCEPT_BIT] != 0) {
@@ -116,7 +118,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	WSAClean();
+	WSACleanup();
 	return 0;
 }
 
