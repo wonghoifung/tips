@@ -6,6 +6,7 @@
 #include "CircularQueue.h"
 #include "Registry.h"
 #include "IniFile.h"
+#include "AutodetectMemoryLeak.h"
 using namespace std;
 
 static void testIni();
