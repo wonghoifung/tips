@@ -22,6 +22,7 @@
 // #import "C:\\Program Files\\Common Files\\System\\ADO\\msado15.dll" rename("EOF", "EndOfFile") no_namespace
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "mswsock.lib")
+#pragma comment(lib, "Advapi32.lib") // for registry
 
 enum IO_TYPE
 {

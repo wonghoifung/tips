@@ -4,28 +4,40 @@
 #include "MemoryPool.h"
 #include "Stream.h"
 #include "CircularQueue.h"
+#include "Registry.h"
 using namespace std;
 
 int main() {
-	void* dummy=NULL;
-
-	for (int i = 0; i < 10; ++i) {
-		CLog::WriteLog(_T("%s, %d"), L"hello", i + 1);
+	CRegistry reg;
+	if (!reg.CreateKey(HKEY_CURRENT_USER, L"Software\\WINLIB")) {
+		cout << "cannot createkey" << endl;
 	}
 
-	CCircularQueue* cq = new CCircularQueue;
-	cq->Begin();
-	char* s1="hello";
-	char* s2="world";
-	cq->Push(cq, (BYTE*)s1, strlen(s1));
-	cq->Push(cq, (BYTE*)s2, strlen(s2));
-	char buf[32]={0};
-	DWORD len=0;
-	
-	cq->Pop(&dummy, (BYTE*)buf, len);
-	cout<<buf<<" "<<len<<endl;
-	cq->Pop(&dummy, (BYTE*)buf, len);
-	cout<<buf<<" "<<len<<endl;
+	cout << "to set value" << endl;
+	cin.get();
+	if (!reg.SetValue(L"author", 123)) {
+		cout << "cannot setvalue" << endl;
+	}
+
+	cout << "to get value" << endl;
+	cin.get();
+	DWORD val = 0;
+	if (!reg.GetValue(L"author", &val)) {
+		cout << "cannot getvalue" << endl;
+	}
+	cout << val << endl;
+
+	cout << "to del value" << endl;
+	cin.get();
+	if (!reg.DeleteValue(L"author")) {
+		cout << "cannot deletevalue" << endl;
+	}
+
+	cout << "to del key" << endl;
+	cin.get();
+	if (!reg.DeleteKey(HKEY_CURRENT_USER, L"SOFTWARE\\WINLIB")) {
+		cout << "cannot deletekey" << endl;
+	}
 
 	cin.get();
 }
