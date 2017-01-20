@@ -5,9 +5,27 @@
 #include "Stream.h"
 #include "CircularQueue.h"
 #include "Registry.h"
+#include "IniFile.h"
 using namespace std;
 
+static void testIni();
+static void testRegistry();
+
 int main() {
+
+	cin.get();
+}
+
+static void testIni() {
+	CIniFile ini;
+	ini.Open(L"C:\\Users\\albert\\Desktop\\csharp_test\\test_sqlserver2\\winlib.ini");
+	ini.SetValue(L"SECTION", L"author", (FLOAT)123);
+	FLOAT val = 0;
+	ini.GetValue(L"SECTION", L"author", &val);
+	cout << val << endl;
+}
+
+static void testRegistry() {
 	CRegistry reg;
 	if (!reg.CreateKey(HKEY_CURRENT_USER, L"Software\\WINLIB")) {
 		cout << "cannot createkey" << endl;
@@ -38,6 +56,4 @@ int main() {
 	if (!reg.DeleteKey(HKEY_CURRENT_USER, L"SOFTWARE\\WINLIB")) {
 		cout << "cannot deletekey" << endl;
 	}
-
-	cin.get();
 }
