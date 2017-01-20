@@ -32,7 +32,7 @@ enum IO_TYPE
 
 typedef struct _OVERLAPPED_EX
 {
-	OVERLAPPED	Overlapped;
+	OVERLAPPED Overlapped;
 	IO_TYPE	IoType;
 	VOID* Object;
 } OVERLAPPED_EX;
@@ -45,4 +45,4 @@ typedef struct _OVERLAPPED_EX
 #define MAX_QUEUE_LENGTH 500
 #endif
 
-//#include "Log.h"
+#include "Log.h"

@@ -9,6 +9,10 @@ using namespace std;
 int main() {
 	void* dummy=NULL;
 
+	for (int i = 0; i < 10; ++i) {
+		CLog::WriteLog(_T("%s, %d"), L"hello", i + 1);
+	}
+
 	CCircularQueue* cq = new CCircularQueue;
 	cq->Begin();
 	char* s1="hello";
