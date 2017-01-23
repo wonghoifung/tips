@@ -1,1 +1,1 @@
-C:\Users\albert\Desktop\csharp_test\PacketGenerator\Debug Protocol.h TEST
+C:\Users\albert\Desktop\csharp_test\PacketGenerator\Debug\PacketGenerator.exe Protocol.h TEST
