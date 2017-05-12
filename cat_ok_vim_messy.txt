@@ -1,0 +1,2 @@
+1. vim ~/.vimrc
+2. insert: set encoding=utf-8 fileencodings=ucs-bom,utf-8,cp936
