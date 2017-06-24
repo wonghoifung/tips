@@ -3,8 +3,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+ev_loop* loop=EV_DEFAULT;
+
 ev_io stdin_watcher;
 ev_timer timeout_watcher;
+ev_async async_watcher;
 ev_signal signal_watcher;
 ev_child child_watcher;
 ev_stat stat_watcher;
@@ -23,6 +26,12 @@ static void timeout_cb(EV_P_ ev_timer* w, int revents)
   puts("timeout");
   // innermost ev_run stop
   // ev_break(EV_A_ EVBREAK_ONE);
+}
+
+static void async_cb(EV_P_ ev_async* w, int revents)
+{
+  puts("async quit");
+  ev_break(EV_A_ EVBREAK_ONE);
 }
 
 static void sigint_cb(EV_P_ ev_signal* w, int revents)
@@ -51,17 +60,20 @@ static void stat_cb(EV_P_ ev_stat* w, int revents)
   {
     puts("file not found");
   }
+
+  ev_async_send(loop, &async_watcher);
 }
 
 int main()
 {
-  struct ev_loop* loop=EV_DEFAULT;
-
   ev_io_init(&stdin_watcher, stdin_cb, 0, EV_READ);
   ev_io_start(loop, &stdin_watcher);
 
   ev_timer_init(&timeout_watcher, timeout_cb, 0., 3.);
   ev_timer_again(loop, &timeout_watcher);
+
+  ev_async_init(&async_watcher, async_cb);
+  ev_async_start(loop, &async_watcher);
 
   ev_signal_init(&signal_watcher, sigint_cb, SIGINT);
   ev_signal_start(loop, &signal_watcher);
