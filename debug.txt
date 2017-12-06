@@ -1,0 +1,59 @@
+g++ -g -lm -pg test3.cc -o test3
+./test3 #生成gmon.out
+gprof ./test3 #分析单个gmon
+gprof ./test3 gmon.out.* #多个gmon合起来分析
+
+
+g++ -lm -pg -g -ftest-coverage -fprofile-arcs test3.cc -o test3 #生成test3.gcno
+./test3 #生成gmon.out,test3.gcda
+gcov ./test3 #生成test3.cc.gcov
+cat test3.cc.gcov
+gprof --no-graph -l test3 gmon.out
+
+
+sudo perf list #列出perf吃吃的事件
+sudo perf top -e cycles:pp #采样，偏差尽量趋于零
+sudo perf record -e cpu-clock ./test2 #结合report找出热点函数
+sudo perf record -F 50000 -e cpu-clock ./test2 #指定频率
+sudo perf stat -r 10 ./test2 #执行10次求均值
+sudo perf record -g -e cpu-clock ./test2 #调用关系显示
+sudo perf report #多次回车选择不同的项看
+sudo perf stat ./test2
+
+
+/*
+	sudo pip install --upgrade setuptools
+	sudo pip install gprof2dot
+	sudo yum install python graphviz
+	g++ -pg -g -o test test.cc
+	./test
+	gprof ./test | gprof2dot -n0 -e0 | dot -Tpng -o output.png
+*/
+
+
+gprof hello gmon.out -p 得到每个函数占用的执行时间 
+gprof hello gmon.out -q 得到call graph，包含了每个函数的调用关系，调用次数，执行时间等信息。 
+gprof hello gmon.out -A 得到一个带注释的“源代码清单”，它会注释源码，指出每个函数的执行次数。这需要在编译的时候增加 -g选项。
+
+
+top
+free
+vmstat
+/proc/meminfo
+/proc/<pid>/statm
+/proc/<pid>/status
+/proc/<pid>/maps
+
+
+pmap -x 0x......
+pmap -q 0x......
+gdb a.out
+attach pid
+set height 0
+set logging on
+x/1231231231a 0x......
+在gdb.txt中查找malloc
+disas 0x..., 0x...
+info line * 0x...
+list * 0x...
+disassemble/m 0x7fbf57e216e0,0x7fbf57e21760
