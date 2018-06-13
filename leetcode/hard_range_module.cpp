@@ -19,14 +19,12 @@ public:
         }
         t_mpi::iterator it = ranges_.upper_bound(make_pair(left, left));
         if (it != ranges_.begin() && (--it)->second < left) ++it;
-        int a = left;
-        int b = right;
         while (it != ranges_.end() && it->first <= right) {
-            if (left > it->first) a = it->first;
-            if (right < it->second) b = it->second;
+            if (left > it->first) left = it->first;
+            if (right < it->second) right = it->second;
             ranges_.erase(it++);
         }
-        if (a < b) ranges_.insert(make_pair(a,b));
+        if (left < right) ranges_.insert(make_pair(left,right));
     }
     
     bool queryRange(int left, int right) {
