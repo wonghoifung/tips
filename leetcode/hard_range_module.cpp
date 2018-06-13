@@ -26,7 +26,7 @@ public:
             if (right < it->second) b = it->second;
             ranges_.erase(it++);
         }
-        ranges_.insert(make_pair(a,b));
+        if (a < b) ranges_.insert(make_pair(a,b));
     }
     
     bool queryRange(int left, int right) {
